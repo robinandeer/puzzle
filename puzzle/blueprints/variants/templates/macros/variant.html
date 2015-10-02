@@ -1,0 +1,50 @@
+{% macro gt_call(genotypes) -%}
+    <table class="table table-bordered table-hover">
+		<caption>Genotype call</caption>
+		<thead>
+			<tr>
+				<th rowspan="2">Sample</th>
+				<th rowspan="2">Genotype (GT)</th>
+				<th colspan="2">Allele depth (AD)</th>
+				<th rowspan="2">Quality (GQ)</th>
+			</tr>
+			<tr>
+				<th>Ref</th>
+				<th>Alt</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for sample_id, genotype in genotypes.iteritems() %}
+				<tr>
+					<td>{{ sample_id }}</td>
+					<td>{{ genotype.genotype }}</td>
+					<td>{{ genotype.ref_depth }}</td>
+					<td>{{ genotype.alt_depth }}</td>
+					<td>{{ genotype.genotype_quality }}</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{%- endmacro %}
+
+{% macro compounds(compound_variants) -%}
+	<table class="table table-bordered table-hover">
+		<caption>Compounds</caption>
+		<thead>
+			<tr>
+				<th>Variant</th>
+				<th>Score</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for case_id, compounds in compound_variants.iteritems() %}
+				{% for compound in compounds %}
+					<tr>
+						<td><a href="{{ url_for('variants.variant', variant_id=compound.variant_id) }}">{{ compound.variant_id|truncate(20) }}</a></td>
+						<td>{{ compound.compound_score }}</td>
+					</tr>
+				{% endfor %}
+			{% endfor %}
+		</tbody>
+	</table>
+{%- endmacro %}

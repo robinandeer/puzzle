@@ -1,0 +1,17 @@
+{% extends "layouts/base.html" %}
+{% from "macros/variant.html" import compounds, gt_call %}
+
+{% block body_content %}
+	<div class="row">
+		<div class="col-md-8">{{ gt_call(variant.genotypes) }}</div>
+		<div class="col-md-4"></div>
+	</div>
+
+	{% if variant.compound_variants %}
+	<div class="row">
+		<div class="col-md-12">
+			{{ compounds(variant.compound_variants) }}
+		</div>
+	</div>
+	{% endif %}
+{% endblock %}

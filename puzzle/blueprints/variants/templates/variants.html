@@ -1,0 +1,38 @@
+{% extends "layouts/base.html" %}
+
+{% block body_content %}
+	<div class="table-responsive">
+		<table class="table table-bordered table-hover">
+			<thead>
+				<tr>
+					<th>Rank #</th>
+					<th>Score</th>
+					<th>Chromosome</th>
+					<th>Gene</th>
+					<th>CADD</th>
+					<th>Inheritance</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for variant in variants %}
+					<tr>
+						<td><a href="{{ url_for('variants.variant', variant_id=variant.variant_id) }}">{{ variant.index }}</a></td>
+						<td>{{ variant.rank_scores.values()[0] }}</td>
+						<td>{{ variant.CHROM }}</td>
+						<td>{{ variant.info_dict.HGNC_symbol|join(', ') }}</td>
+						<td>{{ variant.info_dict.CADD|join(', ') or '-' }}</td>
+						<td>
+							{% for family in variant.info_dict.GeneticModels %}
+								{% for model in family.split(':')[1].split('|') %}
+									<span class="label label-default">{{ model }}</span>
+								{% endfor %}
+							{% endfor %}
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+
+	<a href="{{ url_for('variants.variants', skip=next_skip) }}" class="btn btn-default">Load more</a>
+{% endblock %}

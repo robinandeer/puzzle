@@ -1,0 +1,23 @@
+# config file for automatic testing at travis-ci.org
+language: python
+
+python:
+    - "3.4"
+    - "2.7"
+
+install:
+    # install dependencies
+    - pip install -r requirements/dev.txt
+
+    # install your own package + executables
+    - pip install --editable .
+
+script:
+    # command to run tests and collect test coverage
+    - py.test --flakes --cov-report html --cov puzzle tests/
+
+notifications:
+    email: false
+
+after_success:
+    coveralls
