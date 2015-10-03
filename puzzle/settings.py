@@ -16,11 +16,11 @@ class BaseConfig:
     # default blueprints
     BLUEPRINTS = [public_bp, variants_bp]
 
-    PUZZLE_ROOT = os.path.abspath('tests/fixtures')
-
 
 class DevConfig(BaseConfig):
     DEBUG = True
+    PUZZLE_ROOT = os.path.abspath('tests/fixtures')
+    PUZZLE_PATTERN = '*.vcf'
 
 
 class TestConfig(DevConfig):

@@ -11,14 +11,17 @@ class Plugin(object):
     def init_app(self, app):
         """Initialize plugin via Flask."""
         self.root_path = app.config['PUZZLE_ROOT']
+        self.pattern = app.config['PUZZLE_PATTERN']
 
-    def _find_vcfs(self):
+    def _find_vcfs(self, pattern=None):
         """Walk subdirectories and return VCF files."""
-        return path(self.root_path).walkfiles('*.vcf')
+        pattern = pattern or self.pattern
+        return path(self.root_path).walkfiles(pattern)
 
-    def vcf_files(self):
+    def vcf_files(self, pattern=None):
         """Return all VCF file paths."""
-        return self._find_vcfs()
+        pattern = pattern or self.pattern
+        return self._find_vcfs(pattern)
 
     def load_vcf(self, vcf_path):
         """Load a new VCF file."""
