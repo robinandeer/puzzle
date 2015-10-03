@@ -1,6 +1,6 @@
 include AUTHORS
 include CONTRIBUTING.md
-include HISTORY.md
+include CHANGELOG.md
 include LICENSE
 include README.md
 
@@ -11,4 +11,4 @@ recursive-include tests *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
 
-recursive-include docs *.rst conf.py tasks.py make.bat
+recursive-include puzzle *.html
