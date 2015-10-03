@@ -16,12 +16,11 @@ class BaseConfig:
     # default blueprints
     BLUEPRINTS = [public_bp, variants_bp]
 
-    PUZZLE_VCF_FILE = os.path.abspath('tests/fixtures/hapmap.vcf')
+    PUZZLE_ROOT = os.path.abspath('tests/fixtures')
 
 
 class DevConfig(BaseConfig):
     DEBUG = True
-    PUZZLE_VCF_FILE = os.path.abspath('tests/fixtures/hapmap.vcf')
 
 
 class TestConfig(DevConfig):

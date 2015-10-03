@@ -1,5 +1,14 @@
 {% extends "layouts/base.html" %}
 
 {% block body_content %}
-	<a href="{{ url_for('variants.variants') }}" class="btn btn-default">Variants</a>
+	<ul class="list-group">
+		{% for vcf_file in vcf_files %}
+			<li class="list-group-item">
+				<span class="badge">{{ (vcf_file.size / 1000000)|round(1) }} MB</span>
+				<a href="{{ url_for('variants.variants', vcf_file=vcf_file) }}">
+					{{ vcf_file.basename() }}
+				</a>
+			</li>
+		{% endfor %}
+	</ul>
 {% endblock %}

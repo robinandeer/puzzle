@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from path import path
 from vcf_parser import VCFParser
 
 
@@ -9,7 +10,19 @@ class Plugin(object):
 
     def init_app(self, app):
         """Initialize plugin via Flask."""
-        self.vcf_file = app.config['PUZZLE_VCF_FILE']
+        self.root_path = app.config['PUZZLE_ROOT']
+
+    def _find_vcfs(self):
+        """Walk subdirectories and return VCF files."""
+        return path(self.root_path).walkfiles('*.vcf')
+
+    def vcf_files(self):
+        """Return all VCF file paths."""
+        return self._find_vcfs()
+
+    def load_vcf(self, vcf_path):
+        """Load a new VCF file."""
+        self.vcf_file = vcf_path
 
     def _variants(self):
         variants = VCFParser(self.vcf_file, check_info=False)
@@ -18,10 +31,17 @@ class Plugin(object):
             variant['index'] = index + 1
             yield variant
 
-    def variants(self, skip=0, count=30):
+    def variants(self, skip=0, count=30, gene_list=None):
         """Return all variants in the VCF."""
         limit = count + skip
-        for variant in self._variants():
+        if gene_list:
+            filtered_variants = (variant for variant in self._variants()
+                                 if gene_list in
+                                 variant['info_dict']['Clinical_db_gene_annotation'])
+        else:
+            filtered_variants = self._variants()
+
+        for variant in filtered_variants:
             if variant['index'] >= skip:
                 if variant['index'] <= limit:
                     yield variant

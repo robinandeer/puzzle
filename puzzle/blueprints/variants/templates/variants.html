@@ -1,6 +1,18 @@
 {% extends "layouts/base.html" %}
 
 {% block body_content %}
+	<div class="form-group">
+		<div class="btn-group">
+			<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+				Gene list <span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu">
+				<li><a href="{{ url_for('variants.variants', gene_list='OMIM-141201') }}">OMIM-141201</a></li>
+				<li><a href="{{ url_for('variants.variants', gene_list='FullList') }}">FullList</a></li>
+			</ul>
+		</div>
+	</div>
+
 	<div class="table-responsive">
 		<table class="table table-bordered table-hover">
 			<thead>
@@ -9,6 +21,7 @@
 					<th>Score</th>
 					<th>Chromosome</th>
 					<th>Gene</th>
+					<th>1000G</th>
 					<th>CADD</th>
 					<th>Inheritance</th>
 				</tr>
@@ -20,6 +33,7 @@
 						<td>{{ variant.rank_scores.values()[0] }}</td>
 						<td>{{ variant.CHROM }}</td>
 						<td>{{ variant.info_dict.HGNC_symbol|join(', ') }}</td>
+						<td>{{ variant.info_dict['1000GAF']|map('float')|map('round', 4)|join(', ') }}</td>
 						<td>{{ variant.info_dict.CADD|join(', ') or '-' }}</td>
 						<td>
 							{% for family in variant.info_dict.GeneticModels %}
