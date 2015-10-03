@@ -9,26 +9,37 @@ The main entry point for the command line interface.
 Invoke as ``puzzle`` (if installed)
 or ``python -m puzzle`` (no install required).
 """
-from __future__ import absolute_import, unicode_literals
 import logging
 import sys
 
-from puzzle.log import configure_stream
+import click
+
+import puzzle
+from .factory import create_app
+from .log import configure_stream, LEVELS
+from .settings import BaseConfig
 
 logger = logging.getLogger(__name__)
 
 
-def cli():
-    """Add some useful functionality here or import from a submodule."""
+@click.command()
+@click.option('--host', default='0.0.0.0')
+@click.option('--port', default=5000)
+@click.option('-v', '--verbose', count=True, default=2)
+@click.argument('vcf_root')
+@click.version_option(puzzle.__version__)
+def cli(host, port, verbose, vcf_root):
+    """Browse VCF files."""
     # configure root logger to print to STDERR
-    configure_stream(level='DEBUG')
+    loglevel = LEVELS.get(min(verbose, 3))
+    configure_stream(level=loglevel)
 
     # launch the command line interface
     logger.debug('Booting up command line interface')
 
-    # ...oops, it wasn't implemented yet!
-    logger.error('Please implement the command line interface!')
-    raise NotImplementedError('Puzzle CLI not implemented yet')
+    BaseConfig.PUZZLE_ROOT = vcf_root
+    app = create_app(config_obj=BaseConfig)
+    app.run(host=host, port=port)
 
 
 if __name__ == '__main__':
