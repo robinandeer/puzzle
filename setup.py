@@ -72,6 +72,13 @@ setup(
     include_package_data=True,
     zip_safe=False,
 
+    package_data={
+        'puzzle': [
+            'blueprints/**/templates/*.html',
+            'blueprints/**/templates/**/*.html',
+        ]
+    },
+
     # Install requirements loaded from ``requirements.txt``
     install_requires=parse_reqs(),
 
