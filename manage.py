@@ -3,8 +3,9 @@
 from flask.ext.script import Manager
 
 from puzzle.factory import create_app
+from puzzle.settings import DevConfig
 
-app = create_app()
+app = create_app(config_obj=DevConfig)
 manager = Manager(app)
 
 

@@ -32,6 +32,9 @@ class Plugin(object):
         for index, variant in enumerate(variants):
             variant['id'] = index
             variant['index'] = index + 1
+            variant['start'] = int(variant['POS'])
+            variant['stop'] = int(variant['POS']) + (len(variant['REF'])
+                                                     - len(variant['ALT']))
             yield variant
 
     def variants(self, skip=0, count=30, gene_list=None):
