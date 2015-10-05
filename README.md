@@ -1,6 +1,17 @@
 # Puzzle [![PyPI version][fury-image]][fury-url] [![Build Status][travis-image]][travis-url]
 A new secret project :P
 
+Try it out!
+
+```bash
+$ git clone git clone https://github.com/robinandeer/puzzle.git
+$ cd puzzle
+$ pip install --editable .
+$ puzzle tests/
+# open webbrowser on port 5000
+$ open http://localhost:5000
+```
+
 
 ## Features
 
@@ -8,12 +19,6 @@ A new secret project :P
 
 
 ## Install for development
-
-```bash
-$ git clone git clone https://github.com/robinandeer/puzzle.git
-$ cd puzzle
-$ pip install --editable .
-```
 
 
 ## Contributing
