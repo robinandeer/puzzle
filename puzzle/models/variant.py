@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class Transcript(dict):
     """Class that holds information about a transcript"""
@@ -19,12 +23,16 @@ class Genotype(dict):
 
 class Variant(dict):
     """docstring for Variant"""
-    def __init__(self, CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, FORMAT=None):
+    def __init__(self, CHROM, POS, ID, REF, ALT, QUAL, FILTER):
         super(Variant, self).__init__(CHROM=CHROM, POS=POS, ID=ID, REF=REF, 
-        ALT=ALT, QUAL=QUAL, FILTER=FILTER, INFO=INFO, FORMAT=FORMAT)
+        ALT=ALT, QUAL=QUAL, FILTER=FILTER)
+        
+        self._set_variant_id()
+        self['index'] = None
         
         self['thousand_g'] = None # float
         self['cadd_score'] = None # float
+        self['most_severe_consequence'] = None # float
         
         self['hgnc_symbols'] = []
         self['frequencies'] = []
@@ -60,4 +68,16 @@ class Variant(dict):
     def add_transcript(self, transcript):
         """Add the information transcript"""
         self['transcripts'].append(transcript)
+    
+    def _set_variant_id(self, variant_id=None):
+        """Set the variant id for this variant"""
+        if variant_id:
+            self['variant_id'] = variant_id
+        else:
+            self['variant_id'] = '_'.join([
+                self['CHROM'],
+                self['POS'],
+                self['REF'],
+                self['ALT']
+                ])
 

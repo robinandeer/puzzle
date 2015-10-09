@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
+import logging
+
 from path import path
 
-from puzzle.models import Variant
+from puzzle.models import (Variant, Genotype, Transcript)
+from puzzle.utils import (get_most_severe_consequence, get_hgnc_symbols)
 
-from vcftoolbox import (get_variant_dict, HeaderParser, get_info_dict)
+from vcftoolbox import (get_variant_dict, HeaderParser, get_info_dict, 
+get_vep_dict)
 
+logger = logging.getLogger(__name__)
 
 class Plugin(object):
     """docstring for Plugin"""
@@ -40,50 +45,124 @@ class Plugin(object):
                     break
         
         header_line = head.header
-        if len(header_line) > 8:
-            variant_columns = header_line[:9]
-        else:
-            variant_columns = header_line[:8]
+        individuals = head.individuals
         
-        print(header.info_dict)
-        sys.exit()
+        variant_columns = ['CHROM','POS','ID','REF','ALT','QUAL','FILTER']
+        
+        vep_header = head.vep_columns
         
         with open(vcf_file_path, 'r') as vcf_file:
             index = 0
             for variant_line in vcf_file:
                 if not variant_line.startswith('#'):
                     index += 1
+                    #Create a variant dict:
                     variant_dict =  get_variant_dict(
                         variant_line = variant_line,
                         header_line = header_line
                     )
-                    variant_dict['info_dict'] = get_info_dict(variant_dict['INFO'])
-                    variant_dict['vep_dict'] = get_vep_dict(
-                        vep_string = variant_dict['info_dict'].get('CSQ', '')
+                    #Crreate a info dict:
+                    variant_dict['info_dict'] = get_info_dict(
+                        info_line = variant_dict['INFO']
                     )
-                    variant = Variant(
-                        **{column: variant_dict[column] for column in variant_columns}
+                    vep_string = variant_dict['info_dict'].get('CSQ')
+                    
+                    if vep_string:
+                        vep_dict = get_vep_dict(
+                            vep_string = vep_string,
+                            vep_header = vep_header
                         )
-                    print(variant)
-        #
-        # for index, variant in enumerate(variants):
-        #     variant['id'] = index
-        #     variant['index'] = index + 1
-        #     variant['start'] = int(variant['POS'])
-        #     variant['stop'] = int(variant['POS']) + (len(variant['REF'])
-        #                                              - len(variant['ALT']))
-        #     yield variant
+                    
+                    variant = Variant(
+                        **{column: variant_dict.get(column, '.') 
+                            for column in variant_columns}
+                        )
+                    logger.debug("Creating a variant object of variant {0}".format(
+                        variant.get('variant_id')))
+                    
+                    variant['index'] = index
+                    logger.debug("Updating index to: {0}".format(
+                        index))
+                    
+                    variant['start'] = int(variant_dict['POS'])
+                    
+                    variant['stop'] = int(variant_dict['POS']) + \
+                        (len(variant_dict['REF']) - len(variant_dict['ALT']))
+                    
+                    # It would be easy to update these keys...
+                    thousand_g = variant_dict['info_dict'].get('1000GAF')
+                    if thousand_g:
+                        logger.debug("Updating thousand_g to: {0}".format(
+                            thousand_g))
+                        variant['thousand_g'] = float(thousand_g)
+                    
+                    cadd_score = variant_dict['info_dict'].get('CADD')
+                    if cadd_score:
+                        logger.debug("Updating cadd_score to: {0}".format(
+                            cadd_score))
+                        variant['cadd_score'] = float(cadd_score)
+                    
+                    #Add genotype calls:
+                    if individuals:
+                        for sample_id in individuals:
+                            raw_call = dict(zip(
+                                variant_dict['FORMAT'].split(':'), 
+                                variant_dict[sample_id].split(':'))
+                            )
+                            variant.add_individual(Genotype(
+                                sample_id = sample_id, 
+                                genotype = raw_call.get('GT', './.'), 
+                                ref_depth = raw_call.get('AD', ',')[0], 
+                                alt_depth = raw_call.get('AD', ',')[1], 
+                                genotype_quality = raw_call.get('GQ', '.'), 
+                                depth = raw_call.get('DP', '.')
+                            ))
+                    
+                    #Add transcript information:
+                    if vep_string:
+                        for allele in vep_dict:
+                            for transcript_info in vep_dict[allele]:
+                                variant.add_transcript(Transcript(
+                                    SYMBOL = transcript_info.get('SYMBOL'), 
+                                    Feature = transcript_info.get('Feature'), 
+                                    BIOTYPE = transcript_info.get('BIOTYPE'), 
+                                    Consequence = transcript_info.get('Consequence'), 
+                                    STRAND = transcript_info.get('STRAND'), 
+                                    SIFT = transcript_info.get('SIFT'), 
+                                    PolyPhen = transcript_info.get('PolyPhen'), 
+                                    EXON = transcript_info.get('EXON'), 
+                                    HGVSc = transcript_info.get('HGVSc'), 
+                                    HGVSp = transcript_info.get('HGVSp')
+                                ))
+                    
+                    variant['most_severe_consequence'] = get_most_severe_consequence(
+                        variant['transcripts']
+                    )
+                    
+                    variant['hgcn_symbols'] = list(get_hgnc_symbols(
+                        transcripts = variant['transcripts']
+                    ))
+                    
+                    yield variant
 
-    def variants(self, case_id, skip=0, count=30, gene_list=None):
-        """Return all variants in the VCF."""
+    def variants(self, case_id, skip=0, count=30, gene_list=[]):
+        """Return all variants in the VCF.
+            
+            Args:
+                case_id (str): Path to a vcf file(for this adapter)
+                skip (int): Skip first variants
+                count (int): The number of variants to return
+                gene_list (list): A list of genes
+        """
         
         limit = count + skip
+        
         if gene_list:
+            gene_list = set(gene_list)
             filtered_variants = (variant for variant in self._variants(case_id)
-                                 if gene_list in
-                                 variant['info_dict']['Clinical_db_gene_annotation'])
+                                 if set(variant['hgcn_symbols'].intersection(gene_list)))
         else:
-            filtered_variants = self._variants()
+            filtered_variants = self._variants(case_id)
 
         for variant in filtered_variants:
             if variant['index'] >= skip:
@@ -101,7 +180,9 @@ class Plugin(object):
 
 
 if __name__ == '__main__':
+    from pprint import pprint as pp
     vcf_file = "tests/fixtures/15031.vcf"
     plugin = Plugin()
-    plugin._variants(vcf_file)
-    print("hej")
+    for variant in plugin.variants(case_id = vcf_file):
+        print(variant)
+    
