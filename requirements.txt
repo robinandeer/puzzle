@@ -6,5 +6,5 @@
 -r requirements/conda.txt
 
 Flask-Script
-vcf-parser
+vcftoolbox
 path.py
