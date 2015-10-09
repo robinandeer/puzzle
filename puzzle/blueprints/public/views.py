@@ -12,4 +12,4 @@ blueprint = Blueprint(BP_NAME, __name__, template_folder='templates',
 @blueprint.route('/')
 def index():
     """Show the landing page."""
-    return render_template('index.html', vcf_files=db.vcf_files())
+    return render_template('index.html', cases=db.cases())

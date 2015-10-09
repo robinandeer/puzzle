@@ -6,14 +6,14 @@
 		<div class="col-md-6">
 			<ul class="list-group">
 				<li class="list-group-item">
-					<span class="badge">{{ variant.rank_scores.values()[0] }}</span>
+					<span class="badge">{{ variant.rank_score or '-' }}</span>
 					Rank score
 				</li>
 
-				{% if variant.info_dict.CADD %}
+				{% if variant.cadd_score %}
 					<li class="list-group-item">
 						<span class="badge">
-							{{ variant.info_dict.CADD|join(', ') }}
+							{{ variant.cadd_score }}
 						</span>
 						CADD score
 					</li>
@@ -30,12 +30,8 @@
 
 				<ul class="list-group">
 					<li class="list-group-item">
-						<span class="badge">{{ variant.info_dict['1000GAF']|map('float')|map('round', 4)|join(', ') }}</span>
+						<span class="badge">{{ variant.thousand_g }}</span>
 						Thousand genomes
-					</li>
-					<li class="list-group-item">
-						<span class="badge">{{ variant.info_dict.EXACAF|map('float')|map('round', 4)|join(', ') }}</span>
-						ExAC 
 					</li>
 				</ul>
 			</div>
@@ -43,7 +39,7 @@
 	</div>
 
 	<div class="row">
-		<div class="col-md-8">{{ gt_call(variant.genotypes) }}</div>
+		<div class="col-md-8">{{ gt_call(variant.individuals) }}</div>
 		<div class="col-md-4"></div>
 	</div>
 

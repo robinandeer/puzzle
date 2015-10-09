@@ -2,11 +2,10 @@
 
 {% block body_content %}
 	<ul class="list-group">
-		{% for vcf_file in vcf_files %}
+		{% for case in cases %}
 			<li class="list-group-item">
-				<span class="badge">{{ (vcf_file.size / 1000000)|round(1) }} MB</span>
-				<a href="{{ url_for('variants.variants', vcf_file=vcf_file) }}">
-					{{ vcf_file.basename() }}
+				<a href="{{ url_for('variants.variants', case_id=case.id) }}">
+					{{ case.name }}
 				</a>
 			</li>
 		{% endfor %}

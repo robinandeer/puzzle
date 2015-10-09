@@ -1,3 +1,3 @@
-from __future__ import absolute_import
-
+# -*- coding: utf-8 -*-
+from .case import Case
 from .variant import (Variant, Genotype, Transcript)

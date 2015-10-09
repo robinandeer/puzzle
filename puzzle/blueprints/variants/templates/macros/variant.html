@@ -1,4 +1,4 @@
-{% macro gt_call(genotypes) -%}
+{% macro gt_call(individuals) -%}
     <table class="table table-bordered table-hover">
 		<caption>Genotype call</caption>
 		<thead>
@@ -14,13 +14,13 @@
 			</tr>
 		</thead>
 		<tbody>
-			{% for sample_id, genotype in genotypes.iteritems() %}
+			{% for individual in individuals %}
 				<tr>
-					<td>{{ sample_id }}</td>
-					<td>{{ genotype.genotype }}</td>
-					<td>{{ genotype.ref_depth }}</td>
-					<td>{{ genotype.alt_depth }}</td>
-					<td>{{ genotype.genotype_quality }}</td>
+					<td>{{ individual.sample_id }}</td>
+					<td>{{ individual.genotype }}</td>
+					<td>{{ individual.ref_depth }}</td>
+					<td>{{ individual.alt_depth }}</td>
+					<td>{{ individual.genotype_quality }}</td>
 				</tr>
 			{% endfor %}
 		</tbody>
