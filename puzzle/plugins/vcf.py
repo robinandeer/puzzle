@@ -62,10 +62,10 @@ class Plugin(object):
                         header_line = header_line
                     )
                     #Crreate a info dict:
-                    variant_dict['info_dict'] = get_info_dict(
+                    info_dict = get_info_dict(
                         info_line = variant_dict['INFO']
                     )
-                    vep_string = variant_dict['info_dict'].get('CSQ')
+                    vep_string = info_dict.get('CSQ')
                     
                     if vep_string:
                         vep_dict = get_vep_dict(
@@ -90,17 +90,25 @@ class Plugin(object):
                         (len(variant_dict['REF']) - len(variant_dict['ALT']))
                     
                     # It would be easy to update these keys...
-                    thousand_g = variant_dict['info_dict'].get('1000GAF')
+                    thousand_g = info_dict.get('1000GAF')
                     if thousand_g:
                         logger.debug("Updating thousand_g to: {0}".format(
                             thousand_g))
                         variant['thousand_g'] = float(thousand_g)
                     
-                    cadd_score = variant_dict['info_dict'].get('CADD')
+                    cadd_score = info_dict.get('CADD')
                     if cadd_score:
                         logger.debug("Updating cadd_score to: {0}".format(
                             cadd_score))
                         variant['cadd_score'] = float(cadd_score)
+
+                    rank_score_entry = info_dict.get('RankScore')
+                    if rank_score_entry:
+                        for family_annotation in rank_score_entry.split(','):
+                            rank_score = family_annotation.split(':')[-1]
+                        logger.debug("Updating cadd_score to: {0}".format(
+                            cadd_score))
+                        variant['rank_score'] = float(rank_score)
                     
                     #Add genotype calls:
                     if individuals:
@@ -112,8 +120,8 @@ class Plugin(object):
                             variant.add_individual(Genotype(
                                 sample_id = sample_id, 
                                 genotype = raw_call.get('GT', './.'), 
-                                ref_depth = raw_call.get('AD', ',')[0], 
-                                alt_depth = raw_call.get('AD', ',')[1], 
+                                ref_depth = raw_call.get('AD', ',').split(',')[0], 
+                                alt_depth = raw_call.get('AD', ',').split(',')[1], 
                                 genotype_quality = raw_call.get('GQ', '.'), 
                                 depth = raw_call.get('DP', '.')
                             ))
@@ -180,9 +188,11 @@ class Plugin(object):
 
 
 if __name__ == '__main__':
+    import sys
     from pprint import pprint as pp
-    vcf_file = "tests/fixtures/15031.vcf"
+    vcf_file = sys.argv[1]
     plugin = Plugin()
     for variant in plugin.variants(case_id = vcf_file):
         print(variant)
+        print('')
     

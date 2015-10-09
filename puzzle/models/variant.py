@@ -32,7 +32,8 @@ class Variant(dict):
         
         self['thousand_g'] = None # float
         self['cadd_score'] = None # float
-        self['most_severe_consequence'] = None # float
+        self['most_severe_consequence'] = None # str
+        self['rank_score'] = None # float
         
         self['hgnc_symbols'] = []
         self['frequencies'] = []
