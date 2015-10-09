@@ -3,7 +3,7 @@ from path import path
 
 from puzzle.models import Variant
 
-from vcftoolbox import get_variant_dict, HeaderParser
+from vcftoolbox import (get_variant_dict, HeaderParser, get_info_dict)
 
 
 class Plugin(object):
@@ -45,6 +45,9 @@ class Plugin(object):
         else:
             variant_columns = header_line[:8]
         
+        print(header.info_dict)
+        sys.exit()
+        
         with open(vcf_file_path, 'r') as vcf_file:
             index = 0
             for variant_line in vcf_file:
@@ -53,6 +56,10 @@ class Plugin(object):
                     variant_dict =  get_variant_dict(
                         variant_line = variant_line,
                         header_line = header_line
+                    )
+                    variant_dict['info_dict'] = get_info_dict(variant_dict['INFO'])
+                    variant_dict['vep_dict'] = get_vep_dict(
+                        vep_string = variant_dict['info_dict'].get('CSQ', '')
                     )
                     variant = Variant(
                         **{column: variant_dict[column] for column in variant_columns}
