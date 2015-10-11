@@ -16,6 +16,11 @@ class Gene(dict):
     def __init__(self, symbol, omim_number = None):
         super(Gene, self).__init__(symbol=symbol, omim_number=omim_number)
 
+class Compound(dict):
+    """Class that holds information about a compound variant"""
+    def __init__(self, variant_id, combined_score = None):
+        super(Compound, self).__init__(variant_id=variant_id, 
+            combined_score=combined_score)
 
 class Genotype(dict):
     """Class that holds information about a genotype call"""
@@ -46,6 +51,7 @@ class Variant(dict):
         self['transcripts'] = [] #List of Transcripts
         self['individuals'] = [] #List of Genotypes
         self['genes'] = [] #List of Genes
+        self['compounds'] = [] #List of Compounds
 
 
     def add_frequency(self, name, value):
@@ -79,6 +85,10 @@ class Variant(dict):
     def add_gene(self, gene):
         """Add the information of a gene"""
         self['genes'].append(gene)
+
+    def add_compound(self, compound):
+        """Add the information of a compound variant"""
+        self['compounds'].append(compound)
 
     def _set_variant_id(self, variant_id=None):
         """Set the variant id for this variant"""

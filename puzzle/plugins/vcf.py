@@ -3,7 +3,7 @@ import logging
 
 from path import path
 
-from puzzle.models import (Case, Variant, Genotype, Transcript, Gene)
+from puzzle.models import (Case, Variant, Genotype, Transcript, Gene, Compound)
 from puzzle.utils import (get_most_severe_consequence, get_hgnc_symbols, 
 get_omim_number)
 
@@ -163,6 +163,20 @@ class Plugin(object):
                             symbol = hgnc_id, 
                             omim_number = get_omim_number(hgnc_id)
                         ))
+                    
+                    compound_entry = info_dict.get('Compounds')
+                    if compound_entry:
+                        for family_annotation in compound_entry.split(','):
+                            compounds = family_annotation.split(':')[-1].split('|')
+                            for compound in compounds:
+                                splitted_compound = compound.split('>')
+                                compound_id = splitted_compound[0]
+                                compound_score = splitted_compound[-1]
+                                
+                                variant.add_compound(Compound(
+                                    variant_id = compound_id, 
+                                    combined_score = compound_score
+                                ))
 
                     yield variant
 
