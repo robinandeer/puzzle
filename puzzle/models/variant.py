@@ -11,6 +11,11 @@ class Transcript(dict):
         BIOTYPE=BIOTYPE, Consequence=Consequence, STRAND=STRAND, SIFT=SIFT,
         PolyPhen=PolyPhen, EXON=EXON, HGVSc=HGVSc, HGVSp=HGVSp)
 
+class Gene(dict):
+    """Class that holds information about a Gene"""
+    def __init__(self, symbol, omim_number = None):
+        super(Gene, self).__init__(symbol=symbol, omim_number=omim_number)
+
 
 class Genotype(dict):
     """Class that holds information about a genotype call"""
@@ -40,6 +45,7 @@ class Variant(dict):
         self['severities'] = []
         self['transcripts'] = [] #List of Transcripts
         self['individuals'] = [] #List of Genotypes
+        self['genes'] = [] #List of Genes
 
 
     def add_frequency(self, name, value):
@@ -69,6 +75,10 @@ class Variant(dict):
     def add_transcript(self, transcript):
         """Add the information transcript"""
         self['transcripts'].append(transcript)
+
+    def add_gene(self, gene):
+        """Add the information of a gene"""
+        self['genes'].append(gene)
 
     def _set_variant_id(self, variant_id=None):
         """Set the variant id for this variant"""

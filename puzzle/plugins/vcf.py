@@ -3,8 +3,9 @@ import logging
 
 from path import path
 
-from puzzle.models import (Case, Variant, Genotype, Transcript)
-from puzzle.utils import (get_most_severe_consequence, get_hgnc_symbols)
+from puzzle.models import (Case, Variant, Genotype, Transcript, Gene)
+from puzzle.utils import (get_most_severe_consequence, get_hgnc_symbols, 
+get_omim_number)
 
 from vcftoolbox import (get_variant_dict, HeaderParser, get_info_dict,
                         get_vep_dict)
@@ -150,10 +151,18 @@ class Plugin(object):
                     variant['most_severe_consequence'] = get_most_severe_consequence(
                         variant['transcripts']
                     )
-
-                    variant['hgnc_symbols'] = list(get_hgnc_symbols(
+                    
+                    hgnc_symbols = get_hgnc_symbols(
                         transcripts = variant['transcripts']
-                    ))
+                    )
+                    
+                    variant['hgnc_symbols'] = list(hgnc_symbols)
+                    
+                    for hgnc_id in hgnc_symbols:
+                        variant.add_gene(Gene(
+                            symbol = hgnc_id, 
+                            omim_number = get_omim_number(hgnc_id)
+                        ))
 
                     yield variant
 
