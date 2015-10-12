@@ -1,5 +1,5 @@
 {% extends "layouts/base.html" %}
-{% from "macros/variant.html" import compounds, gt_call, vep_transcripts %}
+{% from "macros/variant.html" import compounds_table, gt_call, vep_transcripts %}
 
 {% block body_content %}
 	<div class="row">
@@ -88,10 +88,10 @@
 		</div>
 	</div>
 
-	{% if variant.compound_variants %}
+	{% if variant.compounds %}
 	<div class="row">
 		<div class="col-md-12">
-			{{ compounds(variant.compound_variants) }}
+			{{ compounds_table(compounds, case_id) }}
 		</div>
 	</div>
 	{% endif %}

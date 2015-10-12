@@ -26,4 +26,9 @@ def variant(case_id, variant_id):
     variant = db.variant(case_id, variant_id)
     if variant is None:
         return abort(404, "variant not found")
-    return render_template('variant.html', variant=variant)
+
+    # sort compounds by score
+    sorted_compounds = sorted(variant['compounds'],
+                              key=lambda compound: compound['combined_score'])
+    return render_template('variant.html', variant=variant,
+                           compounds=sorted_compounds, ase_id=case_id)
