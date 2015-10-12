@@ -40,13 +40,6 @@
 						Most severe consequence
 					</li>
 				{% endif %}
-
-				{% if variant.genes %}
-					<li class="list-group-item">
-						Genes (OMIM)
-						<div class="pull-right">{{ omim_links(variant.genes) }}</div>
-					</li>
-				{% endif %}
 			</ul>
 		</div>
 
@@ -62,13 +55,18 @@
 						{{ variant.ALT }}
 					</div>
 				</li>
+
+				{% if variant.genes %}
+					<li class="list-group-item">
+						Genes (OMIM)
+						<div class="pull-right">{{ omim_links(variant.genes) }}</div>
+					</li>
+				{% endif %}
 			</ul>
 		</div>
 	</div>
 
 	<div class="row">
-		<div class="col-md-6">{{ gt_call(variant.individuals) }}</div>
-		
 		<div class="col-md-3">
 			<div class="panel panel-default">
 				<div class="panel-heading">Frequencies</div>
@@ -89,6 +87,8 @@
 				</ul>
 			</div>
 		</div>
+
+		<div class="col-md-6">{{ gt_call(variant.individuals) }}</div>
 
 		<div class="col-md-3">
 			<div class="panel panel-default">

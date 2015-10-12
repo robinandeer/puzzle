@@ -10,13 +10,11 @@
 
 	<title>
 		{% block title %}
-			{{ page_title | default('Project') }}
+			{{ page_title | default('Puzzle') }}
 		{% endblock %}
 	</title>
 
-	{% block css %}
-		<link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
-	{% endblock %}
+	{% block css %}{% endblock %}
 
 	{% block js_top %}
 		<!-- Latest compiled and minified CSS -->
