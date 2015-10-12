@@ -1,14 +1,29 @@
 {% extends "layouts/base.html" %}
 {% from "macros/variant.html" import compounds_table, gt_call, vep_transcripts, omim_links %}
 
+{% block nav_left %}
+	<li>
+		<a href="{{ url_for('variants.variants', case_id=case_id) }}">
+			Variants
+		</a>
+	</li>
+{% endblock %}
+
 {% block body_content %}
 	<div class="row">
 		<div class="col-md-6">
 			<ul class="list-group">
 				<li class="list-group-item">
-					<span class="badge">{{ variant.rank_score or '-' }}</span>
-					Rank score
+					<span class="badge">{{ variant.index }}</span>
+					Ranking
 				</li>
+
+				{% if variant.rank_score %}
+					<li class="list-group-item">
+						<span class="badge">{{ variant.rank_score }}</span>
+						Rank score
+					</li>
+				{% endif %}
 
 				{% if variant.cadd_score %}
 					<li class="list-group-item">
@@ -18,23 +33,57 @@
 						CADD score
 					</li>
 				{% endif %}
-				<li class="list-group-item">
-					<span class="badge">{{ variant.most_severe_consequence }}</span>
-					Most severe consequence
-				</li>
-				<li class="list-group-item">
-					{{ omim_links(variant.genes) }}
-				</li>
+
+				{% if variant.most_severe_consequence %}
+					<li class="list-group-item">
+						<span class="badge">{{ variant.most_severe_consequence }}</span>
+						Most severe consequence
+					</li>
+				{% endif %}
+
+				{% if variant.genes %}
+					<li class="list-group-item">
+						Genes
+						<div class="pull-right">{{ omim_links(variant.genes) }}</div>
+					</li>
+				{% endif %}
 			</ul>
 		</div>
 
+		<div class="col-md-6">
+			<ul class="list-group">
+				<li class="list-group-item">
+					Position
+					<div class="pull-right">
+						{{ variant.CHROM }}:{{ variant.POS }}
+
+						|
+
+						{{ variant.REF }}
+						<span class="glyphicon glyphicon-arrow-right"></span>
+						{{ variant.ALT }}
+					</div>
+				</li>
+			</ul>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-6">{{ gt_call(variant.individuals) }}</div>
+		
 		<div class="col-md-3">
 			<div class="panel panel-default">
 				<div class="panel-heading">Frequencies</div>
 
 				<ul class="list-group">
 					<li class="list-group-item">
-						<span class="badge">{{ variant.thousand_g }}</span>
+						<span class="badge">
+							{% if variant.thousand_g %}
+								{{ variant.thousand_g|round(4) }}
+							{% else %}
+								N/A
+							{% endif %}
+						</span>
 						Thousand genomes
 					</li>
 				</ul>
@@ -49,15 +98,12 @@
 						<li class="list-group-item">
 							{{ model }}
 						</li>
+					{% else %}
+						<li class="list-group-item">N/A</li>
 					{% endfor %}
 				</ul>
 			</div>
 		</div>
-	</div>
-
-	<div class="row">
-		<div class="col-md-8">{{ gt_call(variant.individuals) }}</div>
-		<div class="col-md-4"></div>
 	</div>
 
 	<div class="row">
@@ -67,18 +113,25 @@
 				<div class="panel-body">
 					<div class="btn-group" role="group">
 						<a class="btn btn-default" href="https://www.solvebio.com/variant/GRCh37-chr{{ variant.CHROM }}-{{ variant.start }}-{{ variant.stop }}-{{ variant.ALT }}" target="_blank">SolveBio</a>
+
 						<a class="btn btn-default" href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr{{ variant.CHROM }}:{{ variant.start }}-{{ variant.stop }}&dgv=pack&knownGene=pack&omimGene=pack" target="_blank">UCSC</a>
+
+						{% if variant.ID %}
+							<a class="btn btn-default" href="http://snpedia.com/index.php/{{ variant.ID }}" target="_blank">SNPedia</a>
+						{% endif %}
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 
-	<div class="row">
-		<div class="col-md-12">
-			{{ vep_transcripts(variant.transcripts) }}
+	{% if variant.transcripts %}
+		<div class="row">
+			<div class="col-md-12">
+				{{ vep_transcripts(variant.transcripts) }}
+			</div>
 		</div>
-	</div>
+	{% endif %}
 
 	{% if variant.compounds %}
 	<div class="row">
