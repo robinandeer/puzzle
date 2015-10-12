@@ -3,9 +3,8 @@ import logging
 
 from path import path
 
-from puzzle.models import (Case, Variant, Genotype, Transcript, Gene, Compound)
-from puzzle.utils import (get_most_severe_consequence, get_hgnc_symbols, 
-get_omim_number)
+from puzzle.models import (Case, Variant, Genotype, Transcript)
+from puzzle.utils import (get_most_severe_consequence, get_hgnc_symbols)
 
 from vcftoolbox import (get_variant_dict, HeaderParser, get_info_dict,
                         get_vep_dict)
@@ -35,61 +34,6 @@ class Plugin(object):
                           name=vcf.basename()) for vcf in vcfs)
         return case_objs
 
-    def _add_compounds(self, variant, info_dict):
-        """Check if there are any compounds and add them to the variant
-        
-        """
-        compound_entry = info_dict.get('Compounds')
-        if compound_entry:
-            for family_annotation in compound_entry.split(','):
-                compounds = family_annotation.split(':')[-1].split('|')
-                for compound in compounds:
-                    splitted_compound = compound.split('>')
-                    
-                    compound_score = None
-                    if len(splitted_compound) > 1:
-                        compound_id = splitted_compound[0]
-                        compound_score = splitted_compound[-1]
-                    
-                    variant.add_compound(Compound(
-                        variant_id = compound_id, 
-                        combined_score = compound_score
-                    ))
-    
-    def _add_genes(self, variant):
-        """Add the genes for a variant"""
-        
-        hgnc_symbols = get_hgnc_symbols(
-            transcripts = variant['transcripts']
-        )
-    
-        variant['hgnc_symbols'] = list(hgnc_symbols)
-    
-        for hgnc_id in hgnc_symbols:
-            variant.add_gene(Gene(
-                symbol = hgnc_id, 
-                omim_number = get_omim_number(hgnc_id)
-            ))
-    
-    def _add_transcripts(self, variant, vep_dict):
-        """Add the transcripts for a variant"""
-        
-        for allele in vep_dict:
-            for transcript_info in vep_dict[allele]:
-                variant.add_transcript(Transcript(
-                    SYMBOL = transcript_info.get('SYMBOL'),
-                    Feature = transcript_info.get('Feature'),
-                    BIOTYPE = transcript_info.get('BIOTYPE'),
-                    Consequence = transcript_info.get('Consequence'),
-                    STRAND = transcript_info.get('STRAND'),
-                    SIFT = transcript_info.get('SIFT'),
-                    PolyPhen = transcript_info.get('PolyPhen'),
-                    EXON = transcript_info.get('EXON'),
-                    HGVSc = transcript_info.get('HGVSc'),
-                    HGVSp = transcript_info.get('HGVSp')
-                ))
-        
-    
     def _variants(self, vcf_file_path):
         head = HeaderParser()
         # Parse the header
@@ -166,9 +110,19 @@ class Plugin(object):
                     if rank_score_entry:
                         for family_annotation in rank_score_entry.split(','):
                             rank_score = family_annotation.split(':')[-1]
-                        logger.debug("Updating cadd_score to: {0}".format(
-                            cadd_score))
+                        logger.debug("Updating rank_score to: {0}".format(
+                            rank_score))
                         variant['rank_score'] = float(rank_score)
+
+                    genetic_models_entry = info_dict.get('GeneticModels')
+                    if genetic_models_entry:
+                        genetic_models = []
+                        for family_annotation in genetic_models_entry.split(','):
+                            for genetic_model in family_annotation.split(':')[-1].split('|'):
+                                genetic_models.append(genetic_model)
+                        logger.debug("Updating rank_score to: {0}".format(
+                            rank_score))
+                        variant['genetic_models'] = genetic_models
 
                     #Add genotype calls:
                     if individuals:
@@ -186,16 +140,30 @@ class Plugin(object):
                                 depth = raw_call.get('DP', '.')
                             ))
 
+                    #Add transcript information:
                     if vep_string:
-                        #Add transcript information:
-                        self._add_transcripts(variant, vep_dict)
-                    
+                        for allele in vep_dict:
+                            for transcript_info in vep_dict[allele]:
+                                variant.add_transcript(Transcript(
+                                    SYMBOL = transcript_info.get('SYMBOL'),
+                                    Feature = transcript_info.get('Feature'),
+                                    BIOTYPE = transcript_info.get('BIOTYPE'),
+                                    Consequence = transcript_info.get('Consequence'),
+                                    STRAND = transcript_info.get('STRAND'),
+                                    SIFT = transcript_info.get('SIFT'),
+                                    PolyPhen = transcript_info.get('PolyPhen'),
+                                    EXON = transcript_info.get('EXON'),
+                                    HGVSc = transcript_info.get('HGVSc'),
+                                    HGVSp = transcript_info.get('HGVSp')
+                                ))
+
                     variant['most_severe_consequence'] = get_most_severe_consequence(
                         variant['transcripts']
                     )
-                    self._add_genes(variant)
-                    
-                    self._add_compounds(variant=variant, info_dict=info_dict)
+
+                    variant['hgnc_symbols'] = list(get_hgnc_symbols(
+                        transcripts = variant['transcripts']
+                    ))
 
                     yield variant
 
@@ -208,6 +176,7 @@ class Plugin(object):
                 count (int): The number of variants to return
                 gene_list (list): A list of genes
         """
+
         limit = count + skip
 
         if gene_list:
@@ -226,7 +195,15 @@ class Plugin(object):
                     break
 
     def variant(self, case_id, variant_id):
-        """Return a specific variant."""
+        """Return a specific variant.
+        
+            Args:
+                case_id (str): Path to vcf file
+                variant_id (str): A variant id
+            
+            Returns:
+                variant (Variant): The variant object for the given id
+        """
         for variant in self.variants(case_id):
             if variant['variant_id'] == variant_id:
                 return variant

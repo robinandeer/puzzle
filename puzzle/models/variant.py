@@ -52,7 +52,7 @@ class Variant(dict):
         self['individuals'] = [] #List of Genotypes
         self['genes'] = [] #List of Genes
         self['compounds'] = [] #List of Compounds
-
+        self['genetic_models'] = [] #List of genetic models followed
 
     def add_frequency(self, name, value):
         """Add a frequency that will be displayed on the variant level
