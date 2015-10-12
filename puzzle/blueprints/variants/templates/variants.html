@@ -1,4 +1,5 @@
 {% extends "layouts/base.html" %}
+{% from "macros/variant.html" import omim_links %}
 
 {% block body_content %}
 	<div class="table-responsive">
@@ -20,7 +21,7 @@
 						<td><a href="{{ url_for('variants.variant', case_id=case_id, variant_id=variant.variant_id) }}">{{ variant.index }}</a></td>
 						<td>{{ variant.rank_score }}</td>
 						<td>{{ variant.CHROM }}</td>
-						<td>{{ variant.hgnc_symbols|join(', ') }}</td>
+						<td>{{ omim_links(variant.genes) }}</td>
 						<td>{{ variant.most_severe_consequence or '-' }}</td>
 						<td>{{ variant.thousand_g or '-' }}</td>
 						<td>{{ variant.cadd_score or '-' }}</td>

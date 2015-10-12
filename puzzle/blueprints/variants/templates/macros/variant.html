@@ -84,3 +84,11 @@
 		</table>
 	</div>
 {% endmacro %}
+
+{% macro omim_links(genes) %}
+	{% for gene in genes %}
+		<a href="http://www.omim.org/entry/{{ gene.omim_number }}" target="_blank">
+			{{ gene.symbol }}
+		</a>
+	{% endfor %}
+{% endmacro %}

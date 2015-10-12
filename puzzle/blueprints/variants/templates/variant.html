@@ -1,5 +1,5 @@
 {% extends "layouts/base.html" %}
-{% from "macros/variant.html" import compounds_table, gt_call, vep_transcripts %}
+{% from "macros/variant.html" import compounds_table, gt_call, vep_transcripts, omim_links %}
 
 {% block body_content %}
 	<div class="row">
@@ -22,12 +22,12 @@
 					<span class="badge">{{ variant.most_severe_consequence }}</span>
 					Most severe consequence
 				</li>
+				<li class="list-group-item">
+					{{ omim_links(variant.genes) }}
+				</li>
 			</ul>
 		</div>
-		<div class="col-md-6"></div>
-	</div>
 
-	<div class="row">
 		<div class="col-md-3">
 			<div class="panel panel-default">
 				<div class="panel-heading">Frequencies</div>
@@ -38,14 +38,6 @@
 						Thousand genomes
 					</li>
 				</ul>
-			</div>
-		</div>
-
-		<div class="col-md-3">
-			<div class="panel panel-default">
-				<div class="panel-heading">Severities</div>
-
-				<ul class="list-group"></ul>
 			</div>
 		</div>
 
