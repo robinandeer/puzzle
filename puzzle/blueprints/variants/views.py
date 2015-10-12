@@ -31,4 +31,4 @@ def variant(case_id, variant_id):
     sorted_compounds = sorted(variant['compounds'],
                               key=lambda compound: compound['combined_score'])
     return render_template('variant.html', variant=variant,
-                           compounds=sorted_compounds, ase_id=case_id)
+                           compounds=sorted_compounds, case_id=case_id)
