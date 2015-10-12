@@ -27,7 +27,7 @@
 	</table>
 {%- endmacro %}
 
-{% macro compounds(compound_variants) -%}
+{% macro compounds_table(compound_variants, case_id) -%}
 	<table class="table table-bordered table-hover">
 		<caption>Compounds</caption>
 		<thead>
@@ -37,13 +37,11 @@
 			</tr>
 		</thead>
 		<tbody>
-			{% for case_id, compounds in compound_variants.iteritems() %}
-				{% for compound in compounds %}
-					<tr>
-						<td><a href="{{ url_for('variants.variant', variant_id=compound.variant_id) }}">{{ compound.variant_id|truncate(20) }}</a></td>
-						<td>{{ compound.compound_score }}</td>
-					</tr>
-				{% endfor %}
+			{% for compound in compound_variants %}
+				<tr>
+					<td><a href="{{ url_for('variants.variant', case_id=case_id, variant_id=compound.variant_id) }}">{{ compound.variant_id|truncate(20) }}</a></td>
+					<td>{{ compound.combined_score }}</td>
+				</tr>
 			{% endfor %}
 		</tbody>
 	</table>
@@ -85,4 +83,12 @@
 			</tbody>
 		</table>
 	</div>
+{% endmacro %}
+
+{% macro omim_links(genes) %}
+	{% for gene in genes %}
+		<a href="http://www.omim.org/entry/{{ gene.omim_number }}" target="_blank">
+			{{ gene.symbol }}
+		</a>
+	{% endfor %}
 {% endmacro %}
