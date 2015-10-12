@@ -43,7 +43,7 @@
 
 				{% if variant.genes %}
 					<li class="list-group-item">
-						Genes
+						Genes (OMIM)
 						<div class="pull-right">{{ omim_links(variant.genes) }}</div>
 					</li>
 				{% endif %}
@@ -55,9 +55,7 @@
 				<li class="list-group-item">
 					Position
 					<div class="pull-right">
-						{{ variant.CHROM }}:{{ variant.POS }}
-
-						|
+						{{ variant.CHROM }}:{{ variant.POS }} |
 
 						{{ variant.REF }}
 						<span class="glyphicon glyphicon-arrow-right"></span>
@@ -76,16 +74,18 @@
 				<div class="panel-heading">Frequencies</div>
 
 				<ul class="list-group">
-					<li class="list-group-item">
-						<span class="badge">
-							{% if variant.thousand_g %}
-								{{ variant.thousand_g|round(4) }}
-							{% else %}
-								N/A
-							{% endif %}
-						</span>
-						Thousand genomes
-					</li>
+					{% for label, value in variant.frequencies %}
+						<li class="list-group-item">
+							<span class="badge">
+								{% if value %}
+									{{ value|round(4) }}
+								{% else %}
+									N/A
+								{% endif %}
+							</span>
+							{{ label }}
+						</li>
+					{% endfor %}
 				</ul>
 			</div>
 		</div>
@@ -112,13 +112,17 @@
 				<div class="panel-heading">External links</div>
 				<div class="panel-body">
 					<div class="btn-group" role="group">
-						<a class="btn btn-default" href="https://www.solvebio.com/variant/GRCh37-chr{{ variant.CHROM }}-{{ variant.start }}-{{ variant.stop }}-{{ variant.ALT }}" target="_blank">SolveBio</a>
+						<a class="btn btn-default" href="http://grch37.ensembl.org/Homo_sapiens/Location/View?db=core;r={{ variant.CHROM }}:{{ variant.start }}-{{ variant.stop }}" target="_blank">Ensembl</a>
 
 						<a class="btn btn-default" href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr{{ variant.CHROM }}:{{ variant.start }}-{{ variant.stop }}&dgv=pack&knownGene=pack&omimGene=pack" target="_blank">UCSC</a>
+
+						<a class="btn btn-default" href="https://www.solvebio.com/variant/GRCh37-chr{{ variant.CHROM }}-{{ variant.start }}-{{ variant.stop }}-{{ variant.ALT }}" target="_blank">SolveBio</a>
 
 						{% if variant.ID %}
 							<a class="btn btn-default" href="http://snpedia.com/index.php/{{ variant.ID }}" target="_blank">SNPedia</a>
 						{% endif %}
+
+						<a class="btn btn-default" href="http://tools.genes.toronto.edu/" target="_blank">SPANR</a>
 					</div>
 				</div>
 			</div>

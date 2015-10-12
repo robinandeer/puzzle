@@ -135,6 +135,7 @@ class Plugin(object):
                         **{column: variant_dict.get(column, '.')
                             for column in variant_columns}
                         )
+                    variant['frequencies'] = []
                     logger.debug("Creating a variant object of variant {0}".format(
                         variant.get('variant_id')))
 
@@ -153,6 +154,8 @@ class Plugin(object):
                         logger.debug("Updating thousand_g to: {0}".format(
                             thousand_g))
                         variant['thousand_g'] = float(thousand_g)
+                    variant['frequencies'].append(('1000GAF',
+                                                   variant.get('thousand_g')))
 
                     cadd_score = info_dict.get('CADD')
                     if cadd_score:
