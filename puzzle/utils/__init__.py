@@ -1,3 +1,9 @@
+from __future__ import absolute_import
+import os
+import json
+import puzzle
+import pkg_resources
+
 SO_TERMS = (
   'transcript_ablation',
   'splice_donor_variant',
@@ -44,5 +50,11 @@ SEVERITY_DICT = {}
 for severity, term in enumerate(SO_TERMS):
     SEVERITY_DICT[term] = severity
 
+resource_package = puzzle.__name__
+resource_file = os.path.join('resources', 'hgnc_to_omim.json')
 
-from .get_info import get_most_severe_consequence, get_hgnc_symbols
+with open(os.path.join(resource_package, resource_file), 'r') as f:
+    HGNC_TO_OMIM = json.load(f)
+
+from .get_info import (get_most_severe_consequence, get_hgnc_symbols, 
+get_omim_number)
