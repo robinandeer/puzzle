@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from path import path
-from vcf_parser import VCFParser
 
 
 class Plugin(object):
@@ -17,10 +15,10 @@ class Plugin(object):
 
     def variants(self, case_id, skip=0, count=30, gene_list=None):
         """Return count variants for a case.
-        
+
         """
         raise NotImplementedError
-        
+
     def variant(self, variant_id):
         """Return a specific variant."""
         raise NotImplementedError

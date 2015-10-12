@@ -10,13 +10,11 @@
 
 	<title>
 		{% block title %}
-			{{ page_title | default('Project') }}
+			{{ page_title | default('Puzzle') }}
 		{% endblock %}
 	</title>
 
-	{% block css %}
-		<link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
-	{% endblock %}
+	{% block css %}{% endblock %}
 
 	{% block js_top %}
 		<!-- Latest compiled and minified CSS -->
@@ -35,6 +33,12 @@
 						{% block header_title %}Puzzle{% endblock %}
 					</a>
 				</div>
+
+				<div class="collapse navbar-collapse">
+          			<ul class="nav navbar-nav">
+          				{% block nav_left %}{% endblock %}
+          			</ul>
+        		</div>
 			</div>
 		</nav>
 		<div class="container">

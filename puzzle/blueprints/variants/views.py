@@ -12,12 +12,17 @@ blueprint = Blueprint(BP_NAME, __name__, url_prefix='/variants',
 def variants(case_id):
     """Show the landing page."""
     gene_list = request.args.get('gene_list')
+    thousand_g = request.args.get('thousand_g')
+    if thousand_g:
+        thousand_g = float(thousand_g)
 
     skip = int(request.args.get('skip', 0))
     next_skip = skip + 30
-    variants = db.variants(case_id, skip=skip, gene_list=gene_list)
+    variants = db.variants(case_id, skip=skip, gene_list=gene_list,
+                           thousand_g=thousand_g)
     return render_template('variants.html', variants=variants,
-                           next_skip=next_skip, case_id=case_id)
+                           next_skip=next_skip, case_id=case_id,
+                           thousand_g=thousand_g)
 
 
 @blueprint.route('/<case_id>/<variant_id>')

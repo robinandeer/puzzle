@@ -65,19 +65,11 @@ class Variant(dict):
             Args:
                 name (str): The name of the frequency field
         """
-        self['frequencies'].append(
-            {
-                name: value
-            }
-        )
+        self['frequencies'].append({name: value})
 
     def add_severities(self, name, value):
         """docstring for add_frequency"""
-        self['frequencies'].append(
-            {
-                name: value
-            }
-        )
+        self['frequencies'].append({name: value})
 
     def add_individual(self, genotype):
         """Add the information for a individual"""
