@@ -55,4 +55,4 @@ for severity, term in enumerate(SO_TERMS):
 resource_package = puzzle.__name__
 resource_path = os.path.join('resources', 'hgnc_to_omim.json')
 converter_file = pkg_resources.resource_string(resource_package, resource_path)
-HGNC_TO_OMIM = json.loads(converter_file)
+HGNC_TO_OMIM = json.loads(converter_file.decode('utf-8'))
