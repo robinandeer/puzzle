@@ -19,7 +19,7 @@ $ open http://localhost:5000
 
 
 ## Install for development
-I decided to try out [Otto][otto] for this project to make sure you have it installed :smile:
+I decided to try out [Otto][otto] for this project so make sure you have it installed :smile:
 
 ```bash
 $ git clone git clone https://github.com/robinandeer/puzzle.git
@@ -27,7 +27,7 @@ $ cd puzzle
 $ otto dev
 $ otto dev ssh
 $ npm install
-$ sudo apt-get install vim python-pip
+$ sudo apt-get install vim python-pip git
 $ pip install --user --editable .
 $ puzzle /vagrant/tests/
 # open webbrowser on port 5000

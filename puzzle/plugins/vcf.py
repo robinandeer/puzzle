@@ -208,7 +208,6 @@ class Plugin(object):
                 count (int): The number of variants to return
                 gene_list (list): A list of genes
         """
-
         limit = count + skip
 
         if gene_list:

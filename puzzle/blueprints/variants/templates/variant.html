@@ -1,5 +1,5 @@
 {% extends "layouts/base.html" %}
-{% from "macros/variant.html" import compounds, gt_call %}
+{% from "macros/variant.html" import compounds, gt_call, vep_transcripts %}
 
 {% block body_content %}
 	<div class="row">
@@ -18,6 +18,10 @@
 						CADD score
 					</li>
 				{% endif %}
+				<li class="list-group-item">
+					<span class="badge">{{ variant.most_severe_consequence }}</span>
+					Most severe consequence
+				</li>
 			</ul>
 		</div>
 		<div class="col-md-6"></div>
@@ -36,6 +40,27 @@
 				</ul>
 			</div>
 		</div>
+
+		<div class="col-md-3">
+			<div class="panel panel-default">
+				<div class="panel-heading">Severities</div>
+
+				<ul class="list-group"></ul>
+			</div>
+		</div>
+
+		<div class="col-md-3">
+			<div class="panel panel-default">
+				<div class="panel-heading">Inheritance models</div>
+				<ul class="list-group">
+					{% for model in variant.genetic_models %}
+						<li class="list-group-item">
+							{{ model }}
+						</li>
+					{% endfor %}
+				</ul>
+			</div>
+		</div>
 	</div>
 
 	<div class="row">
@@ -50,10 +75,16 @@
 				<div class="panel-body">
 					<div class="btn-group" role="group">
 						<a class="btn btn-default" href="https://www.solvebio.com/variant/GRCh37-chr{{ variant.CHROM }}-{{ variant.start }}-{{ variant.stop }}-{{ variant.ALT }}" target="_blank">SolveBio</a>
-						<a href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr{{ variant.CHROM }}:{{ variant.start }}-{{ variant.stop }}&dgv=pack&knownGene=pack&omimGene=pack" class="btn btn-default">UCSC</a>
+						<a class="btn btn-default" href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr{{ variant.CHROM }}:{{ variant.start }}-{{ variant.stop }}&dgv=pack&knownGene=pack&omimGene=pack" target="_blank">UCSC</a>
 					</div>
 				</div>
 			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-12">
+			{{ vep_transcripts(variant.transcripts) }}
 		</div>
 	</div>
 
