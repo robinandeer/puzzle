@@ -105,7 +105,7 @@ class Plugin(object):
         header_line = head.header
         individuals = head.individuals
 
-        variant_columns = ['CHROM','POS','ID','REF','ALT','QUAL','FILTER']
+        variant_columns = ['CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER']
 
         vep_header = head.vep_columns
 
