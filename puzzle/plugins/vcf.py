@@ -208,25 +208,28 @@ class Plugin(object):
                     self._add_compounds(variant=variant, info_dict=info_dict)
                     yield variant
 
-    def variants(self, case_id, skip=0, count=30, gene_list=[]):
+    def variants(self, case_id, skip=0, count=30, gene_list=[],
+                 thousand_g=None):
         """Return all variants in the VCF.
 
             Args:
-                case_id (str): Path to a vcf file(for this adapter)
+                case_id (str): Path to a vcf file (for this adapter)
                 skip (int): Skip first variants
                 count (int): The number of variants to return
                 gene_list (list): A list of genes
+                thousand_g (float): filter variants based on frequency
         """
-
+        vcf_path = case_id.replace('|', '/')
         limit = count + skip
 
+        filtered_variants = self._variants(vcf_path)
         if gene_list:
             gene_list = set(gene_list)
-            filtered_variants = (variant for variant in self._variants(case_id)
+            filtered_variants = (variant for variant in filtered_variants
                                  if set(variant['hgnc_symbols'].intersection(gene_list)))
-        else:
-            vcf_path = case_id.replace('|', '/')
-            filtered_variants = self._variants(vcf_path)
+        if thousand_g:
+            filtered_variants = (variant for variant in filtered_variants
+                                 if variant['thousand_g'] <= thousand_g)
 
         for variant in filtered_variants:
             if variant['index'] >= skip:

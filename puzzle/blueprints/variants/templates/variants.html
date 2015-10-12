@@ -2,6 +2,16 @@
 {% from "macros/variant.html" import omim_links %}
 
 {% block body_content %}
+	<div class="panel panel-default">
+		<div class="panel-heading">Filters</div>
+		<div class="panel-body">
+			<form class="form-inline" method="get" action="{{ url_for('variants.variants', case_id=case_id) }}">
+				<input name="thousand_g" type="number" class="form-control" id="1000gaf" placeholder="1000GAF" step="0.0001" value="{{ thousand_g }}">
+				<button class="btn btn-default" type="submit">Filter</button>
+			</form>
+		</div>
+	</div>
+
 	<div class="table-responsive">
 		<table class="table table-bordered table-hover">
 			<thead>
