@@ -1,4 +1,4 @@
-# Puzzle [![PyPI version][fury-image]][fury-url] [![Build Status][travis-image]][travis-url]
+# Puzzle [![Build Status][travis-image]][travis-url] [![Test Coverage][coveralls-img]][coveralls-url]
 A new secret project :P
 
 Try it out!
@@ -42,8 +42,8 @@ Anyone can help make this project better - read [CONTRIBUTING](CONTRIBUTING.md) 
 MIT. See the [LICENSE](LICENSE) file for more details.
 
 
-[fury-url]: http://badge.fury.io/py/puzzle
-[fury-image]: https://badge.fury.io/py/puzzle.png
 [travis-url]: https://travis-ci.org/robinandeer/puzzle
-[travis-image]: https://travis-ci.org/robinandeer/puzzle.png?branch=develop
+[travis-image]: https://img.shields.io/travis/robinandeer/puzzle.svg?style=flat-square
+[coveralls-url]: https://coveralls.io/github/robinandeer/puzzle
+[coveralls-img]: https://img.shields.io/coveralls/robinandeer/puzzle.svg?style=flat-square
 [otto]: https://ottoproject.io/
