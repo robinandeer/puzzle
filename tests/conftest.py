@@ -14,5 +14,5 @@ def app(request):
 
 @pytest.fixture
 def vcf():
-    db = VcfPlugin(TestConfig.PUZZLE_VCF_FILE)
+    db = VcfPlugin()
     return db
