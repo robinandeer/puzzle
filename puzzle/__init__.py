@@ -8,15 +8,14 @@ A new secret project :P
 :copyright: (c) 2015 by Robin Andeer
 :licence: MIT, see LICENCE for more details
 """
-from __future__ import absolute_import, unicode_literals
 import logging
 
 # Generate your own AsciiArt at:
 # patorjk.com/software/taag/#f=Calvin%20S&t=Puzzle
 __banner__ = r"""
-╦  ╦┌─┐┌┐┌┌─┐┬ ┬┌─┐┬─┐┌┬┐
-╚╗╔╝├─┤││││ ┬│ │├─┤├┬┘ ││  by Robin Andeer
- ╚╝ ┴ ┴┘└┘└─┘└─┘┴ ┴┴└──┴┘
+╔═╗┬ ┬┌─┐┌─┐┬  ┌─┐
+╠═╝│ │┌─┘┌─┘│  ├┤   by Robin Andeer
+╩  └─┘└─┘└─┘┴─┘└─┘  & Måns Magnusson
 """
 
 __title__ = 'puzzle'

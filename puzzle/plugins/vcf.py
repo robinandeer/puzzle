@@ -231,10 +231,10 @@ class Plugin(object):
             filtered_variants = (variant for variant in filtered_variants
                                  if variant['thousand_g'] <= thousand_g)
 
-        for variant in filtered_variants:
-            if variant['index'] >= skip:
-                if variant['index'] <= limit:
-                    yield variant
+        for variant_obj in filtered_variants:
+            if variant_obj['index'] >= skip:
+                if variant_obj['index'] <= limit:
+                    yield variant_obj
                 else:
                     break
 
@@ -248,9 +248,9 @@ class Plugin(object):
             Returns:
                 variant (Variant): The variant object for the given id
         """
-        for variant in self.variants(case_id):
-            if variant['variant_id'] == variant_id:
-                return variant
+        for variant_obj in self.variants(case_id, count=float('inf')):
+            if variant_obj['variant_id'] == variant_id:
+                return variant_obj
         return None
 
 
@@ -262,4 +262,3 @@ if __name__ == '__main__':
     for variant in plugin.variants(case_id=vcf_file):
         print(variant)
         print('')
-
