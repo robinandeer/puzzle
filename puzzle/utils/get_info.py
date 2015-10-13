@@ -1,4 +1,4 @@
-from . import SEVERITY_DICT, HGNC_TO_OMIM
+from .constants import SEVERITY_DICT, HGNC_TO_OMIM
 
 
 def get_most_severe_consequence(transcripts):
@@ -52,6 +52,7 @@ def get_hgnc_symbols(transcripts):
 
     return hgnc_symbols
 
+
 def get_omim_number(hgnc_symbol):
     """Get the omim number for a hgnc symbol
 
@@ -61,7 +62,5 @@ def get_omim_number(hgnc_symbol):
         Returns:
             omim_number (int): The omim number
     """
-
     omim_number = HGNC_TO_OMIM.get(hgnc_symbol)
-    
     return omim_number
