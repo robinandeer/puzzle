@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-from path import path
-from vcf_parser import VCFParser
-
 
 class Plugin(object):
     """docstring for Plugin"""

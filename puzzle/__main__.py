@@ -23,14 +23,29 @@ logger = logging.getLogger(__name__)
 
 
 @click.command()
-@click.option('--host', default='0.0.0.0')
-@click.option('--port', default=5000)
-@click.option('--debug', is_flag=True)
-@click.option('-v', '--verbose', count=True, default=2)
-@click.option('-p', '--pattern', default='*.vcf')
-@click.argument('vcf_root')
+@click.option('--host', 
+    default='0.0.0.0'
+)
+@click.option('--port', 
+    default=5000
+)
+@click.option('--debug', 
+    is_flag=True
+)
+@click.option('-v', '--verbose', 
+    count=True, 
+    default=2
+)
+@click.option('-p', '--pattern', 
+    default='*.vcf'
+)
+@click.option('--plugin',   
+    type=click.Choice(['vcf', 'gemini']),
+    default='vcf'
+)
+@click.argument('source')
 @click.version_option(puzzle.__version__)
-def cli(host, port, debug, verbose, pattern, vcf_root):
+def cli(host, port, debug, verbose, pattern, plugin, source):
     """Browse VCF files."""
     # configure root logger to print to STDERR
     loglevel = LEVELS.get(min(verbose, 3))
@@ -39,7 +54,7 @@ def cli(host, port, debug, verbose, pattern, vcf_root):
     # launch the command line interface
     logger.debug('Booting up command line interface')
 
-    BaseConfig.PUZZLE_ROOT = vcf_root
+    BaseConfig.PUZZLE_ROOT = source
     BaseConfig.PUZZLE_PATTERN = pattern
     app = create_app(config_obj=BaseConfig)
     app.run(host=host, port=port, debug=debug)
