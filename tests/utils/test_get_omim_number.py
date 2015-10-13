@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from puzzle.utils import (get_most_severe_consequence, get_hgnc_symbols,
-                          get_omim_number)
+from puzzle.utils import (get_omim_number)
 
 
 def test_get_omim_number():
