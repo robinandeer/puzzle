@@ -5,7 +5,9 @@ from path import path
 
 from puzzle.models import (Case, Compound, Variant, Gene, Genotype, Transcript)
 from puzzle.utils import (get_most_severe_consequence, get_hgnc_symbols,
-                          get_omim_number)
+                          get_omim_number, get_ensembl_id)
+
+from puzzle.plugins import Plugin
 
 from vcftoolbox import (get_variant_dict, HeaderParser, get_info_dict,
                         get_vep_dict)
@@ -13,10 +15,8 @@ from vcftoolbox import (get_variant_dict, HeaderParser, get_info_dict,
 logger = logging.getLogger(__name__)
 
 
-class Plugin(object):
+class VcfPlugin(Plugin):
     """docstring for Plugin"""
-    def __init__(self, vcf_file=None):
-        self.vcf_file = vcf_file
 
     def init_app(self, app):
         """Initialize plugin via Flask."""
@@ -63,12 +63,11 @@ class Plugin(object):
             transcripts = variant['transcripts']
         )
 
-        variant['hgnc_symbols'] = list(hgnc_symbols)
-
         for hgnc_id in hgnc_symbols:
             variant.add_gene(Gene(
                 symbol=hgnc_id,
-                omim_number=get_omim_number(hgnc_id)
+                omim_number=get_omim_number(hgnc_id),
+                ensembl_id=get_ensembl_id(hgnc_id)
             ))
 
     def _add_transcripts(self, variant, vep_dict):
