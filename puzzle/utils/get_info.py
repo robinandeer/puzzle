@@ -62,7 +62,14 @@ def get_omim_number(hgnc_symbol):
         Returns:
             omim_number (int): The omim number
     """
-    omim_number = HGNC_TO_OMIM.get(hgnc_symbol).get('mim_nr')
+    
+    hgnc=HGNC_TO_OMIM.get(hgnc_symbol)
+    
+    if hgnc is not None:
+        omim_number = hgnc.get('mim_nr')
+    else:
+        omim_number = None
+
     return omim_number
 
 def get_ensembl_id(hgnc_symbol):
@@ -74,5 +81,11 @@ def get_ensembl_id(hgnc_symbol):
         Returns:
             ensembl_id (int): The ensembl id
     """
-    ensembl_id = HGNC_TO_OMIM.get(hgnc_symbol).get('ensembl_id')
+    hgnc = HGNC_TO_OMIM.get(hgnc_symbol)
+
+    if hgnc is not None:
+        ensembl_id = hgnc.get('ensembl_id')
+    else:
+        ensembl_id = None
+
     return ensembl_id
