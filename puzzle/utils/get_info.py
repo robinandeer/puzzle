@@ -63,8 +63,8 @@ def get_omim_number(hgnc_symbol):
             omim_number (int): The omim number
     """
     
-    hgnc=HGNC_TO_OMIM.get(hgnc_symbol)
-    
+    hgnc = HGNC_TO_OMIM.get(hgnc_symbol)
+
     if hgnc is not None:
         omim_number = hgnc.get('mim_nr')
     else:
