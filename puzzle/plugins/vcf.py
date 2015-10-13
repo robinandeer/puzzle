@@ -249,7 +249,6 @@ class Plugin(object):
                 variant (Variant): The variant object for the given id
         """
         for variant_obj in self.variants(case_id, count=float('inf')):
-            print(variant_obj['variant_id'])
             if variant_obj['variant_id'] == variant_id:
                 return variant_obj
         return None
