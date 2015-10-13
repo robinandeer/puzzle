@@ -15,8 +15,9 @@ class Transcript(dict):
 
 class Gene(dict):
     """Class that holds information about a Gene"""
-    def __init__(self, symbol, omim_number=None):
-        super(Gene, self).__init__(symbol=symbol, omim_number=omim_number)
+    def __init__(self, symbol, omim_number=None, ensembl_id=None):
+        super(Gene, self).__init__(symbol=symbol, omim_number=omim_number, 
+        ensembl_id=ensembl_id)
 
 
 class Compound(dict):
@@ -50,7 +51,6 @@ class Variant(dict):
         self['most_severe_consequence'] = None  # str
         self['rank_score'] = None  # float
 
-        self['hgnc_symbols'] = []
         self['frequencies'] = []
         self['severities'] = []
         self['transcripts'] = []  # List of Transcripts
