@@ -14,10 +14,12 @@ from vcftoolbox import (get_variant_dict, HeaderParser, get_info_dict,
 
 logger = logging.getLogger(__name__)
 
-
 class VcfPlugin(Plugin):
     """docstring for Plugin"""
-
+    
+    def __init__(self):
+        super(VcfPlugin, self).__init__()
+    
     def init_app(self, app):
         """Initialize plugin via Flask."""
         self.root_path = app.config['PUZZLE_ROOT']
@@ -134,7 +136,7 @@ class VcfPlugin(Plugin):
                         **{column: variant_dict.get(column, '.')
                             for column in variant_columns}
                         )
-                    variant['frequencies'] = []
+                    
                     logger.debug("Creating a variant object of variant {0}".format(
                         variant.get('variant_id')))
 
@@ -257,7 +259,7 @@ if __name__ == '__main__':
     import sys
     from pprint import pprint as pp
     vcf_file = sys.argv[1]
-    plugin = Plugin()
+    plugin = VcfPlugin()
     for variant in plugin.variants(case_id=vcf_file):
         print(variant)
         print('')
