@@ -1,5 +1,7 @@
+import logging
 from .constants import SEVERITY_DICT, HGNC_TO_OMIM
 
+logger = logging.getLogger(__name__)
 
 def get_most_severe_consequence(transcripts):
     """Get the most severe consequence
@@ -17,16 +19,23 @@ def get_most_severe_consequence(transcripts):
 
     for transcript in transcripts:
         for consequence in transcript['Consequence'].split('&'):
+            logger.debug("Checking severity score for consequence: {0}".format(
+                consequence
+            ))
             severity_score = SEVERITY_DICT.get(
                 consequence
             )
-            if most_severe_score:
-                if severity_score < most_severe_score:
+            logger.debug("Severity score found: {0}".format(
+                severity_score
+            ))
+            if severity_score != None:
+                if most_severe_score:
+                    if severity_score < most_severe_score:
+                        most_severe_consequence = consequence
+                        most_severe_score = severity_score
+                else:
                     most_severe_consequence = consequence
                     most_severe_score = severity_score
-            else:
-                most_severe_consequence = consequence
-                most_severe_score = severity_score
 
     return most_severe_consequence
 
