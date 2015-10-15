@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from flask import abort, Blueprint, jsonify, render_template, request
-from puzzle.ext import db
+from flask import (abort, current_app as app, Blueprint, jsonify,
+                   render_template, request)
 
 BP_NAME = __name__.split('.')[-2]
 blueprint = Blueprint(BP_NAME, __name__, url_prefix='/variants',
@@ -18,8 +18,8 @@ def variants(case_id):
 
     skip = int(request.args.get('skip', 0))
     next_skip = skip + 30
-    variants = db.variants(case_id, skip=skip, gene_list=gene_list,
-                           thousand_g=thousand_g)
+    variants = app.db.variants(case_id, skip=skip, gene_list=gene_list,
+                               thousand_g=thousand_g)
     return render_template('variants.html', variants=variants,
                            next_skip=next_skip, case_id=case_id,
                            thousand_g=thousand_g)
@@ -28,7 +28,7 @@ def variants(case_id):
 @blueprint.route('/<case_id>/<variant_id>')
 def variant(case_id, variant_id):
     """Show a single variant."""
-    variant = db.variant(case_id, variant_id)
+    variant = app.db.variant(case_id, variant_id)
     if variant is None:
         return abort(404, "variant not found")
 
