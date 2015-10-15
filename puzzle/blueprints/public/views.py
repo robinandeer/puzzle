@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import Blueprint, render_template
-
-from puzzle.ext import db
+from flask import Blueprint, current_app as app, render_template
 
 BP_NAME = __name__.split('.')[-2]
 blueprint = Blueprint(BP_NAME, __name__, template_folder='templates',
@@ -12,4 +10,4 @@ blueprint = Blueprint(BP_NAME, __name__, template_folder='templates',
 @blueprint.route('/')
 def index():
     """Show the landing page."""
-    return render_template('index.html', cases=db.cases())
+    return render_template('index.html', cases=app.db.cases())

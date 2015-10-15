@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import os.path
+
 from .blueprints import public_bp, variants_bp
+from .plugins import VcfPlugin
 
 PROJECT_NAME = __name__.split('.')[0]
 
@@ -12,6 +14,7 @@ class BaseConfig:
 
     # http://flask.pocoo.org/docs/quickstart/#sessions
     SECRET_KEY = 'secret key'
+    PUZZLE_BACKEND = VcfPlugin()
 
     # default blueprints
     BLUEPRINTS = [public_bp, variants_bp]

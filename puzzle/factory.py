@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import Flask
 
-from .ext import db
 from .settings import BaseConfig
 
 
@@ -29,4 +28,6 @@ def register_blueprints(app):
 
 def bind_extensions(app):
     """Configure extensions."""
-    db.init_app(app)
+    # bind plugin to app object
+    app.db = app.config['PUZZLE_BACKEND']
+    app.db.init_app(app)

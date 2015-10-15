@@ -3,6 +3,7 @@ from .constants import SEVERITY_DICT, HGNC_TO_OMIM
 
 logger = logging.getLogger(__name__)
 
+
 def get_most_severe_consequence(transcripts):
     """Get the most severe consequence
 
@@ -71,7 +72,7 @@ def get_omim_number(hgnc_symbol):
         Returns:
             omim_number (int): The omim number
     """
-    
+
     omim_number = HGNC_TO_OMIM.get(hgnc_symbol,{}).get('mim_nr', None)
 
     return omim_number
