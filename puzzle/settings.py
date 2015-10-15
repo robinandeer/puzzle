@@ -24,6 +24,8 @@ class DevConfig(BaseConfig):
     DEBUG = True
     PUZZLE_ROOT = os.path.abspath('tests/fixtures')
     PUZZLE_PATTERN = '*.vcf'
+    PUZZLE_TYPE = 'vcf'
+    PUZZLE_PLUGIN = VcfPlugin()
 
 
 class TestConfig(DevConfig):

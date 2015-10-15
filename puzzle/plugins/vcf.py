@@ -25,13 +25,10 @@ class VcfPlugin(Plugin):
         self.root_path = app.config['PUZZLE_ROOT']
         self.pattern = app.config['PUZZLE_PATTERN']
 
-    def _find_vcfs(self, pattern='*.vcf'):
-        """Walk subdirectories and return VCF files."""
-        return path(self.root_path).walkfiles(pattern)
-
     def cases(self, pattern=None):
         """Return all VCF file paths."""
         pattern = pattern or self.pattern
+        
         vcfs = self._find_vcfs(pattern)
         case_objs = (Case(case_id=vcf.replace('/', '|'),
                           name=vcf.basename()) for vcf in vcfs)
@@ -58,25 +55,44 @@ class VcfPlugin(Plugin):
                         combined_score=compound_score
                     ))
 
-    def _add_genes(self, variant):
-        """Add the genes for a variant"""
-
+    def _get_genes(self, variant):
+        """Add the genes for a variant
+        
+            Get the hgnc symbols from all transcripts and add them 
+            to the variant
+            
+            Args:
+                variant (dict): A variant dictionary
+            
+            Returns:
+                genes (list): A list of Genes
+        """
+        genes = []
         hgnc_symbols = get_hgnc_symbols(
             transcripts = variant['transcripts']
         )
-
         for hgnc_id in hgnc_symbols:
-            variant.add_gene(Gene(
+            genes.append(Gene(
                 symbol=hgnc_id,
                 omim_number=get_omim_number(hgnc_id),
                 ensembl_id=get_ensembl_id(hgnc_id)
-            ))
-
+                )
+            )
+        return genes
+    
     def _add_transcripts(self, variant, vep_dict):
-        """Add the transcripts for a variant"""
+        """Get all transcripts for a variant
+        
+            Args:
+                vep_dict (dict): A vep dict
+            
+            Returns:
+                transcripts (list): A list of transcripts
+        """
+        transcripts = []
         for allele in vep_dict:
             for transcript_info in vep_dict[allele]:
-                variant.add_transcript(Transcript(
+                transcripts.append(Transcript(
                     SYMBOL = transcript_info.get('SYMBOL'),
                     Feature = transcript_info.get('Feature'),
                     BIOTYPE = transcript_info.get('BIOTYPE'),
@@ -88,6 +104,7 @@ class VcfPlugin(Plugin):
                     HGVSc = transcript_info.get('HGVSc'),
                     HGVSp = transcript_info.get('HGVSp')
                 ))
+        return transcripts
 
     def _variants(self, vcf_file_path):
         head = HeaderParser()
@@ -199,13 +216,17 @@ class VcfPlugin(Plugin):
 
                     # Add transcript information:
                     if vep_string:
-                        self._add_transcripts(variant, vep_dict)
+                        for transcript in self._get_transcripts(variant, vep_dict):
+                            variant.add_transcript(transcript)
 
                     variant['most_severe_consequence'] = get_most_severe_consequence(
                         variant['transcripts']
                     )
-                    self._add_genes(variant)
+                    for gene in self._get_genes(variant):
+                        variant.add_gene(gene)
+                    
                     self._add_compounds(variant=variant, info_dict=info_dict)
+                    
                     yield variant
 
     def variants(self, case_id, skip=0, count=30, gene_list=[],
@@ -223,6 +244,7 @@ class VcfPlugin(Plugin):
         limit = count + skip
 
         filtered_variants = self._variants(vcf_path)
+        
         if gene_list:
             gene_list = set(gene_list)
             filtered_variants = (variant for variant in filtered_variants
