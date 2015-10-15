@@ -12,3 +12,8 @@ def test_get_phenotype():
     assert get_omim_number('MCCRP2') != get_omim_number('PLK4')
     assert get_omim_number('MCCRP2') == None
     assert get_omim_number('PLK4') == 605031
+
+# def test_get_specific():
+#     """docstring for test_get_specific"""
+#     assert get_omim_number('DDX11L1') == 605031
+    

@@ -5,8 +5,8 @@ logger = logging.getLogger(__name__)
 
 class Transcript(dict):
     """Class that holds information about a transcript"""
-    def __init__(self, SYMBOL, Feature, BIOTYPE, Consequence, STRAND, SIFT,
-                 PolyPhen, EXON, HGVSc, HGVSp):
+    def __init__(self, SYMBOL, Feature, Consequence, BIOTYPE=None, STRAND=None, 
+                SIFT=None, PolyPhen=None, EXON=None, HGVSc=None, HGVSp=None):
         super(Transcript, self).__init__(
             SYMBOL=SYMBOL, Feature=Feature, BIOTYPE=BIOTYPE,
             Consequence=Consequence, STRAND=STRAND, SIFT=SIFT,
