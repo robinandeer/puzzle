@@ -22,7 +22,7 @@ def vcf():
 @pytest.fixture
 def variant():
     """Return a variant dictionary"""
-    data = dict(CHROM='1', POS=100, ID='rs01', REF='A', ALT='T', QUAL='100',
+    data = dict(CHROM='1', POS='100', ID='rs01', REF='A', ALT='T', QUAL='100',
                 FILTER='PASS')
     variant = Variant(**data)
     return variant
