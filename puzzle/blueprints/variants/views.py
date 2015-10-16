@@ -21,9 +21,12 @@ def variants(case_id):
     next_skip = skip + 30
     variants = app.db.variants(case_id, skip=skip, thousand_g=thousand_g,
                                gene_list=gene_symbols)
+
+    query_dict = {key: request.args.getlist(key) for key in request.args.keys()}
     return render_template('variants.html', variants=variants,
                            next_skip=next_skip, case_id=case_id,
-                           thousand_g=thousand_g, gene_symbols=gene_symbols)
+                           thousand_g=thousand_g, gene_symbols=gene_symbols,
+                           query_dict=query_dict)
 
 
 @blueprint.route('/<case_id>/<variant_id>')

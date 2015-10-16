@@ -58,5 +58,6 @@
 		</table>
 	</div>
 
-	<a href="{{ url_for('variants.variants', case_id=case_id, skip=next_skip) }}" class="btn btn-default">Load more</a>
+	{{ query_dict.update({'skip': next_skip})|default('', True) }}
+	<a href="{{ url_for('variants.variants', case_id=case_id, **query_dict) }}" class="btn btn-default">Load more</a>
 {% endblock %}
