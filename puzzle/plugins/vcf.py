@@ -206,7 +206,7 @@ class VcfPlugin(Plugin):
                     self._add_compounds(variant=variant, info_dict=info_dict)
                     yield variant
 
-    def variants(self, case_id, skip=0, count=30, gene_list=[],
+    def variants(self, case_id, skip=0, count=30, gene_list=None,
                  thousand_g=None):
         """Return all variants in the VCF.
 
@@ -224,7 +224,8 @@ class VcfPlugin(Plugin):
         if gene_list:
             gene_list = set(gene_list)
             filtered_variants = (variant for variant in filtered_variants
-                                 if set(variant['hgnc_symbols'].intersection(gene_list)))
+                                 if (set(gene['symbol'] for gene in variant['genes'])
+                                     .intersection(gene_list)))
         if thousand_g:
             filtered_variants = (variant for variant in filtered_variants
                                  if variant['thousand_g'] <= thousand_g)

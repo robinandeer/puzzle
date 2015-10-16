@@ -6,7 +6,16 @@
 		<div class="panel-heading">Filters</div>
 		<div class="panel-body">
 			<form class="form-inline" method="get" action="{{ url_for('variants.variants', case_id=case_id) }}">
-				<input name="thousand_g" type="number" class="form-control" id="1000gaf" placeholder="1000GAF" step="0.0001" value="{{ thousand_g }}">
+				<div class="input-group">
+					<div class="input-group-addon">1000GAF</div>
+					<input name="thousand_g" type="number" class="form-control" placeholder="0.0004" step="0.0001" value="{{ thousand_g }}">
+				</div>
+
+				<div class="input-group">
+					<div class="input-group-addon">Genes</div>
+					<input name="gene_symbol" type="text" class="form-control" placeholder="ADK,LPP" value="{{ (gene_symbols or '')|join(',') }}"></input>
+				</div>
+
 				<button class="btn btn-default" type="submit">Filter</button>
 			</form>
 		</div>
