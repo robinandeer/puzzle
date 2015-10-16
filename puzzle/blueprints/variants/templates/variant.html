@@ -72,16 +72,16 @@
 				<div class="panel-heading">Frequencies</div>
 
 				<ul class="list-group">
-					{% for label, value in variant.frequencies %}
+					{% for frequency in variant.frequencies %}
 						<li class="list-group-item">
 							<span class="badge">
-								{% if value %}
-									{{ value|round(4) }}
+								{% if frequency.value %}
+									{{ frequency.value|round(4) }}
 								{% else %}
 									N/A
 								{% endif %}
 							</span>
-							{{ label }}
+							{{ frequency.label }}
 						</li>
 					{% endfor %}
 				</ul>

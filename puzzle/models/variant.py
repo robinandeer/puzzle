@@ -16,7 +16,7 @@ class Transcript(dict):
 class Gene(dict):
     """Class that holds information about a Gene"""
     def __init__(self, symbol, omim_number=None, ensembl_id=None):
-        super(Gene, self).__init__(symbol=symbol, omim_number=omim_number, 
+        super(Gene, self).__init__(symbol=symbol, omim_number=omim_number,
         ensembl_id=ensembl_id)
 
 
@@ -67,11 +67,11 @@ class Variant(dict):
         """
         logger.debug("Adding frequency {0} with value {1} to variant {2}".format(
             name, value, self['variant_id']))
-        self['frequencies'].append({name: value})
+        self['frequencies'].append({'label': name, 'value': value})
 
     def add_severity(self, name, value):
         """Add a severity to the variant
-        
+
             Args:
                 name (str): The name of the severity
                 value : The value of the severity
@@ -82,9 +82,9 @@ class Variant(dict):
 
     def add_individual(self, genotype):
         """Add the information for a individual
-            
+
             This adds a genotype dict to variant['individuals']
-            
+
             Args:
                 genotype (dict): A genotype dictionary
         """
@@ -94,9 +94,9 @@ class Variant(dict):
 
     def add_transcript(self, transcript):
         """Add the information transcript
-        
+
             This adds a transcript dict to variant['transcripts']
-            
+
             Args:
                 transcript (dict): A transcript dictionary
         """
@@ -106,12 +106,12 @@ class Variant(dict):
 
     def add_gene(self, gene):
         """Add the information of a gene
-        
+
             This adds a gene dict to variant['genes']
-            
+
             Args:
                 gene (dict): A gene dictionary
-        
+
         """
         logger.debug("Adding gene {0} to variant {1}".format(
             gene, self['variant_id']))
@@ -119,26 +119,26 @@ class Variant(dict):
 
     def add_compound(self, compound):
         """Add the information of a compound variant
-        
+
             This adds a compound dict to variant['compounds']
-        
+
             Args:
                 compound (dict): A compound dictionary
-        
+
         """
         logger.debug("Adding compound {0} to variant {1}".format(
             compound, self['variant_id']))
         self['compounds'].append(compound)
-    
+
     def update_variant_id(self, variant_id):
         """Update the variant id for an individual
-        
+
             Args:
                 variant_id (str): A variant id
         """
-        
+
         self._set_variant_id(variant_id=variant_id)
-        
+
     def _set_variant_id(self, variant_id=None):
         """Set the variant id for this variant"""
         if not variant_id:
@@ -148,9 +148,9 @@ class Variant(dict):
                 self['REF'],
                 self['ALT']
                 ])
-        
+
         logger.debug("Updating variant id to {0}".format(
             variant_id))
-        
+
         self['variant_id'] = variant_id
-        
+
