@@ -22,9 +22,19 @@ class VcfPlugin(Plugin):
     
     def init_app(self, app):
         """Initialize plugin via Flask."""
+        logger.debug("Updating root path to {0}".format(
+            app.config['PUZZLE_ROOT']
+        ))
         self.root_path = app.config['PUZZLE_ROOT']
+        logger.debug("Updating pattern to {0}".format(
+            app.config['PUZZLE_PATTERN']
+        ))
         self.pattern = app.config['PUZZLE_PATTERN']
-
+    
+    def _find_vcfs(self, pattern='*.vcf'):
+            """Walk subdirectories and return VCF files."""
+            return path(self.root_path).walkfiles(pattern)
+    
     def cases(self, pattern=None):
         """Return all VCF file paths."""
         pattern = pattern or self.pattern
@@ -80,7 +90,7 @@ class VcfPlugin(Plugin):
             )
         return genes
     
-    def _add_transcripts(self, variant, vep_dict):
+    def _get_transcripts(self, variant, vep_dict):
         """Get all transcripts for a variant
         
             Args:
