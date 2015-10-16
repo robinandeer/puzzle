@@ -1,32 +1,14 @@
-from puzzle.models import Variant
+# -*- coding: utf-8 -*-
 
 
-def get_variant(CHROM="1",POS='100',ID='rs01',REF='A',ALT='T',QUAL='100',
-                FILTER='PASS'):
-    """Return a variant dictionary"""
-    return {
-        'CHROM': CHROM,
-        'POS': POS,
-        'ID': ID,
-        'REF': REF,
-        'ALT': ALT,
-        'QUAL': QUAL,
-        'FILTER': FILTER
-    }
-
-
-def test_variant():
+def test_variant(variant):
     """docstring for test_variant"""
-    variant = Variant(**get_variant())
-
     assert variant['CHROM'] == '1'
     assert variant['variant_id'] == '1_100_A_T'
 
 
-def test_adding_transcript():
+def test_adding_transcript(variant):
     """docstring for test_variant"""
-    variant = Variant(**get_variant())
-
     assert variant['transcripts'] == []
 
     transcript = {'SYMBOL': 'ADK'}
@@ -35,17 +17,15 @@ def test_adding_transcript():
     assert variant['transcripts'] == [transcript]
 
 
-def test_add_frequency():
+def test_add_frequency(variant):
     """docstring for test_variant"""
-    variant = Variant(**get_variant())
     assert variant['frequencies'] == []
     variant.add_frequency(name='1000G', value=0.01)
     assert variant['frequencies'] == [{'label': '1000G', 'value': 0.01}]
 
 
-def test_add_severity():
+def test_add_severity(variant):
     """docstring for test_variant"""
-    variant = Variant(**get_variant())
 
     assert variant['severities'] == []
 
@@ -57,9 +37,8 @@ def test_add_severity():
     assert variant['severities'] == [{'SIFT':0.9}]
 
 
-def test_add_individual():
+def test_add_individual(variant):
     """docstring for test_variant"""
-    variant = Variant(**get_variant())
 
     assert variant['individuals'] == []
 
@@ -70,9 +49,8 @@ def test_add_individual():
     assert variant['individuals'] == [genotype]
 
 
-def test_add_gene():
+def test_add_gene(variant):
     """docstring for test_variant"""
-    variant = Variant(**get_variant())
 
     assert variant['genes'] == []
 
@@ -83,9 +61,8 @@ def test_add_gene():
     assert variant['genes'] == [gene]
 
 
-def test_add_compound():
+def test_add_compound(variant):
     """docstring for test_variant"""
-    variant = Variant(**get_variant())
 
     assert variant['compounds'] == []
 
@@ -96,9 +73,8 @@ def test_add_compound():
     assert variant['compounds'] == [compound]
 
 
-def test_update_variant_id():
+def test_update_variant_id(variant):
     """docstring for test_variant"""
-    variant = Variant(**get_variant())
 
     assert variant['variant_id'] == '1_100_A_T'
 
