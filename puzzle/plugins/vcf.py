@@ -153,8 +153,7 @@ class VcfPlugin(Plugin):
                         logger.debug("Updating thousand_g to: {0}".format(
                             thousand_g))
                         variant['thousand_g'] = float(thousand_g)
-                    variant['frequencies'].append(('1000GAF',
-                                                   variant.get('thousand_g')))
+                    variant.add_frequency('1000GAF', variant.get('thousand_g'))
 
                     cadd_score = info_dict.get('CADD')
                     if cadd_score:
