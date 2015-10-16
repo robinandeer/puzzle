@@ -230,9 +230,9 @@ class VcfPlugin(Plugin):
             filtered_variants = (variant for variant in filtered_variants
                                  if variant['thousand_g'] <= thousand_g)
 
-        for variant_obj in filtered_variants:
-            if variant_obj['index'] >= skip:
-                if variant_obj['index'] <= limit:
+        for index, variant_obj in enumerate(filtered_variants):
+            if index >= skip:
+                if index <= limit:
                     yield variant_obj
                 else:
                     break
