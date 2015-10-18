@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 @click.group()
-@click.option('-t', '--plugin', type=click.Choice(['vcf', 'gemini']), default='vcf')
+@click.option('-p', '--plugin', type=click.Choice(['vcf', 'gemini']), default='vcf')
 @click.option('-v', '--verbose', count=True, default=2)
 @click.argument('root')
 @click.pass_context
@@ -72,7 +72,4 @@ def view(ctx, host, port, debug, pattern):
     
     app = create_app(config_obj=BaseConfig)
     
-    # print(BaseConfig.__dict__)
-    # print(app.__dict__)
-    # sys.exit()
     app.run(host=host, port=port, debug=debug)
