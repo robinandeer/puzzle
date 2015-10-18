@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+import logging
 from flask import Flask
 
 from .settings import BaseConfig
 
+logger = logging.getLogger(__name__)
 
 def create_app(config=None, config_obj=None):
     """Flask app factory function."""
@@ -30,4 +32,5 @@ def bind_extensions(app):
     """Configure extensions."""
     # bind plugin to app object
     app.db = app.config['PUZZLE_BACKEND']
+    logger.debug("Initializing app")
     app.db.init_app(app)
