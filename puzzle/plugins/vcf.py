@@ -249,8 +249,6 @@ class VcfPlugin(Plugin):
                 count (int): The number of variants to return
                 gene_list (list): A list of genes
                 thousand_g (float): filter variants based on frequency
-            Yields:
-                variant_obj (dict): A variant dictionary
         """
         vcf_path = case_id.replace('|', '/')
         limit = count + skip
