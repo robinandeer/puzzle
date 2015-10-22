@@ -51,7 +51,7 @@ def cli(ctx, plugin, verbose, root):
             logger.info("root has to point to a gemini databse")
             logger.info("Exiting")
             sys.exit(1)
-            
+
 
 
 @cli.command()
@@ -69,7 +69,7 @@ def view(ctx, host, port, debug, pattern):
     BaseConfig.PUZZLE_PATTERN = pattern
     logger.debug('Set puzzle backend to {0}'.format(ctx.parent.plugin))
     BaseConfig.PUZZLE_BACKEND = ctx.parent.plugin
-    
+
     app = create_app(config_obj=BaseConfig)
-    
+
     app.run(host=host, port=port, debug=debug)
