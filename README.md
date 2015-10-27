@@ -2,11 +2,13 @@
 
 Variant Caller GUI and genetic disease analysis tool.
 
+Try the online [demo](https://puzzle-demo-robinandeer.c9.io) or install and run locally:
+
 ```bash
-$ git clone git clone https://github.com/robinandeer/puzzle.git
+$ git clone https://github.com/robinandeer/puzzle.git
 $ cd puzzle
 $ pip install --editable .
-$ puzzle tests/
+$ puzzle tests/ view
 # open webbrowser on port 5000
 $ open http://localhost:5000
 ```
