@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 import logging
 
 from path import path
@@ -11,6 +12,8 @@ from puzzle.plugins import Plugin
 
 from vcftoolbox import (get_variant_dict, HeaderParser, get_info_dict,
                         get_vep_dict)
+
+from ped_parser import FamilyParser
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +42,12 @@ class VcfPlugin(Plugin):
         """Return all VCF file paths."""
         pattern = pattern or self.pattern
 
-        vcfs = self._find_vcfs(pattern)
+        #If pointing to a single file
+        if os.path.isfile(self.root_path):
+            vcfs = [path(self.root_path)]
+        else:
+            vcfs = self._find_vcfs(pattern)
+
         case_objs = (Case(case_id=vcf.replace('/', '|'),
                           name=vcf.basename()) for vcf in vcfs)
         return case_objs

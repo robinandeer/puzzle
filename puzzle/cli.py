@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
+import os
 import logging
 
 import click
@@ -31,9 +32,14 @@ logger = logging.getLogger(__name__)
 @click.option('-f', '--family_file',
     type=click.File('r')
 )
+@click.option('-t' ,'--family_type', 
+                type=click.Choice(['ped', 'alt']), 
+                default='ped',
+                help='If the analysis use one of the known setups, please specify which one.'
+)
 @click.argument('root')
 @click.pass_context
-def cli(ctx, plugin, verbose, root, family_file):
+def cli(ctx, plugin, verbose, root, family_file, family_type):
     """Puzzle: manage DNA variant resources."""
     # configure root logger to print to STDERR
     loglevel = LEVELS.get(min(verbose, 3))
@@ -43,11 +49,16 @@ def cli(ctx, plugin, verbose, root, family_file):
     logger.debug('Booting up command line interface')
     ctx.root = root
 
+    ctx.family_file = family_file
+    ctx.family_type = family_type
     if plugin == 'vcf':
         if family_file:
-            pass
-        else:
-            ctx.plugin = VcfPlugin()
+            # If family file we only allow one vcf file as input
+            if not os.path.isfile(root):
+                logger.error("root has to be a vcf file when running with family file")
+                logger.info("Exiting")
+                sys.exit(1)
+        ctx.plugin = VcfPlugin()
         
             
     elif plugin == 'gemini':
@@ -85,6 +96,11 @@ def view(ctx, host, port, debug, pattern):
     BaseConfig.PUZZLE_PATTERN = pattern
     logger.debug('Set puzzle backend to {0}'.format(ctx.parent.plugin))
     BaseConfig.PUZZLE_BACKEND = ctx.parent.plugin
+    print(ctx.__dict__)
+    
+    if ctx.parent.family_file:
+        BaseConfig.FAMILY_FILE = ctx.parent.family_file
+        BaseConfig.FAMILY_TYPE = ctx.parent.family_type
 
     app = create_app(config_obj=BaseConfig)
 
