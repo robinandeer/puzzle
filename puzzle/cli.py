@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 )
 @click.argument('root')
 @click.pass_context
-def cli(ctx, plugin, verbose, root):
+def cli(ctx, plugin, verbose, root, family_file):
     """Puzzle: manage DNA variant resources."""
     # configure root logger to print to STDERR
     loglevel = LEVELS.get(min(verbose, 3))
@@ -44,22 +44,27 @@ def cli(ctx, plugin, verbose, root):
     ctx.root = root
 
     if plugin == 'vcf':
-        ctx.plugin = VcfPlugin()
-        if ctx.vcf:
+        if family_file:
+            pass
+        else:
+            ctx.plugin = VcfPlugin()
+        
             
     elif plugin == 'gemini':
         try:
+            #First check if gemini is properly installed:
             from gemini import GeminiQuery
+            #Then check if we are looking at a proper database
+            try:
+                gq = GeminiQuery(root)
+            except OperationalError as e:
+                logger.error("{0} is not a valid gemini db".format(root))
+                logger.info("root has to point to a gemini databse")
+                logger.info("Exiting")
+                sys.exit(1)
             ctx.plugin = GeminiPlugin()
         except ImportError:
             logger.error("Need to have gemini installed to use gemini plugin")
-            logger.info("Exiting")
-            sys.exit(1)
-        try:
-            gq = GeminiQuery(root)
-        except OperationalError as e:
-            logger.error("{0} is not a valid gemini db".format(root))
-            logger.info("root has to point to a gemini databse")
             logger.info("Exiting")
             sys.exit(1)
 

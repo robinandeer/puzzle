@@ -20,7 +20,7 @@ class Individual(dict):
                 variant_source (str): Path to source (vcf file)
                 bam_path (str): Path to bamfiles (vcf file)
         """
-        super(Individual, self).__init__(id=ind_id, name=name or ind_id, 
-                case_id=case_id, mother=mother, father=father, sex=sex,
-                phenotype=phenotype, index=index, variant_source=variant_source,
-                bam_path=bam_path)
+        super(Individual, self).__init__(ind_id=ind_id, name=ind_id, 
+                case_id=case_id, mother=mother, father=father, sex=sex, 
+                phenotype=phenotype, index=index, 
+                variant_source=variant_source, bam_path=bam_path)
