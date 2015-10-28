@@ -1,5 +1,6 @@
 {% extends "layouts/base.html" %}
 {% from "macros/variant.html" import omim_links %}
+{% from "macros/filters.html" import filters %}
 
 {% block body_content %}
 	<div class="panel-group" id="filter-accordion">
@@ -12,33 +13,7 @@
 
 			<div id="view-filters" class="panel-collapse collapse">
 				<div class="panel-body">
-					<form method="get" action="{{ url_for('variants.variants', case_id=case_id) }}">
-						<div class="form-group">
-							<div class="row">
-								<div class="col-xs-6">
-									<label class="control-label">Frequency</label>
-									<input type="text" class="form-control" name="frequency" type="number" placeholder="0.0004" step="0.0001" value="{{ frequency }}">
-								</div>
-								<div class="col-xs-6">
-									<label class="control-label">CADD</label>
-									<input type="text" class="form-control" name="cadd" type="number" placeholder="23.4" step="0.1" value="{{ cadd }}">
-								</div>
-							</div>
-						</div>
-
-						<div class="form-group">
-							<div class="row">
-								<div class="col-xs-10">
-									<label class="control-label">Genes</label>
-		                			<input type="text" class="form-control" name="gene_symbol" type="text" placeholder="ADK,LPP" value="{{ (gene_symbols or '')|join(',') }}">
-								</div>
-								<div class="col-xs-2">
-									<label class="control-label">Submit</label>
-									<button class="btn btn-default form-control" type="submit">Filter</button>
-								</div>
-							</div>
-						</div>
-					</form>	
+					{{ filters(case_id, frequency, cadd, gene_symbols) }}
 				</div>
 			</div>
 		</div>
