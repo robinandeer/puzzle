@@ -29,7 +29,7 @@ Anyone can help make this project better - read [CONTRIBUTING](CONTRIBUTING.md) 
 I decided to try out [Otto][otto] for this project so make sure you have it installed :smile:
 
 ```bash
-$ git clone git clone https://github.com/robinandeer/puzzle.git
+$ git clone https://github.com/robinandeer/puzzle.git
 $ cd puzzle
 $ otto dev
 $ otto dev ssh
