@@ -16,10 +16,10 @@ logger = logging.getLogger(__name__)
 
 class VcfPlugin(Plugin):
     """docstring for Plugin"""
-    
+
     def __init__(self):
         super(VcfPlugin, self).__init__()
-    
+
     def init_app(self, app):
         """Initialize plugin via Flask."""
         logger.debug("Updating root path to {0}".format(
@@ -30,15 +30,15 @@ class VcfPlugin(Plugin):
             app.config['PUZZLE_PATTERN']
         ))
         self.pattern = app.config['PUZZLE_PATTERN']
-    
+
     def _find_vcfs(self, pattern='*.vcf'):
         """Walk subdirectories and return VCF files."""
         return path(self.root_path).walkfiles(pattern)
-    
+
     def cases(self, pattern=None):
         """Return all VCF file paths."""
         pattern = pattern or self.pattern
-        
+
         vcfs = self._find_vcfs(pattern)
         case_objs = (Case(case_id=vcf.replace('/', '|'),
                           name=vcf.basename()) for vcf in vcfs)
@@ -67,13 +67,13 @@ class VcfPlugin(Plugin):
 
     def _get_genes(self, variant):
         """Add the genes for a variant
-        
-            Get the hgnc symbols from all transcripts and add them 
+
+            Get the hgnc symbols from all transcripts and add them
             to the variant
-            
+
             Args:
                 variant (dict): A variant dictionary
-            
+
             Returns:
                 genes (list): A list of Genes
         """
@@ -89,13 +89,13 @@ class VcfPlugin(Plugin):
                 )
             )
         return genes
-    
+
     def _get_transcripts(self, variant, vep_dict):
         """Get all transcripts for a variant
-        
+
             Args:
                 vep_dict (dict): A vep dict
-            
+
             Returns:
                 transcripts (list): A list of transcripts
         """
@@ -163,7 +163,7 @@ class VcfPlugin(Plugin):
                         **{column: variant_dict.get(column, '.')
                             for column in variant_columns}
                         )
-                    
+
                     logger.debug("Creating a variant object of variant {0}".format(
                         variant.get('variant_id')))
 
@@ -234,13 +234,13 @@ class VcfPlugin(Plugin):
                     )
                     for gene in self._get_genes(variant):
                         variant.add_gene(gene)
-                    
+
                     self._add_compounds(variant=variant, info_dict=info_dict)
-                    
+
                     yield variant
 
     def variants(self, case_id, skip=0, count=30, gene_list=None,
-                 thousand_g=None):
+                 frequency=None, cadd=None):
         """Return all variants in the VCF.
 
             Args:
@@ -248,21 +248,22 @@ class VcfPlugin(Plugin):
                 skip (int): Skip first variants
                 count (int): The number of variants to return
                 gene_list (list): A list of genes
-                thousand_g (float): filter variants based on frequency
+                frequency (float): filter variants based on frequency
+                cadd (float): filter variants based on CADD score
         """
         vcf_path = case_id.replace('|', '/')
         limit = count + skip
 
         filtered_variants = self._variants(vcf_path)
-        
+
         if gene_list:
             gene_list = set(gene_list)
             filtered_variants = (variant for variant in filtered_variants
                                  if (set(gene['symbol'] for gene in variant['genes'])
                                      .intersection(gene_list)))
-        if thousand_g:
+        if frequency:
             filtered_variants = (variant for variant in filtered_variants
-                                 if variant['thousand_g'] <= thousand_g)
+                                 if variant['thousand_g'] <= frequency)
 
         for index, variant_obj in enumerate(filtered_variants):
             if index >= skip:

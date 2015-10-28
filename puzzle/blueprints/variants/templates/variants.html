@@ -2,22 +2,45 @@
 {% from "macros/variant.html" import omim_links %}
 
 {% block body_content %}
-	<div class="panel panel-default">
-		<div class="panel-heading">Filters</div>
-		<div class="panel-body">
-			<form class="form-inline" method="get" action="{{ url_for('variants.variants', case_id=case_id) }}">
-				<div class="input-group">
-					<div class="input-group-addon">1000GAF</div>
-					<input name="thousand_g" type="number" class="form-control" placeholder="0.0004" step="0.0001" value="{{ thousand_g }}">
-				</div>
+	<div class="panel-group" id="filter-accordion">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h4 class="panel-title">
+					<a role="button" data-toggle="collapse" data-parent="#accordion" href="#view-filters">Filters</a>
+				</h4>
+			</div>
 
-				<div class="input-group">
-					<div class="input-group-addon">Genes</div>
-					<input name="gene_symbol" type="text" class="form-control" placeholder="ADK,LPP" value="{{ (gene_symbols or '')|join(',') }}"></input>
-				</div>
+			<div id="view-filters" class="panel-collapse collapse">
+				<div class="panel-body">
+					<form method="get" action="{{ url_for('variants.variants', case_id=case_id) }}">
+						<div class="form-group">
+							<div class="row">
+								<div class="col-xs-6">
+									<label class="control-label">Frequency</label>
+									<input type="text" class="form-control" name="frequency" type="number" placeholder="0.0004" step="0.0001" value="{{ frequency }}">
+								</div>
+								<div class="col-xs-6">
+									<label class="control-label">CADD</label>
+									<input type="text" class="form-control" name="cadd" type="number" placeholder="23.4" step="0.1" value="{{ cadd }}">
+								</div>
+							</div>
+						</div>
 
-				<button class="btn btn-default" type="submit">Filter</button>
-			</form>
+						<div class="form-group">
+							<div class="row">
+								<div class="col-xs-10">
+									<label class="control-label">Genes</label>
+		                			<input type="text" class="form-control" name="gene_symbol" type="text" placeholder="ADK,LPP" value="{{ (gene_symbols or '')|join(',') }}">
+								</div>
+								<div class="col-xs-2">
+									<label class="control-label">Submit</label>
+									<button class="btn btn-default form-control" type="submit">Filter</button>
+								</div>
+							</div>
+						</div>
+					</form>	
+				</div>
+			</div>
 		</div>
 	</div>
 
