@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 {% from "macros/variant.html" import omim_links %}
-{% from "macros/filters.html" import filters %}
+{% from "macros/filters.html" import filters_form %}
 
 {% block body_content %}
 	<div class="panel-group" id="filter-accordion">
@@ -13,7 +13,7 @@
 
 			<div id="view-filters" class="panel-collapse collapse">
 				<div class="panel-body">
-					{{ filters(case_id, frequency, cadd, gene_symbols) }}
+					{{ filters_form(case_id, inheritance_models, consequences, filters) }}
 				</div>
 			</div>
 		</div>
@@ -56,6 +56,5 @@
 		</table>
 	</div>
 
-	{{ query_dict.update({'skip': next_skip})|default('', True) }}
-	<a href="{{ url_for('variants.variants', case_id=case_id, **query_dict) }}" class="btn btn-default">Load more</a>
+	<a href="{{ url_for('variants.variants', case_id=case_id, **filters.query_dict) }}" class="btn btn-default">Load more</a>
 {% endblock %}
