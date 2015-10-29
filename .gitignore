@@ -44,6 +44,7 @@ htmlcov
 TRASH*
 *.tar.gz
 .vagrant
+dev/
 
 # SublimeText: workspace files are user-specific
 *.sublime-workspace
