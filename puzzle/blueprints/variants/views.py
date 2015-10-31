@@ -45,7 +45,7 @@ def parse_filters():
     for key in ('frequency', 'cadd'):
         try:
             filters[key] = float(request.args.get(key))
-        except ValueError:
+        except (ValueError, TypeError):
             pass
 
     filters['gene_symbols'] = genes_str.split(',') if genes_str else None
