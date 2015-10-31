@@ -1,23 +1,21 @@
 {% extends "layouts/base.html" %}
 {% from "macros/variant.html" import omim_links %}
+{% from "macros/filters.html" import filters_form %}
 
 {% block body_content %}
-	<div class="panel panel-default">
-		<div class="panel-heading">Filters</div>
-		<div class="panel-body">
-			<form class="form-inline" method="get" action="{{ url_for('variants.variants', case_id=case_id) }}">
-				<div class="input-group">
-					<div class="input-group-addon">1000GAF</div>
-					<input name="thousand_g" type="number" class="form-control" placeholder="0.0004" step="0.0001" value="{{ thousand_g }}">
-				</div>
+	<div class="panel-group" id="filter-accordion">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h4 class="panel-title">
+					<a role="button" data-toggle="collapse" data-parent="#accordion" href="#view-filters">Filters</a>
+				</h4>
+			</div>
 
-				<div class="input-group">
-					<div class="input-group-addon">Genes</div>
-					<input name="gene_symbol" type="text" class="form-control" placeholder="ADK,LPP" value="{{ (gene_symbols or '')|join(',') }}"></input>
+			<div id="view-filters" class="panel-collapse collapse">
+				<div class="panel-body">
+					{{ filters_form(case_id, inheritance_models, consequences, filters) }}
 				</div>
-
-				<button class="btn btn-default" type="submit">Filter</button>
-			</form>
+			</div>
 		</div>
 	</div>
 
@@ -58,6 +56,5 @@
 		</table>
 	</div>
 
-	{{ query_dict.update({'skip': next_skip})|default('', True) }}
-	<a href="{{ url_for('variants.variants', case_id=case_id, **query_dict) }}" class="btn btn-default">Load more</a>
+	<a href="{{ url_for('variants.variants', case_id=case_id, **filters.query_dict) }}" class="btn btn-default">Load more</a>
 {% endblock %}

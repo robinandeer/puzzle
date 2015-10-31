@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-from flask import (abort, current_app as app, Blueprint, jsonify,
-                   render_template, request)
+from flask import (abort, current_app as app, Blueprint, render_template,
+                   request)
+
+from puzzle.constants import INHERITANCE_MODELS_SHORT, SO_TERMS
 
 BP_NAME = __name__.split('.')[-2]
 blueprint = Blueprint(BP_NAME, __name__, url_prefix='/variants',
@@ -10,23 +12,16 @@ blueprint = Blueprint(BP_NAME, __name__, url_prefix='/variants',
 
 @blueprint.route('/<case_id>')
 def variants(case_id):
-    """Show the landing page."""
-    thousand_g = request.args.get('thousand_g')
-    gene_symbols = request.args.get('gene_symbol')
-    gene_symbols = gene_symbols.split(',') if gene_symbols else None
-    if thousand_g:
-        thousand_g = float(thousand_g)
+    """Show all variants for a case."""
+    filters = parse_filters()
+    variants = app.db.variants(case_id, skip=filters['skip'],
+                               frequency=filters.get('frequency'),
+                               gene_list=filters['gene_symbols'],
+                               cadd=filters.get('cadd'))
 
-    skip = int(request.args.get('skip', 0))
-    next_skip = skip + 30
-    variants = app.db.variants(case_id, skip=skip, thousand_g=thousand_g,
-                               gene_list=gene_symbols)
-
-    query_dict = {key: request.args.getlist(key) for key in request.args.keys()}
-    return render_template('variants.html', variants=variants,
-                           next_skip=next_skip, case_id=case_id,
-                           thousand_g=thousand_g, gene_symbols=gene_symbols,
-                           query_dict=query_dict)
+    return render_template('variants.html', variants=variants, case_id=case_id,
+                           filters=filters, consequences=SO_TERMS,
+                           inheritance_models=INHERITANCE_MODELS_SHORT)
 
 
 @blueprint.route('/<case_id>/<variant_id>')
@@ -41,3 +36,23 @@ def variant(case_id, variant_id):
                               key=lambda compound: compound['combined_score'])
     return render_template('variant.html', variant=variant,
                            compounds=sorted_compounds, case_id=case_id)
+
+
+def parse_filters():
+    """Parse variant filters from the request object."""
+    genes_str = request.args.get('gene_symbol')
+    filters = {}
+    for key in ('frequency', 'cadd'):
+        try:
+            filters[key] = float(request.args.get(key))
+        except (ValueError, TypeError):
+            pass
+
+    filters['gene_symbols'] = genes_str.split(',') if genes_str else None
+    filters['selected_models'] = request.args.getlist('inheritance_models')
+    filters['selected_consequences'] = request.args.getlist('consequences')
+    filters['skip'] = int(request.args.get('skip', 0))
+    filters['query_dict'] = {key: request.args.getlist(key) for key
+                             in request.args.keys()}
+    filters['query_dict'].update({'skip': (filters['skip'] + 30)})
+    return filters

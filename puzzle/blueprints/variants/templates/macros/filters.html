@@ -1,0 +1,54 @@
+{% macro filters_form(case_id, inheritance_models, consequences, filters) %}
+<form method="get" action="{{ url_for('variants.variants', case_id=case_id) }}">
+	<div class="form-group">
+		<div class="row">
+			<div class="col-xs-6">
+				<label class="control-label">Frequency</label>
+				<input type="text" class="form-control" name="frequency" type="number" placeholder="0.0004" step="0.0001" value="{{ filters.frequency or '' }}">
+			</div>
+			<div class="col-xs-6">
+				<label class="control-label">CADD</label>
+				<input type="text" class="form-control" name="cadd" type="number" placeholder="23.4" step="0.1" value="{{ filters.cadd or '' }}">
+			</div>
+		</div>
+	</div>
+
+	<div class="form-group">
+		<div class="row">
+			<div class="col-xs-6">
+				<label class="control-label">Inheritance models</label>
+				{{ select_input('inheritance_models', inheritance_models, filters.selected_models) }}
+			</div>
+			<div class="col-xs-6">
+				<label class="control-label">Consequences</label>
+				{{ select_input('consequences', consequences, filters.selected_consequences) }}
+			</div>
+		</div>
+	</div>
+
+	<div class="form-group">
+		<div class="row">
+			<div class="col-xs-9">
+				<label class="control-label">Genes</label>
+    			<input type="text" class="form-control" name="gene_symbol" type="text" placeholder="ADK,LPP" value="{{ (filters.gene_symbols or '')|join(',') }}">
+			</div>
+			<div class="col-xs-3">
+				<label class="control-label">Submit</label>
+				<button class="btn btn-default form-control" type="submit">Filter</button>
+			</div>
+		</div>
+	</div>
+</form>
+{% endmacro %}
+
+{% macro select_input(name, items, selected) %}
+<select name="{{ name }}" multiple class="form-control">
+	{% for item in items %}
+		{% if item in selected %}
+			<option value="{{ item }}" selected>{{ item }}</option>
+		{% else %}
+			<option value="{{ item }}">{{ item }}</option>
+		{% endif %}
+	{% endfor %}
+</select>
+{% endmacro %}
