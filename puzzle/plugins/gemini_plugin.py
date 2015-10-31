@@ -238,13 +238,13 @@ class GeminiPlugin(Plugin):
         
         gemini_query = "SELECT * from variants"
         
-        any_query = False
+        any_filter = False
         #This would be the fastest solution but it seems like we loose all variants
         #that are missing a frequency...
         if frequency:
             gemini_query += " WHERE (max_aaf_all < {0} or max_aaf_all is"\
-                            " Null)".format(thousand_g)
-            any_query = True
+                            " Null)".format(frequency)
+            any_filter = True
 
         if cadd:
             if any_filter:
@@ -262,13 +262,9 @@ class GeminiPlugin(Plugin):
             filtered_variants = (variant for variant in filtered_variants
                                  if set(variant['hgnc_symbols'].intersection(gene_list)))
 
-        if thousand_g:
-            filtered_variants = (variant for variant in filtered_variants
-                                 if variant['thousand_g'] <= thousand_g)
-
-        for variant_obj in filtered_variants:
-            if variant_obj['index'] >= skip:
-                if variant_obj['index'] <= limit:
+        for index, variant_obj in enumerate(filtered_variants):
+            if index >= skip:
+                if index <= limit:
                     yield variant_obj
                 else:
                     break
