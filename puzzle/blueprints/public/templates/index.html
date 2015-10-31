@@ -4,8 +4,12 @@
 	<ul class="list-group">
 		{% for case in cases %}
 			<li class="list-group-item">
-				<a href="{{ url_for('variants.variants', case_id=case.id) }}">
+				<a href="{{ url_for('public.case', case_id=case.id) }}">
 					{{ case.name }}
+				</a>
+
+				<a class="pull-right" href="{{ url_for('variants.variants', case_id=case.id) }}">
+					Variants
 				</a>
 			</li>
 		{% endfor %}

@@ -2,6 +2,7 @@
     <table class="table table-bordered table-hover">
 		<thead>
 			<tr>
+				<th rowspan="2">Family</th>
 				<th rowspan="2">Sample</th>
 				<th rowspan="2">Genotype (GT)</th>
 				<th colspan="2">Allele depth (AD)</th>
@@ -15,6 +16,7 @@
 		<tbody>
 			{% for individual in individuals %}
 				<tr>
+					<td>{{ individual.family_id }}</td>
 					<td>{{ individual.sample_id }}</td>
 					<td>{{ individual.genotype }}</td>
 					<td>{{ individual.ref_depth }}</td>

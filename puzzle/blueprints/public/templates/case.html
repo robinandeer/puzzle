@@ -1,5 +1,35 @@
 {% extends "layouts/base.html" %}
 
 {% block body_content %}
-	
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<span class="lead">Case: <span class="text-primary">{{ case_id }}</span></span>
+
+				<a class="btn btn-primary pull-right btn-sm" href="{{ url_for('variants.variants', case_id=case_id) }}">Variants</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">Individuals</div>
+			<ul class="list-group">
+				{% for individual_id, individual in case.individuals.items() %}
+					<li class="list-group-item">
+						{% if individual.affected %}
+							<span class="badge">AFFECTED</span>
+						{% endif %}
+						{{ individual_id }} <small><strong class="text-info">{{ 'M' if individual.sex == 1 else 'F' }}</strong></small>
+					</li>
+				{% endfor %}
+			</ul>
+		</div>
+	</div>
+</div>
+
 {% endblock %}

@@ -17,6 +17,7 @@ from ped_parser import FamilyParser
 
 logger = logging.getLogger(__name__)
 
+
 class VcfPlugin(Plugin):
     """docstring for Plugin"""
 
@@ -42,7 +43,7 @@ class VcfPlugin(Plugin):
         """Return all VCF file paths."""
         pattern = pattern or self.pattern
 
-        #If pointing to a single file
+        # if pointing to a single file
         if os.path.isfile(self.root_path):
             vcfs = [path(self.root_path)]
         else:
@@ -51,6 +52,9 @@ class VcfPlugin(Plugin):
         case_objs = (Case(case_id=vcf.replace('/', '|'),
                           name=vcf.basename()) for vcf in vcfs)
         return case_objs
+
+    def case(self):
+        return self.family
 
     def _add_compounds(self, variant, info_dict):
         """Check if there are any compounds and add them to the variant

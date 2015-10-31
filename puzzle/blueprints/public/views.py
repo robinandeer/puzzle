@@ -16,4 +16,4 @@ def index():
 @blueprint.route('/cases/<case_id>')
 def case(case_id):
     """Show the overview for a case."""
-    return render_template('case.html', case={})
+    return render_template('case.html', case=app.db.case(), case_id=case_id)
