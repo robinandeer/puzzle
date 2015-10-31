@@ -4,3 +4,6 @@ repo_url: https://github.com/robinandeer/puzzle
 dev_addr: "0.0.0.0:4000"
 theme: bootstrap
 docs_dir: docs
+
+pages:
+- Home: index.md
