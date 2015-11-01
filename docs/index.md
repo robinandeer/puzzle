@@ -4,7 +4,7 @@ Variant Caller GUI and genetic disease analysis tool.
 
 ## Overview
 
-Puzzle will look for variant calling resources such as VCF files and [GEMINI](http://gemini.readthedocs.org/en/latest/) databases and visualize their content. It lets you inspect, annotate, and analyze variant calls.
+Puzzle will look for variant calling resources such as VCF files and [GEMINI](gemini) databases and visualize their content. It lets you inspect, annotate, and analyze variant calls.
 
 Puzzle is not primarily meant to be run as a persistant server but think of it more as an webinterface to quickly spin to visualize your variant calls.
 
@@ -35,4 +35,6 @@ Right now it will only work well with databases that includes one family.
 ## Developing Puzzle
 Puzzle is a Python Flask app with a command line interface. It can work with multiple backends using plugins; raw VCFs, GEMINI, MongoDB.
 
-Anyone can help make this project better - read [CONTRIBUTING](CONTRIBUTING.md) to get started!
+Anyone can help make this project better - read [CONTRIBUTING](about/contributing.md) to get started!
+
+[gemini]: https://github.com/arq5x/gemini

@@ -7,3 +7,5 @@ docs_dir: docs
 
 pages:
 - Home: index.md
+- About:
+    - 'Contributing': 'about/contributing.md'
