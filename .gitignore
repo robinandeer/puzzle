@@ -64,3 +64,6 @@ node_modules/
 
 # otto
 .otto
+
+# mkdocs
+site/
