@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+
+	<title>Contributing - Puzzle Docs</title>
+
+        <link href="../../css/bootstrap-3.0.3.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link rel="stylesheet" href="../../css/highlight.css">
+        <link href="../../css/base.css" rel="stylesheet">
+
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+        
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+            <!-- Main title -->
+            <a class="navbar-brand" href="../..">Puzzle Docs</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+            <!-- Main navigation -->
+            <ul class="nav navbar-nav">
+            
+            
+                <li >
+                    <a href="../..">Home</a>
+                </li>
+            
+            
+            
+                <li class="dropdown active">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">About <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                    
+                        <li class="active">
+                            <a href="./">Contributing</a>
+                        </li>
+                    
+                    </ul>
+                </li>
+            
+            
+            </ul>
+
+            <!-- Search, Navigation and Repo links -->
+            <ul class="nav navbar-nav navbar-right">
+                <li >
+                    <a rel="next" href="../..">
+                        <i class="fa fa-arrow-left"></i> Previous
+                    </a>
+                </li>
+                <li class="disabled">
+                    <a rel="prev" >
+                        Next <i class="fa fa-arrow-right"></i>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="https://github.com/robinandeer/puzzle">
+                        
+                            <i class="fa fa-github"></i>
+                        
+                        GitHub
+                    </a>
+                </li>
+                
+            </ul>
+        </div>
+    </div>
+</div>
+
+        <div class="container">
+            <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+    
+        <li class="main active"><a href="#contributing">Contributing</a></li>
+        
+            <li><a href="#general">General</a></li>
+        
+            <li><a href="#issue-tracker">Issue tracker</a></li>
+        
+            <li><a href="#types-of-contributions">Types of Contributions</a></li>
+        
+            <li><a href="#get-started">Get Started!</a></li>
+        
+            <li><a href="#pull-request-guidelines">Pull Request Guidelines</a></li>
+        
+            <li><a href="#coding-conventions">Coding conventions</a></li>
+        
+            <li><a href="#tips">Tips</a></li>
+        
+    
+    </ul>
+</div></div>
+            <div class="col-md-9" role="main">
+
+<h1 id="contributing">Contributing</h1>
+<p>All contributions are much welcome and greatly appreciated! Expect to be credited for you effort.</p>
+<p>This document is adapted from the cookiecutter <a href="https://github.com/audreyr/cookiecutter/blob/master/CONTRIBUTING.rst">CONTRIBUTING.rst</a>.</p>
+<h2 id="general">General</h2>
+<p>Generally try to limit the scope of any Pull Request to an atomic update if possible. This way, it's much easier to assess and review your changes.</p>
+<p>You should expect a considerably faster turn around if you submit two or more PRs instead of baking them all into one major PR.</p>
+<h2 id="issue-tracker">Issue tracker</h2>
+<p>puzzle uses the excellent <a href="https://github.com/robinandeer/puzzle/issues">GitHub issue tracker</a>.</p>
+<p>Personally, I also recommend giving <a href="https://www.zenhub.io/">ZenHub</a> a try. After installing the Google Chrome plugin, visit the <a href="https://github.com/robinandeer/puzzle/issues#boards">puzzle boards</a>. This way, it's very easy to get an overview of the current bug/feature request situation.</p>
+<h2 id="types-of-contributions">Types of Contributions</h2>
+<p>There are many ways you can help out and improve this repository.</p>
+<h3 id="report-bugs">Report Bugs</h3>
+<p>Report bugs at <a href="https://github.com/robinandeer/puzzle/issues">robinandeer/puzzle/issues</a>.</p>
+<p>Consider including the following data in your bug report:</p>
+<ul>
+<li>Your operating system name and version</li>
+<li>Any details about your local setup that might be helpful in troubleshooting</li>
+<li>If you can, provide detailed steps to reproduce the bug</li>
+<li>If you don't have steps to reproduce the bug, just note your observations in as much detail as you can. Questions to start a discussion about the issue are welcome.</li>
+</ul>
+<h3 id="fix-bugs">Fix Bugs</h3>
+<p>Look through the <a href="https://github.com/robinandeer/puzzle/issues">GitHub issues</a> for bugs. Anything tagged with "bug" is open to whoever wants to implement it. A good idea is also to review the comment thread to see if the issue is already referenced in any open pull requests.</p>
+<h3 id="implement-features">Implement Features</h3>
+<p>Look through the <a href="https://github.com/robinandeer/puzzle/issues">GitHub issues</a> for features. Anything tagged with "feature" is open to whoever wants to implement it.</p>
+<h3 id="write-documentation">Write Documentation</h3>
+<p>Puzzle could always use more documentation, whether as part of the official Puzzle docs, in inline docstrings, or even on the web in blog posts, articles, and such.</p>
+<p>If you have written your own tutorial or review of the software, please consider adding a refferal link to the repository.</p>
+<h3 id="submit-feedback">Submit Feedback</h3>
+<p>The best way to send feedback is to <a href="https://github.com/robinandeer/puzzle/issues">open a new issue</a>.</p>
+<p>If you are requesting a feature:</p>
+<ul>
+<li>Explain in detail how it would work</li>
+<li>Keep the scope as narrow as possible, to make it easier to implement (atomic)</li>
+</ul>
+<h2 id="get-started">Get Started!</h2>
+<p>Ready to contribute? Here's how to set up <code>Puzzle</code> for local development.</p>
+<blockquote>
+<p>Over time my ambition is to provide a reproducable and automated setup through Vagrant.</p>
+</blockquote>
+<ol>
+<li>
+<p>Fork the <a href="https://github.com/robinandeer/puzzle">robinandeer/puzzle</a> repo on GitHub</p>
+</li>
+<li>
+<p>Clone your fork locally:</p>
+</li>
+</ol>
+<p><code>bash
+  $ git clone git@github.com:&lt;your github username&gt;/puzzle.git</code></p>
+<p>I would personally recommend <a href="https://mac.github.com/">GitHub for Mac</a> to easily manage pull requests and <a href="http://www.sourcetreeapp.com/">SourceTree</a> as an excellent GUI for git.</p>
+<ol>
+<li>Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development:</li>
+</ol>
+<p><code>bash
+  $ mkvirtualenv puzzle
+  $ cd puzzle/
+  $ pip install --editable .</code></p>
+<ol>
+<li>Create a branch for local development:</li>
+</ol>
+<p><code>bash
+  $ git checkout -b name-of-your-bugfix-or-feature</code></p>
+<ol>
+<li>
+<p>Make you changes locally</p>
+</li>
+<li>
+<p>When you're done making changes, check that your changes pass flake8 and the tests, including testing other Python versions with tox:</p>
+</li>
+</ol>
+<p><code>bash
+  $ flake8 puzzle tests
+  $ invoke test
+  $ tox</code></p>
+<p>To get flake8 and tox, just pip install them into your virtualenv.</p>
+<ol>
+<li>Commit your changes and push your branch to GitHub:</li>
+</ol>
+<p><code>bash
+  $ git add .
+  $ git commit -m "Detailed description of your changes."
+  $ git push origin name-of-your-bugfix-or-feature</code></p>
+<ol>
+<li>
+<p>Check that the test coverage hasn't dropped:</p>
+<p><code>bash
+$ invoke coverage</code></p>
+</li>
+<li>
+<p>Submit a pull request through the GitHub website. I would encourage you to submit your pull request early in the process. This makes it easier to maintain an overview of current development and opens up for continous discussion.</p>
+</li>
+</ol>
+<h2 id="pull-request-guidelines">Pull Request Guidelines</h2>
+<p>Before you submit a pull request, check that it meets these guidelines:</p>
+<ol>
+<li>
+<p>The pull request should include tests.</p>
+</li>
+<li>
+<p>If the pull request adds functionality, the docs should be updated. Put your new functionality into a function with a docstring, and add the feature to the list in README.md.</p>
+</li>
+<li>
+<p>The pull request should work for Python 2.7, 3.4, and PyPy. Check the <a href="https://travis-ci.org/robinandeer/puzzle/pull_requests">Travis page</a> and make sure that the tests pass for all supported Python versions.</p>
+</li>
+</ol>
+<h2 id="coding-conventions">Coding conventions</h2>
+<p>Generally I recommend two ways to stay up-to-date on puzzle coding standards.</p>
+<ol>
+<li>
+<p>Read and pay attention to current code in the repository</p>
+</li>
+<li>
+<p>Install a plugin for <a href="http://editorconfig.org/">EditorConfig</a> and let it handle some of the detailed settings for you.</p>
+</li>
+</ol>
+<h2 id="tips">Tips</h2>
+<p>To run a particular test:</p>
+<pre><code class="bash">$ python -m pytest tests.test_find.TestFind.test_find_template
+</code></pre>
+
+<p>To run a subset of tests:</p>
+<pre><code class="bash">$ python -m pytest tests.test_find
+</code></pre></div>
+        </div>
+
+	<footer class="col-md-12">
+		<hr>
+		
+		<center>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</center>
+	</footer>
+
+
+        <script src="../../js/jquery-1.10.2.min.js"></script>
+        <script src="../../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../../js/highlight.pack.js"></script>
+        <script src="../../js/base.js"></script>
+    </body>
+</html>
