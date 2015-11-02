@@ -251,31 +251,44 @@ class VcfPlugin(Plugin):
 
                     yield variant
 
-    def variants(self, case_id, skip=0, count=30, gene_list=None,
-                 frequency=None, cadd=None):
+    def variants(self, case_id, skip=0, count=30, filters={}):
         """Return all variants in the VCF.
 
             Args:
                 case_id (str): Path to a vcf file (for this adapter)
                 skip (int): Skip first variants
                 count (int): The number of variants to return
-                gene_list (list): A list of genes
-                frequency (float): filter variants based on frequency
-                cadd (float): filter variants based on CADD score
+                filters (dict): A dictionary with filters. Currently this will 
+                look like: {
+                    gene_list: [] (list of hgnc ids),
+                    frequency: None (float),
+                    cadd: None (float),
+                    consequence: [] (list of consequences),
+                    is_lof: None (Bool), 
+                    genetic_models [] (list of genetic models)
+                }
         """
+        
         vcf_path = case_id.replace('|', '/')
         limit = count + skip
 
         filtered_variants = self._variants(vcf_path)
 
-        if gene_list:
-            gene_list = set(gene_list)
+        if filters.get(gene_list):
+            gene_list = set(filters['gene_list'])
             filtered_variants = (variant for variant in filtered_variants
                                  if (set(gene['symbol'] for gene in variant['genes'])
                                      .intersection(gene_list)))
-        if frequency:
+
+        if filters.get('frequency'):
+            frequency = float(filters['frequency'])
             filtered_variants = (variant for variant in filtered_variants
-                                 if variant['thousand_g'] <= frequency)
+                                 if variant['max_freq'] <= frequency)
+
+        if filters.get('cadd'):
+            cadd_score = float(filters['cadd'])
+            filtered_variants = (variant for variant in filtered_variants
+                                 if variant['max_freq'] <= cadd_score)
 
         for index, variant_obj in enumerate(filtered_variants):
             if index >= skip:
