@@ -53,8 +53,27 @@ class VcfPlugin(Plugin):
                           name=vcf.basename()) for vcf in vcfs)
         return case_objs
 
-    def case(self):
-        return self.family
+    def case(self, case_id=None):
+        """Return a Case object
+        
+            If no case_id is given return one case
+            
+            Args:
+                case_id (str): A case id
+            
+            Returns:
+                A Case object
+        """
+        cases = self.cases()
+        if case_id:
+            for case in cases:
+                if case['case_id'] == case_id:
+                    return case
+        else:
+            if cases:
+                return list(cases)[0]
+        
+        return Case(case_id='unknown')
 
     def _add_compounds(self, variant, info_dict):
         """Check if there are any compounds and add them to the variant

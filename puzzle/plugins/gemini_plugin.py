@@ -100,7 +100,29 @@ class GeminiPlugin(Plugin):
         """Return all cases."""
 
         return self.case_objs
-
+    
+    def case(self, case_id=None):
+        """Return a Case object
+        
+            If no case_id is given return one case
+            
+            Args:
+                case_id (str): A case id
+            
+            Returns:
+                A Case object
+        """
+        cases = self.cases()
+        if case_id:
+            for case in cases:
+                if case['case_id'] == case_id:
+                    return case
+        else:
+            if cases:
+                return cases[0]
+        
+        return Case(case_id='unknown')
+    
     def _get_genotypes(self, gemini_variant, individual_objs):
         """Add the genotypes for a variant for all individuals
 
