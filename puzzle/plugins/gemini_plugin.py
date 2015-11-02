@@ -27,13 +27,52 @@ class GeminiPlugin(Plugin):
         logger.debug("Updating pattern to {0}".format(
             app.config['PUZZLE_ROOT']
         ))
-        self.case_objs = []
-        self.individuals = []
+        self.individuals = self._get_individuals()
+        self.case_objs = self._get_cases(self.individuals)
 
+    def _get_cases(self, individuals):
+        """Return the cases found in the database
+            
+            Args:
+                individuals(list): List of Individuals
+                
+            Returns:
+                case_objs(list): List of Cases 
+        """
+        case_objs = []
         case_ids = set()
         logger.info("Looking for cases in {0}".format(
             self.db
         ))
+        for individual in indivuduals:
+            case_ids.add(individual['family_id'])
+        
+        for case_id in case_ids:
+            logger.info("Found case {0}".format(case_id))
+            case = Case(
+                case_id=case_id,
+                name=case_id
+                )
+            # Add the individuals to the correct case
+            for individual in individuals:
+                if individual['case_id'] == case_id:
+                    logger.info("Adding ind {0} to case {1}".format(
+                        individual['name'], individual['case_id']
+                    ))
+                    case.add_individual(individual)
+            
+            case_objs.append(case)
+        
+        return case_objs
+    
+    def _get_individuals(self):
+        """Return a list with the individual objects found in db
+        
+            Returns:
+                indivuduals (list): List of Individuals
+        
+        """
+        indivuduals = []
         gq = GeminiQuery(self.db)
         #Dictionaru with sample to index in the gemini database
         sample_to_idx = gq.sample_to_idx
@@ -43,7 +82,7 @@ class GeminiPlugin(Plugin):
         for individual in gq:
             logger.info("Found individual {0} with family id {1}".format(
                 individual['name'], individual['family_id']))
-            self.individuals.append(
+            individuals.append(
                 Individual(
                     ind_id=individual['name'],
                     case_id=individual['family_id'],
@@ -55,31 +94,14 @@ class GeminiPlugin(Plugin):
                     variant_source=self.db,
                     bam_path=None)
             )
-            case_ids.add(individual['family_id'])
-
-        # Add the cases to the adapter
-        for case_id in case_ids:
-            case = Case(
-                case_id=case_id,
-                name=case_id
-                )
-            # Add the individuals to the correct case
-            for individual in self.individuals:
-                if individual['case_id'] == case_id:
-                    logger.info("Adding ind {0} to case {1}".format(
-                        individual['name'], individual['case_id']
-                    ))
-                    case.add_individual(individual)
-            logger.info("Adding case {0} to adapter.".format(case_id))
-            self.case_objs.append(case)
-
+        return individuals
 
     def cases(self, pattern=None):
         """Return all cases."""
 
         return self.case_objs
 
-    def _get_individuals(self, gemini_variant, individual_objs):
+    def _get_genotypes(self, gemini_variant, individual_objs):
         """Add the genotypes for a variant for all individuals
 
             Args:
@@ -207,7 +229,7 @@ class GeminiPlugin(Plugin):
         # Use the gemini id for fast search
         variant.update_variant_id(gemini_variant['variant_id'])
         # Update the individuals
-        individual_genotypes = self._get_individuals(
+        individual_genotypes = self._get_genotypes(
             gemini_variant=gemini_variant,
             individual_objs=individual_objs
             )
@@ -300,16 +322,23 @@ class GeminiPlugin(Plugin):
 
 
 
-    def variants(self, case_id, skip=0, count=30, gene_list=None,
-                 frequency=None, cadd=None):
+    def variants(self, case_id, skip=0, count=30, filters={}):
         """Return count variants for a case.
-
-            case_id : A gemini db
-            skip (int): Skip first variants
-            count (int): The number of variants to return
-            gene_list (list): A list of genes
-            frequency (float): filter variants based on frequency
-
+            
+            Args:
+                case_id (str): A gemini db
+                skip (int): Skip first variants
+                count (int): The number of variants to return
+                filters (dict): A dictionary with filters. Currently this will 
+                look like: {
+                    gene_list: [] (list of hgnc ids),
+                    frequency: None (float),
+                    cadd: None (float),
+                    consequence: [] (list of consequences),
+                    is_lof: None (Bool), 
+                    genetic_models [] (list of genetic models)
+                }
+            
         """
         logger.debug("Looking for variants in {0}".format(case_id))
 
@@ -318,26 +347,27 @@ class GeminiPlugin(Plugin):
         gemini_query = "SELECT * from variants"
 
         any_filter = False
-        #This would be the fastest solution but it seems like we loose all variants
-        #that are missing a frequency...
-        if frequency:
+
+        if filters.get('frequency'):
+            frequency = filters['frequency']
             gemini_query += " WHERE (max_aaf_all < {0} or max_aaf_all is"\
                             " Null)".format(frequency)
             any_filter = True
 
-        if cadd:
+        if filters.get('cadd'):
+            cadd_score = filters['cadd']
             if any_filter:
-                gemini_query += " AND (cadd_scaled > {0})".format(cadd)
+                gemini_query += " AND (cadd_scaled > {0})".format(cadd_score)
             else:
-                gemini_query += " WHERE (cadd_scaled > {0})".format(cadd)
+                gemini_query += " WHERE (cadd_scaled > {0})".format(cadd_score)
             any_filter = True
 
         filtered_variants = self._variants(
             case_id=case_id,
             gemini_query=gemini_query)
 
-        if gene_list:
-            gene_list = set(gene_list)
+        if filters.get['gene_list']:
+            gene_list = set(filters['gene_list'])
             filtered_variants = (variant for variant in filtered_variants
                                  if set(variant['hgnc_symbols'].intersection(gene_list)))
 
@@ -388,28 +418,3 @@ class GeminiPlugin(Plugin):
             return variant
 
         return None
-
-if __name__ == '__main__':
-    import sys
-    from pprint import pprint as pp
-    from puzzle.log import configure_stream
-    configure_stream(level="DEBUG")
-    gemini_db = sys.argv[1]
-    plugin = GeminiPlugin()
-
-    for case in plugin.cases(gemini_db):
-        print("Case found: {0}".format(case))
-    # try:
-    #     for variant in plugin.variants(gemini_db, thousand_g=0.01):
-    #         # print(variant['thousand_g'])
-    #         pp(variant)
-    # except DatabaseError as e:
-    #     logger.info("Exiting...")
-    #     sys.exit()
-    # try:
-    #     for variant in plugin.variant(gemini_db, variant_id=3):
-    #         print(variant)
-    # except DatabaseError as e:
-    #     logger.info("Exiting...")
-    #     sys.exit()
-
