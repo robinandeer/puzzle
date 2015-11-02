@@ -311,13 +311,3 @@ class VcfPlugin(Plugin):
             if variant_obj['variant_id'] == variant_id:
                 return variant_obj
         return None
-
-
-if __name__ == '__main__':
-    import sys
-    from pprint import pprint as pp
-    vcf_file = sys.argv[1]
-    plugin = VcfPlugin()
-    for variant in plugin.variants(case_id=vcf_file):
-        print(variant)
-        print('')
