@@ -1,22 +1,20 @@
 # -*- coding: utf-8 -*-
 import logging
-from sqlite3 import OperationalError
 
 from gemini import GeminiQuery
 from puzzle.plugins import Plugin
 from puzzle.models import (Variant, Genotype, Gene, Transcript, Case, Individual)
 from puzzle.utils import (get_omim_number, get_ensembl_id, get_hgnc_symbols,
                           get_most_severe_consequence)
-from puzzle.exceptions import DatabaseError
 
 logger = logging.getLogger(__name__)
+
 
 class GeminiPlugin(Plugin):
     """This is the base class for puzzle plugins"""
 
     def __init__(self):
         super(GeminiPlugin, self).__init__()
-
 
     def init_app(self, app):
         """Initialize plugin via Flask."""
@@ -32,21 +30,21 @@ class GeminiPlugin(Plugin):
 
     def _get_cases(self, individuals):
         """Return the cases found in the database
-            
+
             Args:
                 individuals(list): List of Individuals
-                
+
             Returns:
-                case_objs(list): List of Cases 
+                case_objs(list): List of Cases
         """
         case_objs = []
         case_ids = set()
         logger.info("Looking for cases in {0}".format(
             self.db
         ))
-        for individual in indivuduals:
-            case_ids.add(individual['family_id'])
-        
+        for individual in individuals:
+            case_ids.add(individual['case_id'])
+
         for case_id in case_ids:
             logger.info("Found case {0}".format(case_id))
             case = Case(
@@ -60,19 +58,19 @@ class GeminiPlugin(Plugin):
                         individual['name'], individual['case_id']
                     ))
                     case.add_individual(individual)
-            
+
             case_objs.append(case)
-        
+
         return case_objs
-    
+
     def _get_individuals(self):
         """Return a list with the individual objects found in db
-        
+
             Returns:
-                indivuduals (list): List of Individuals
-        
+                individuals (list): List of Individuals
+
         """
-        indivuduals = []
+        individuals = []
         gq = GeminiQuery(self.db)
         #Dictionaru with sample to index in the gemini database
         sample_to_idx = gq.sample_to_idx
@@ -100,15 +98,15 @@ class GeminiPlugin(Plugin):
         """Return all cases."""
 
         return self.case_objs
-    
+
     def case(self, case_id=None):
         """Return a Case object
-        
+
             If no case_id is given return one case
-            
+
             Args:
                 case_id (str): A case id
-            
+
             Returns:
                 A Case object
         """
@@ -120,9 +118,9 @@ class GeminiPlugin(Plugin):
         else:
             if cases:
                 return cases[0]
-        
+
         return Case(case_id='unknown')
-    
+
     def _get_genotypes(self, gemini_variant, individual_objs):
         """Add the genotypes for a variant for all individuals
 
@@ -346,21 +344,21 @@ class GeminiPlugin(Plugin):
 
     def variants(self, case_id, skip=0, count=30, filters={}):
         """Return count variants for a case.
-            
+
             Args:
                 case_id (str): A gemini db
                 skip (int): Skip first variants
                 count (int): The number of variants to return
-                filters (dict): A dictionary with filters. Currently this will 
+                filters (dict): A dictionary with filters. Currently this will
                 look like: {
                     gene_list: [] (list of hgnc ids),
                     frequency: None (float),
                     cadd: None (float),
                     consequence: [] (list of consequences),
-                    is_lof: None (Bool), 
+                    is_lof: None (Bool),
                     genetic_models [] (list of genetic models)
                 }
-            
+
         """
         logger.debug("Looking for variants in {0}".format(case_id))
 
@@ -388,10 +386,11 @@ class GeminiPlugin(Plugin):
             case_id=case_id,
             gemini_query=gemini_query)
 
-        if filters.get['gene_list']:
+        if filters.get('gene_list'):
             gene_list = set(filters['gene_list'])
             filtered_variants = (variant for variant in filtered_variants
-                                 if set(variant['hgnc_symbols'].intersection(gene_list)))
+                                 if (set(gene['symbol'] for gene in variant['genes'])
+                                     .intersection(gene_list)))
 
         for index, variant_obj in enumerate(filtered_variants):
             if index >= skip:
@@ -399,7 +398,6 @@ class GeminiPlugin(Plugin):
                     yield variant_obj
                 else:
                     break
-
 
     def variant(self, case_id, variant_id):
         """Return a specific variant.
