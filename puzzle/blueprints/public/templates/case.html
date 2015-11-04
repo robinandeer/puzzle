@@ -19,13 +19,15 @@
 		<div class="panel panel-default">
 			<div class="panel-heading">Individuals</div>
 			<ul class="list-group">
-				{% for individual_id, individual in case.individuals.items() %}
+				{% for individual in case.individuals %}
 					<li class="list-group-item">
 						{% if individual.affected %}
 							<span class="badge">AFFECTED</span>
 						{% endif %}
-						{{ individual_id }} <small><strong class="text-info">{{ 'M' if individual.sex == 1 else 'F' }}</strong></small>
+						{{ individual.name }} <small><strong class="text-info">{{ 'M' if individual.sex == 1 else 'F' }}</strong></small>
 					</li>
+				{% else %}
+					<li class="list-group-item">No individuals found.</li>
 				{% endfor %}
 			</ul>
 		</div>
