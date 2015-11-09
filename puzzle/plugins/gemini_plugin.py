@@ -137,6 +137,8 @@ class GeminiPlugin(Plugin):
             individuals.append(Genotype(
                 sample_id=ind['ind_id'],
                 genotype=gemini_variant['gts'][index],
+                case_id=ind.get('case_id'),
+                phenotype=ind.get('phenotype'),
                 ref_depth=gemini_variant['gt_ref_depths'][index],
                 alt_depth=gemini_variant['gt_alt_depths'][index],
                 depth=gemini_variant['gt_depths'][index],

@@ -29,12 +29,12 @@ class Compound(dict):
 
 class Genotype(dict):
     """Class that holds information about a genotype call"""
-    def __init__(self, sample_id, genotype, ref_depth='.', alt_depth='.',
-                 genotype_quality='.', depth='.'):
+    def __init__(self, sample_id, genotype, case_id=None, phenotype=None, 
+                ref_depth='.', alt_depth='.', genotype_quality='.', depth='.'):
         super(Genotype, self).__init__(sample_id=sample_id, genotype=genotype,
-                                       ref_depth=ref_depth, alt_depth=alt_depth,
-                                       depth=depth,
-                                       genotype_quality=genotype_quality)
+                                       case_id=case_id, phenotype=phenotype, 
+                                       ref_depth=ref_depth, alt_depth=alt_depth, 
+                                       depth=depth, genotype_quality=genotype_quality)
 
 
 class Variant(dict):

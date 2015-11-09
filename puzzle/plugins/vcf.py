@@ -4,7 +4,8 @@ import logging
 
 from path import path
 
-from puzzle.models import (Case, Compound, Variant, Gene, Genotype, Transcript)
+from puzzle.models import (Case, Compound, Variant, Gene, Genotype, Transcript,
+                            Individual)
 from puzzle.utils import (get_most_severe_consequence, get_hgnc_symbols,
                           get_omim_number, get_ensembl_id)
 
@@ -36,6 +37,53 @@ class VcfPlugin(Plugin):
     def _find_vcfs(self, pattern='*.vcf'):
         """Walk subdirectories and return VCF files."""
         return path(self.root_path).walkfiles(pattern)
+    
+    def _get_case(self, vcf):
+        """Create a cases and populate it with individuals
+        
+            Args:
+                vcfs (str): Path to vcf files
+            
+            Returns:
+                case_objs (list): List with Case objects
+        """
+        
+        case = Case(case_id=vcf.replace('/', '|'),
+                    name=vcf.basename())
+
+        for individual in self._get_individuals(vcf):
+            case.add_individual(individual)
+
+        return case
+        
+    def _get_individuals(self, vcf):
+        """Get the individuals from a vcf file
+        
+            Args:
+                vcf (str): Path to a vcf
+            
+            Returns:
+                individuals (generator): generator with Individuals
+        """
+        individuals = []
+        head = HeaderParser()
+        with open(vcf, 'r') as vcf_file:
+            for line in vcf_file:
+                line = line.rstrip()
+                if line.startswith('#'):
+                    if line.startswith('##'):
+                        head.parse_meta_data(line)
+                    else:
+                        head.parse_header_line(line)
+                else:
+                    break
+
+        individuals = (Individual(
+            ind_id=ind, case_id=vcf.replace('/', '|'), 
+            index=index, variant_source=vcf) 
+            for index, ind in enumerate(head.individuals))
+        
+        return individuals
 
     def cases(self, pattern=None):
         """Return all VCF file paths."""
@@ -46,9 +94,9 @@ class VcfPlugin(Plugin):
             vcfs = [path(self.root_path)]
         else:
             vcfs = self._find_vcfs(pattern)
-
-        case_objs = (Case(case_id=vcf.replace('/', '|'),
-                          name=vcf.basename()) for vcf in vcfs)
+        
+        case_objs = (self._get_case(vcf) for vcf in vcfs)
+                    
         return case_objs
 
     def case(self, case_id=None):
@@ -63,6 +111,7 @@ class VcfPlugin(Plugin):
                 A Case object
         """
         cases = self.cases()
+
         if case_id:
             for case in cases:
                 if case['case_id'] == case_id:
@@ -160,7 +209,7 @@ class VcfPlugin(Plugin):
                     break
 
         header_line = head.header
-        individuals = head.individuals
+        individuals = self._get_individuals(vcf_file_path)
 
         variant_columns = ['CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER']
 
@@ -239,7 +288,9 @@ class VcfPlugin(Plugin):
 
                     #Add genotype calls:
                     if individuals:
-                        for sample_id in individuals:
+                        for individual in individuals:
+                            sample_id = individual['ind_id']
+                            
                             raw_call = dict(zip(
                                 variant_dict['FORMAT'].split(':'),
                                 variant_dict[sample_id].split(':'))
@@ -247,6 +298,8 @@ class VcfPlugin(Plugin):
                             variant.add_individual(Genotype(
                                 sample_id = sample_id,
                                 genotype = raw_call.get('GT', './.'),
+                                case_id = individual.get('case_id'),
+                                phenotype = individual.get('phenotype'),
                                 ref_depth = raw_call.get('AD', ',').split(',')[0],
                                 alt_depth = raw_call.get('AD', ',').split(',')[1],
                                 genotype_quality = raw_call.get('GQ', '.'),
