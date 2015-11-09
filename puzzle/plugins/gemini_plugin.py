@@ -44,8 +44,8 @@ class GeminiPlugin(Plugin):
         logger.info("Looking for cases in {0}".format(
             self.db
         ))
-        for individual in indivuduals:
-            case_ids.add(individual['family_id'])
+        for individual in individuals:
+            case_ids.add(individual['case_id'])
         
         for case_id in case_ids:
             logger.info("Found case {0}".format(case_id))
@@ -72,7 +72,7 @@ class GeminiPlugin(Plugin):
                 indivuduals (list): List of Individuals
         
         """
-        indivuduals = []
+        individuals = []
         gq = GeminiQuery(self.db)
         #Dictionaru with sample to index in the gemini database
         sample_to_idx = gq.sample_to_idx
