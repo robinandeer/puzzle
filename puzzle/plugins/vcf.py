@@ -13,8 +13,6 @@ from puzzle.plugins import Plugin
 from vcftoolbox import (get_variant_dict, HeaderParser, get_info_dict,
                         get_vep_dict)
 
-from ped_parser import FamilyParser
-
 logger = logging.getLogger(__name__)
 
 
@@ -55,12 +53,12 @@ class VcfPlugin(Plugin):
 
     def case(self, case_id=None):
         """Return a Case object
-        
+
             If no case_id is given return one case
-            
+
             Args:
                 case_id (str): A case id
-            
+
             Returns:
                 A Case object
         """
@@ -72,7 +70,7 @@ class VcfPlugin(Plugin):
         else:
             if cases:
                 return list(cases)[0]
-        
+
         return Case(case_id='unknown')
 
     def _add_compounds(self, variant, info_dict):
@@ -277,23 +275,23 @@ class VcfPlugin(Plugin):
                 case_id (str): Path to a vcf file (for this adapter)
                 skip (int): Skip first variants
                 count (int): The number of variants to return
-                filters (dict): A dictionary with filters. Currently this will 
+                filters (dict): A dictionary with filters. Currently this will
                 look like: {
                     gene_list: [] (list of hgnc ids),
                     frequency: None (float),
                     cadd: None (float),
                     consequence: [] (list of consequences),
-                    is_lof: None (Bool), 
+                    is_lof: None (Bool),
                     genetic_models [] (list of genetic models)
                 }
         """
-        
+
         vcf_path = case_id.replace('|', '/')
         limit = count + skip
 
         filtered_variants = self._variants(vcf_path)
 
-        if filters.get(gene_list):
+        if filters.get('gene_list'):
             gene_list = set(filters['gene_list'])
             filtered_variants = (variant for variant in filtered_variants
                                  if (set(gene['symbol'] for gene in variant['genes'])
