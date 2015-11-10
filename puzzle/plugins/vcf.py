@@ -372,9 +372,9 @@ class VcfPlugin(Plugin):
             filtered_variants = cons_variants
         
         if filters.get('genetic_models'):
-            inheritance_patterns = filters['genetic_models']
+            genetic_models = set(filters['genetic_models'])
             filtered_variants = (variant for variant in filtered_variants
-            if set(variant.get('genetic_models').intersection(inheritance_patterns)))
+            if set(variant.get('genetic_models',[])).intersection(genetic_models))
 
         for index, variant_obj in enumerate(filtered_variants):
             if index >= skip:

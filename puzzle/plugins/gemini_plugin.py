@@ -384,6 +384,18 @@ class GeminiPlugin(Plugin):
                 gemini_query += " WHERE (cadd_scaled > {0})".format(cadd_score)
             any_filter = True
 
+        # if filters.get('gene_list'):
+        #     gene_list = filters['gene_list']
+        #     for index, gene_id in enumerate(gene_list):
+        #         if index == 0:
+        #             if any_filter:
+        #                 gemini_query += " AND gene = '{0}'".format(gene_id)
+        #             else:
+        #                 gemini_query += " WHERE gene = '{0}'".format(gene_id)
+        #         else:
+        #             gemini_query += " OR gene = '{0}')".format(gene_id)
+        #     any_filter = True
+        
         filtered_variants = self._variants(
             case_id=case_id,
             gemini_query=gemini_query)
@@ -393,6 +405,17 @@ class GeminiPlugin(Plugin):
             filtered_variants = (variant for variant in filtered_variants
                                  if (set(gene['symbol'] for gene in variant['genes'])
                                      .intersection(gene_list)))
+
+        if filters.get('consequence'):
+            consequences = set(filters['consequence'])
+            cons_variants = []
+            for variant in filtered_variants:
+                for transcript in variant.get('transcripts', []):
+                    if transcript['Consequence'] in consequences:
+                        cons_variants.append(variant)
+                        break
+            
+            filtered_variants = cons_variants
 
         for index, variant_obj in enumerate(filtered_variants):
             if index >= skip:
