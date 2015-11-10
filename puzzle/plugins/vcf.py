@@ -359,6 +359,22 @@ class VcfPlugin(Plugin):
             cadd_score = float(filters['cadd'])
             filtered_variants = (variant for variant in filtered_variants
                                  if variant['max_freq'] <= cadd_score)
+        
+        if filters.get('consequence'):
+            consequences = set(filters['consequence'])
+            cons_variants = []
+            for variant in filtered_variants:
+                for transcript in variant.get('transcripts', []):
+                    if transcript['Consequence'] in consequences:
+                        cons_variants.append(variant)
+                        break
+            
+            filtered_variants = cons_variants
+        
+        if filters.get('genetic_models'):
+            inheritance_patterns = filters['genetic_models']
+            filtered_variants = (variant for variant in filtered_variants
+            if set(variant.get('genetic_models').intersection(inheritance_patterns)))
 
         for index, variant_obj in enumerate(filtered_variants):
             if index >= skip:
