@@ -345,7 +345,8 @@ class VcfPlugin(Plugin):
         filtered_variants = self._variants(vcf_path)
 
         if filters.get('gene_list'):
-            gene_list = set(filters['gene_list'])
+            gene_list = set([gene_id.strip() for gene_id in filters['gene_list']])
+            
             filtered_variants = (variant for variant in filtered_variants
                                  if (set(gene['symbol'] for gene in variant['genes'])
                                      .intersection(gene_list)))
