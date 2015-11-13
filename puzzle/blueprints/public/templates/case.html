@@ -21,10 +21,15 @@
 			<ul class="list-group">
 				{% for individual in case.individuals %}
 					<li class="list-group-item">
-						{% if individual.affected %}
+						{% if individual.is_affected %}
 							<span class="badge">AFFECTED</span>
 						{% endif %}
-						{{ individual.name }} <small><strong class="text-info">{{ 'M' if individual.sex == 1 else 'F' }}</strong></small>
+						{{ individual.name }}
+						<small><strong class="text-info">
+							{% if individual.sex_human != 'unknown' %}
+								{{ individual.sex_human }}
+							{% endif %}
+						</strong></small>
 					</li>
 				{% else %}
 					<li class="list-group-item">No individuals found.</li>

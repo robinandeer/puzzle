@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
+from .mixins import PedigreeHumanMixin
 
 
-class Individual(dict):
+class Individual(dict, PedigreeHumanMixin):
     """Individual representation."""
-    def __init__(self, ind_id, case_id=None, mother=None, 
-    father=None, sex=None, phenotype = None, index=None, 
+    def __init__(self, ind_id, case_id=None, mother=None,
+    father=None, sex=None, phenotype = None, index=None,
     variant_source=None, bam_path=None):
         """Construct a individual object
-            
+
             Args:
                 ind_id (str): The individual id
                 case_id (str): What case it belongs to
@@ -20,7 +21,7 @@ class Individual(dict):
                 variant_source (str): Path to source (vcf file)
                 bam_path (str): Path to bamfiles (vcf file)
         """
-        super(Individual, self).__init__(ind_id=ind_id, name=ind_id, 
-                case_id=case_id, mother=mother, father=father, sex=sex, 
-                phenotype=phenotype, index=index, 
+        super(Individual, self).__init__(ind_id=ind_id, name=ind_id,
+                case_id=case_id, mother=mother, father=father, sex=sex,
+                phenotype=phenotype, index=index,
                 variant_source=variant_source, bam_path=bam_path)
