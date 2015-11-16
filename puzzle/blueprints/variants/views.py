@@ -14,10 +14,17 @@ blueprint = Blueprint(BP_NAME, __name__, url_prefix='/variants',
 def variants(case_id):
     """Show all variants for a case."""
     filters = parse_filters()
-    variants = app.db.variants(case_id, skip=filters['skip'],
-                               frequency=filters.get('frequency'),
-                               gene_list=filters['gene_symbols'],
-                               cadd=filters.get('cadd'))
+    variants = app.db.variants(
+        case_id,
+        skip=filters['skip'],
+        filters={
+            'gene_list': filters['gene_symbols'],
+            'frequency': filters.get('frequency'),
+            'cadd': filters.get('cadd'),
+            'consequence': filters['selected_consequences'],
+            'genetic_models': filters['selected_models']
+        }
+    )
 
     return render_template('variants.html', variants=variants, case_id=case_id,
                            filters=filters, consequences=SO_TERMS,

@@ -36,7 +36,7 @@
 				{% for variant in variants %}
 					<tr>
 						<td><a href="{{ url_for('variants.variant', case_id=case_id, variant_id=variant.variant_id) }}">{{ variant.index }}</a></td>
-						<td>{{ variant.rank_score }}</td>
+						<td>{{ variant.rank_score or '-' }}</td>
 						<td>{{ variant.CHROM }}</td>
 						<td>{{ omim_links(variant.genes) }}</td>
 						<td>{{ variant.most_severe_consequence or '-' }}</td>
@@ -57,4 +57,11 @@
 	</div>
 
 	<a href="{{ url_for('variants.variants', case_id=case_id, **filters.query_dict) }}" class="btn btn-default">Load more</a>
+{% endblock %}
+
+{% block js_bottom %}
+	{{ super() }}
+	<script type="text/javascript" charset="utf-8">
+		$('.selectpicker').selectpicker();
+	</script>
 {% endblock %}

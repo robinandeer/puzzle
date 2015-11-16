@@ -10,6 +10,7 @@
 {% endblock %}
 
 {% block body_content %}
+	{# Overview #}
 	<div class="row">
 		<div class="col-md-6">
 			<ul class="list-group">
@@ -66,6 +67,7 @@
 		</div>
 	</div>
 
+	{# Genotype and frequency #}
 	<div class="row">
 		<div class="col-md-3">
 			<div class="panel panel-default">
@@ -78,7 +80,7 @@
 								{% if frequency.value %}
 									{{ frequency.value|round(4) }}
 								{% else %}
-									N/A
+									—
 								{% endif %}
 							</span>
 							{{ frequency.label }}
@@ -106,6 +108,7 @@
 		</div>
 	</div>
 
+	{# External links #}
 	<div class="row">
 		<div class="col-md-12">
 			<div class="panel panel-default">

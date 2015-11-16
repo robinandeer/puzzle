@@ -1,11 +1,14 @@
+# -*- coding: utf-8 -*-
 import logging
+
+from .mixins import PedigreeHumanMixin
 
 logger = logging.getLogger(__name__)
 
 
 class Transcript(dict):
     """Class that holds information about a transcript"""
-    def __init__(self, SYMBOL, Feature, Consequence, BIOTYPE=None, STRAND=None, 
+    def __init__(self, SYMBOL, Feature, Consequence, BIOTYPE=None, STRAND=None,
                 SIFT=None, PolyPhen=None, EXON=None, HGVSc=None, HGVSp=None):
         super(Transcript, self).__init__(
             SYMBOL=SYMBOL, Feature=Feature, BIOTYPE=BIOTYPE,
@@ -27,14 +30,14 @@ class Compound(dict):
                                        combined_score=combined_score)
 
 
-class Genotype(dict):
+class Genotype(dict, PedigreeHumanMixin):
     """Class that holds information about a genotype call"""
-    def __init__(self, sample_id, genotype, ref_depth='.', alt_depth='.',
-                 genotype_quality='.', depth='.'):
+    def __init__(self, sample_id, genotype, case_id=None, phenotype=None,
+                ref_depth='.', alt_depth='.', genotype_quality='.', depth='.'):
         super(Genotype, self).__init__(sample_id=sample_id, genotype=genotype,
+                                       case_id=case_id, phenotype=phenotype,
                                        ref_depth=ref_depth, alt_depth=alt_depth,
-                                       depth=depth,
-                                       genotype_quality=genotype_quality)
+                                       depth=depth, genotype_quality=genotype_quality)
 
 
 class Variant(dict):
@@ -47,6 +50,7 @@ class Variant(dict):
         self['index'] = None
 
         self['thousand_g'] = None  # float
+        self['max_freq'] = None  # float
         self['cadd_score'] = None  # float
         self['most_severe_consequence'] = None  # str
         self['rank_score'] = None  # float
@@ -68,6 +72,26 @@ class Variant(dict):
         logger.debug("Adding frequency {0} with value {1} to variant {2}".format(
             name, value, self['variant_id']))
         self['frequencies'].append({'label': name, 'value': value})
+
+    def set_max_freq(self, max_freq=None):
+        """Set the max frequency for the variant
+
+            If max_freq use this, otherwise go through all frequencies and
+            set the highest as self['max_freq']
+
+            Args:
+                max_freq (float): The max frequency
+        """
+        if max_freq:
+            self['max_freq'] = max_freq
+        else:
+            for frequency in self['frequencies']:
+                if self['max_freq']:
+                    if frequency['value'] > self['max_freq']:
+                        self['max_freq'] = frequency['value']
+                else:
+                    self['max_freq'] = frequency['value']
+        return
 
     def add_severity(self, name, value):
         """Add a severity to the variant
