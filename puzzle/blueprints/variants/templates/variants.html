@@ -58,3 +58,10 @@
 
 	<a href="{{ url_for('variants.variants', case_id=case_id, **filters.query_dict) }}" class="btn btn-default">Load more</a>
 {% endblock %}
+
+{% block js_bottom %}
+	{{ super() }}
+	<script type="text/javascript" charset="utf-8">
+		$('.selectpicker').selectpicker();
+	</script>
+{% endblock %}
