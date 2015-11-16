@@ -393,14 +393,14 @@ class GeminiPlugin(Plugin):
                 else:
                     gene_string += ", '{0}'".format(gene_id)
             gene_string += ")"
-            
+
             if any_filter:
                 gemini_query += " AND gene in " + gene_string
             else:
                 gemini_query += " WHERE gene in " + gene_string
-            
+
             any_filter = True
-        
+
         filtered_variants = self._variants(
             case_id=case_id,
             gemini_query=gemini_query)
@@ -413,12 +413,12 @@ class GeminiPlugin(Plugin):
                     if transcript['Consequence'] in consequences:
                         cons_variants.append(variant)
                         break
-            
+
             filtered_variants = cons_variants
 
         for index, variant_obj in enumerate(filtered_variants):
             if index >= skip:
-                if index <= limit:
+                if index < limit:
                     yield variant_obj
                 else:
                     break
