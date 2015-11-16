@@ -33,7 +33,7 @@ install:
     - pip install --editable .
 
     # pull HapMap database
-    - wget https://s3-us-west-2.amazonaws.com/robinandeer/HapMapFew.db -P tests/fixtures/
+    - wget https://s3-us-west-2.amazonaws.com/robinandeer/HapMapFew.db -O tests/fixtures/HapMapFew.db
 
 script:
     # command to run tests and collect test coverage
