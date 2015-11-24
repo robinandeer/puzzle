@@ -87,7 +87,7 @@ class GeminiPlugin(Plugin):
                     mother=individual['maternal_id'],
                     father=individual['paternal_id'],
                     sex=individual['sex'],
-                    phenotype=individual['sex'],
+                    phenotype=individual['phenotype'],
                     index=sample_to_idx.get(individual['name']),
                     variant_source=self.db,
                     bam_path=None)

@@ -96,7 +96,6 @@ def view(ctx, host, port, debug, pattern):
     BaseConfig.PUZZLE_PATTERN = pattern
     logger.debug('Set puzzle backend to {0}'.format(ctx.parent.plugin))
     BaseConfig.PUZZLE_BACKEND = ctx.parent.plugin
-    print(ctx.__dict__)
     
     if ctx.parent.family_file:
         BaseConfig.FAMILY_FILE = ctx.parent.family_file
