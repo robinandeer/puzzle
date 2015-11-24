@@ -24,6 +24,9 @@ class VcfPlugin(Plugin):
 
     def __init__(self):
         super(VcfPlugin, self).__init__()
+        self.db = None
+        self.individuals = None
+        self.case_obj = None
 
     def init_app(self, app):
         """Initialize plugin via Flask."""
@@ -36,11 +39,8 @@ class VcfPlugin(Plugin):
         ))
         self.pattern = app.config['PUZZLE_PATTERN']
         
-        self.db = None
-        self.individuals = None
-        self.case_obj = None
         
-        if app.config['FAMILY_FILE']:
+        if app.config.get('FAMILY_FILE'):
             #If ped file we know there is only one vcf
             self.db = app.config['PUZZLE_ROOT'].replace('/', '|')
             self.individuals = self._get_family_individuals(
