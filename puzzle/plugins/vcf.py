@@ -14,6 +14,8 @@ from puzzle.plugins import Plugin
 from vcftoolbox import (get_variant_dict, HeaderParser, get_info_dict,
                         get_vep_dict)
 
+from ped_parser import FamilyParser
+
 logger = logging.getLogger(__name__)
 
 
@@ -22,6 +24,9 @@ class VcfPlugin(Plugin):
 
     def __init__(self):
         super(VcfPlugin, self).__init__()
+        self.db = None
+        self.individuals = None
+        self.case_obj = None
 
     def init_app(self, app):
         """Initialize plugin via Flask."""
@@ -33,7 +38,76 @@ class VcfPlugin(Plugin):
             app.config['PUZZLE_PATTERN']
         ))
         self.pattern = app.config['PUZZLE_PATTERN']
+        
+        
+        if app.config.get('FAMILY_FILE'):
+            #If ped file we know there is only one vcf
+            self.db = app.config['PUZZLE_ROOT'].replace('/', '|')
+            self.individuals = self._get_family_individuals(
+                app.config['FAMILY_FILE'], app.config['FAMILY_TYPE'])
+            self.case_obj = self._get_family_case(self.individuals)
+            
+    
+    def _get_family_individuals(self, lines, family_type):
+        """Get the individuals found in family file
+        
+            Args:
+                lines (iterable(str)): iterable with individuals
+                family_type (str): The family type
+            Returns:
+                individuals(list(Individual))
+        """
+        individuals = []
+        family_parser = FamilyParser(lines, family_type)
+        families = family_parser.families
+        logger.info("Found families".format(
+                        ','.join(list(families.keys()))))
+        if len(families) != 1:
+            logger.error("Only one family can be used with vcf adapter")
+            raise IOError
+        
+        logger.info("Family used in analysis: {0}".format(
+                        ','.join(list(families.keys()))))
+        for ind_id in family_parser.individuals:
+            individual_object = family_parser.individuals[ind_id]
+            logger.info("Adding individual {0} to adapter".format(
+                individual_object.individual_id))
+            
+            individuals.append(
+                Individual(
+                    ind_id=individual_object.individual_id,
+                    case_id=individual_object.family,
+                    mother=individual_object.mother,
+                    father=individual_object.father,
+                    sex=str(individual_object.sex),
+                    phenotype=str(individual_object.phenotype),
+                    variant_source=self.db,
+                    bam_path=None)
+            )
+            
+        logger.info("Individuals included in analysis: {0}".format(
+                        ','.join(list(family_parser.individuals.keys()))))
+        
+        return individuals
+        
+    def _get_family_case(self, individuals):
+        """Get a Case object from the family file info
+        
+            Args:
+                individuals (list(Individual))
+            
+            Returns:
+                case(Case)
+        """
+        first_individual = individuals[0]
+        case_id = first_individual['case_id']
+        case = Case(case_id=self.db, name=case_id)
 
+        for individual in individuals:
+            case.add_individual(individual)
+        
+        return case
+        
     def _find_vcfs(self, pattern='*.vcf'):
         """Walk subdirectories and return VCF files."""
         return path(self.root_path).walkfiles(pattern)
@@ -88,14 +162,17 @@ class VcfPlugin(Plugin):
     def cases(self, pattern=None):
         """Return all VCF file paths."""
         pattern = pattern or self.pattern
-
-        # if pointing to a single file
-        if os.path.isfile(self.root_path):
-            vcfs = [path(self.root_path)]
-        else:
-            vcfs = self._find_vcfs(pattern)
         
-        case_objs = (self._get_case(vcf) for vcf in vcfs)
+        if self.case_obj:
+            return [self.case_obj]
+        else:
+            # if pointing to a single file
+            if os.path.isfile(self.root_path):
+                vcfs = [path(self.root_path)]
+            else:
+                vcfs = self._find_vcfs(pattern)
+        
+            case_objs = (self._get_case(vcf) for vcf in vcfs)
                     
         return case_objs
 
@@ -110,6 +187,9 @@ class VcfPlugin(Plugin):
             Returns:
                 A Case object
         """
+        if self.case_obj:
+            return self.case_obj
+        
         cases = self.cases()
 
         if case_id:
@@ -209,7 +289,11 @@ class VcfPlugin(Plugin):
                     break
 
         header_line = head.header
-        individuals = self._get_individuals(vcf_file_path)
+        
+        if self.individuals:
+            individuals = self.individuals
+        else:
+            individuals = self._get_individuals(vcf_file_path)
 
         variant_columns = ['CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER']
 

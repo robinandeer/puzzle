@@ -9,3 +9,4 @@ click
 Flask-Script
 vcftoolbox
 path.py
+ped-parser
