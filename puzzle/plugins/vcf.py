@@ -12,7 +12,7 @@ from puzzle.utils import (get_most_severe_consequence, get_hgnc_symbols,
 from puzzle.plugins import Plugin
 
 from vcftoolbox import (get_variant_dict, HeaderParser, get_info_dict,
-                        get_vep_dict)
+                        get_vep_info)
 
 from ped_parser import FamilyParser
 
@@ -248,30 +248,29 @@ class VcfPlugin(Plugin):
             )
         return genes
 
-    def _get_transcripts(self, variant, vep_dict):
+    def _get_transcripts(self, variant, vep_info):
         """Get all transcripts for a variant
 
             Args:
-                vep_dict (dict): A vep dict
+                vep_info (list): A list of vep dicts
 
             Returns:
                 transcripts (list): A list of transcripts
         """
         transcripts = []
-        for allele in vep_dict:
-            for transcript_info in vep_dict[allele]:
-                transcripts.append(Transcript(
-                    SYMBOL = transcript_info.get('SYMBOL'),
-                    Feature = transcript_info.get('Feature'),
-                    BIOTYPE = transcript_info.get('BIOTYPE'),
-                    Consequence = transcript_info.get('Consequence'),
-                    STRAND = transcript_info.get('STRAND'),
-                    SIFT = transcript_info.get('SIFT'),
-                    PolyPhen = transcript_info.get('PolyPhen'),
-                    EXON = transcript_info.get('EXON'),
-                    HGVSc = transcript_info.get('HGVSc'),
-                    HGVSp = transcript_info.get('HGVSp')
-                ))
+        for transcript_info in vep_info:
+            transcripts.append(Transcript(
+                SYMBOL = transcript_info.get('SYMBOL'),
+                Feature = transcript_info.get('Feature'),
+                BIOTYPE = transcript_info.get('BIOTYPE'),
+                Consequence = transcript_info.get('Consequence'),
+                STRAND = transcript_info.get('STRAND'),
+                SIFT = transcript_info.get('SIFT'),
+                PolyPhen = transcript_info.get('PolyPhen'),
+                EXON = transcript_info.get('EXON'),
+                HGVSc = transcript_info.get('HGVSc'),
+                HGVSp = transcript_info.get('HGVSp')
+            ))
         return transcripts
 
     def _variants(self, vcf_file_path):
@@ -313,10 +312,12 @@ class VcfPlugin(Plugin):
                     info_dict = get_info_dict(
                         info_line = variant_dict['INFO']
                     )
+                    #Check if vep annotation:
                     vep_string = info_dict.get('CSQ')
 
                     if vep_string:
-                        vep_dict = get_vep_dict(
+                        #Get the vep annotations
+                        vep_info = get_vep_info(
                             vep_string = vep_string,
                             vep_header = vep_header
                         )
@@ -392,7 +393,7 @@ class VcfPlugin(Plugin):
 
                     # Add transcript information:
                     if vep_string:
-                        for transcript in self._get_transcripts(variant, vep_dict):
+                        for transcript in self._get_transcripts(variant, vep_info):
                             variant.add_transcript(transcript)
 
                     variant['most_severe_consequence'] = get_most_severe_consequence(
