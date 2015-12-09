@@ -7,6 +7,6 @@
 
 click
 Flask-Script
-vcftoolbox
+vcftoolbox>=1.0
 path.py
 ped-parser
