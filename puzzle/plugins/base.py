@@ -6,6 +6,7 @@ class Plugin(object):
     def __init__(self):
         super(Plugin, self).__init__()
         self.db = None
+        self.puzzle_db = None
         self.individuals = None
         self.case_obj = None
         self.mode = 'snv'
@@ -33,4 +34,16 @@ class Plugin(object):
 
     def variant(self, variant_id):
         """Return a specific variant."""
+        raise NotImplementedError
+    
+    def load_case(self, case_lines=None, bam_paths=None):
+        """Load a case to the database"""
+        raise NotImplementedError
+    
+    def connect(self, db_name, host='localhost', port=27017, username=None
+                password=None):
+        """Connect to a database
+        
+            For vcf and gemini this is the database with cases and comments.
+        """
         raise NotImplementedError
