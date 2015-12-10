@@ -49,7 +49,8 @@
 				<li class="list-group-item">
 					Position
 					<div class="pull-right">
-						{{ variant.CHROM }}:{{ variant.POS }} |
+						<a href=http://localhost:60151/goto?locus={{ variant.CHROM }}:{{ variant.POS }}>
+						  {{ variant.CHROM }}:{{ variant.POS }}</a> |
 
 						{{ variant.REF }}
 						<span class="glyphicon glyphicon-arrow-right"></span>
