@@ -53,6 +53,14 @@ def cli(ctx, plugin, verbose, root, family_file, family_type):
     ctx.family_type = family_type
     valid_vcf_suffixes = ('.vcf', '.vcf.gz')
     if plugin == 'vcf':
+        #If root is a file we need to check that it has the correct ending
+        if os.path.isfile(root):
+            if not root.endswith(valid_vcf_suffixes):
+                logger.error("Vcf file has to end with with .vcf or .vcf.gz")
+                logger.info("Please check vcf file {0} or use other"\
+                            " plugin".format(root))
+                logger.info("Exiting")
+                sys.exit(1)
         if family_file:
             # If family file we only allow one vcf file as input
             if not os.path.isfile(root):
