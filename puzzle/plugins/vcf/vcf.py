@@ -16,7 +16,20 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
         self.db = None
         self.individuals = None
         self.case_obj = None
-        
+
+    def connect(self, db_name, host='localhost', port=27017, username=None
+                password=None, dialect='sqlite'):
+        """Connect to a database with cases and comments"""
+        ##TODO make this more intelligent
+        if dialect == 'sqlite':
+            db_string = "sqlite:///{0}".format(dbname))
+        ##TODO add support for more dialects
+        elif dialect == 'mysql':
+            db_string = "mysql://{0}:{1}@{2}/{3}".format(
+                user, password, host, dbname))
+            
+        logger.info("Connecting to database {0}".format(db_string))
+        self.puzzle_db = dataset.connect(db_string)
 
     def init_app(self, app):
         """Initialize plugin via Flask."""

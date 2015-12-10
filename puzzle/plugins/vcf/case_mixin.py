@@ -14,6 +14,28 @@ logger = logging.getLogger(__name__)
 class CaseMixin(object):
     """Class to store methods that deal with Cases in vcf plugin"""
     
+    def load_case(self, case_lines=None, case_type='ped', bam_paths=None):
+        """Load a case to the case database
+        
+            Args:
+                lines (iterable(str)): iterable with individuals
+                family_type (str): The family type
+                bam_paths (dict): Dictionary with case_id as key and bam 
+                                  path as value
+        
+        """
+        if not self.puzzle_db:
+            logger.error("Connect to database before loading case!")
+            ##TODO raise proper exception
+            raise SyntaxError
+        
+        case_table = self.puzzle_db['case']
+        individuals = self._get_family_individuals(
+            lines = case_lines,
+            family_type = family_type
+        )
+        case = self._get_family_case(individuals)
+    
     def _get_family_individuals(self, lines, family_type):
         """Get the individuals found in family file
         

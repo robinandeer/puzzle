@@ -41,6 +41,16 @@ class GeminiPlugin(Plugin):
         logger.debug("Setting can_filter_consequence to 'True'")
         self.can_filter_consequence = True
 
+    
+    def connect(self, db_name, host='localhost', port=27017, username=None
+                password=None):
+        """Connect to a database with cases and comments"""
+        pass
+    
+    def load_case(self, case_lines=None, bam_paths=None):
+        """Load a case to the case database"""
+        pass
+    
     def _get_cases(self, individuals):
         """Return the cases found in the database
 
