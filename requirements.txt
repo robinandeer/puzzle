@@ -12,3 +12,4 @@ path.py
 ped-parser
 pytabix
 phizz>=0.1.1
+pyyaml

@@ -9,7 +9,7 @@ A new secret project :P
 :licence: MIT, see LICENCE for more details
 """
 import logging
-
+import puzzle
 # Generate your own AsciiArt at:
 # patorjk.com/software/taag/#f=Calvin%20S&t=Puzzle
 __banner__ = r"""
@@ -32,3 +32,4 @@ __copyright__ = 'Copyright 2015 Robin Andeer'
 
 # the user should dictate what happens when a logging event occurs
 logging.getLogger(__name__).addHandler(logging.NullHandler())
+resource_package = puzzle.__name__
