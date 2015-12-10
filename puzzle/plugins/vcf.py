@@ -164,7 +164,7 @@ class VcfPlugin(Plugin):
         pattern = pattern or self.pattern
         
         if self.case_obj:
-            return [self.case_obj]
+            case_objs = [self.case_obj]
         else:
             # if pointing to a single file
             if os.path.isfile(self.root_path):

@@ -51,6 +51,7 @@ def cli(ctx, plugin, verbose, root, family_file, family_type):
 
     ctx.family_file = family_file
     ctx.family_type = family_type
+    valid_vcf_suffixes = ('.vcf', '.vcf.gz')
     if plugin == 'vcf':
         if family_file:
             # If family file we only allow one vcf file as input
