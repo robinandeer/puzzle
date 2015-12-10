@@ -95,7 +95,3 @@ class Plugin(object):
             name=name or case_id
         )
         return case
-
-
-
-

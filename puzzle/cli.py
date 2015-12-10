@@ -5,6 +5,9 @@ import logging
 import yaml
 
 import click
+import dataset
+
+from codecs import open
 
 from codecs import open
 
@@ -51,12 +54,12 @@ logger = logging.getLogger(__name__)
     help="Path to where to find variant source(s)"
 )
 @click.pass_context
-def cli(ctx, plugin, verbose, root, family_file, family_type, mode):
+def cli(ctx, plugin, verbose, root, family_file, family_type, mode, bam_path):
     """Puzzle: manage DNA variant resources."""
     # configure root logger to print to STDERR
     loglevel = LEVELS.get(min(verbose, 3))
     configure_stream(level=loglevel)
-
+    
     # launch the command line interface
     logger.debug('Booting up command line interface')
     if root is None:
@@ -112,6 +115,42 @@ def cli(ctx, plugin, verbose, root, family_file, family_type, mode):
             logger.info("Exiting")
             sys.exit(1)
 
+@cli.command()
+@click.option("--db_location", 
+    envvar='HOME',
+    help="Path to where database should be located. Default is $HOME"
+)
+@click.version_option(puzzle.__version__)
+@click.pass_context
+def init(ctx, db_location):
+    """Initialize a database that store information about cases, comments etc
+    
+        The behaviour will be different with different plugins. A config file
+        in YAML format will be created in puzzle/configs with information about
+        the database.
+        
+        VCF:
+            A sqlite database will be built in the home directory of the user
+        GEMINI:
+            A sqlite database will be built in the home directory of the user
+    """
+    plugin_type = ctx.parent.type
+    logger.info("Plugin type: {0}".format(plugin_type))
+    if plugin_type in ['vcf', 'gemini']:
+        db_location = str(os.path.join(db_location, '.puzzle.db'))
+        logger.info("Path to database: {0}".format(db_location))
+        config_path = os.path.join('configs', 'sqlite_config.ini')
+        config_file = os.path.join(resource_package, config_path)
+        
+        if not os.path.exists(db_location):
+            logger.info("Creating database")
+            db = dataset.connect("sqlite:///{0}".format(db_location))
+            logger.info("Database created")
+            ##TODO add username, password etc
+            configs = {
+                'dialect': 'sqlite',
+                'location': db_location,
+            }
 
 @cli.command()
 @click.version_option(puzzle.__version__)
