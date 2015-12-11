@@ -3,7 +3,13 @@
 
 class Plugin(object):
     """docstring for Plugin"""
-
+    def __init__(self):
+        super(Plugin, self).__init__()
+        self.db = None
+        self.individuals = None
+        self.case_obj = None
+        self.mode = 'sv'
+    
     def init_app(self, app):
         """Initialize plugin via Flask."""
         self.root_path = app.config['PUZZLE_ROOT']

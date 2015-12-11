@@ -21,7 +21,11 @@ class Gene(dict):
     def __init__(self, symbol, omim_number=None, ensembl_id=None):
         super(Gene, self).__init__(symbol=symbol, omim_number=omim_number,
         ensembl_id=ensembl_id)
-
+        self['location'] = None
+        self['description'] = None
+        self['morbid'] = None
+        self['ddgp2'] = None
+        self['hi'] = None
 
 class Compound(dict):
     """Class that holds information about a compound variant"""
@@ -33,11 +37,13 @@ class Compound(dict):
 class Genotype(dict, PedigreeHumanMixin):
     """Class that holds information about a genotype call"""
     def __init__(self, sample_id, genotype, case_id=None, phenotype=None,
-                ref_depth='.', alt_depth='.', genotype_quality='.', depth='.'):
+                ref_depth='.', alt_depth='.', genotype_quality='.', depth='.',
+                supporting_evidence='0', pe_support='0', sr_support='0'):
         super(Genotype, self).__init__(sample_id=sample_id, genotype=genotype,
-                                       case_id=case_id, phenotype=phenotype,
-                                       ref_depth=ref_depth, alt_depth=alt_depth,
-                                       depth=depth, genotype_quality=genotype_quality)
+            case_id=case_id, phenotype=phenotype, ref_depth=ref_depth, 
+            alt_depth=alt_depth, depth=depth, genotype_quality=genotype_quality,
+            supporting_evidence=supporting_evidence, pe_support=pe_support, 
+            sr_support=sr_support)
 
 
 class Variant(dict):
@@ -62,6 +68,25 @@ class Variant(dict):
         self['genes'] = []  # List of Genes
         self['compounds'] = []  # List of Compounds
         self['genetic_models'] = []  # List of genetic models followed
+        #SV specific fields:
+        self['sv_type'] = None
+        self['sv_len'] = None
+        self['stop_chrom'] = None
+        self['stop'] = None
+    
+    @property
+    def nr_genes(self):
+        """Return the number of genes"""
+        return len(self['genes'])
+
+    @property
+    def is_intrachromosomal(self):
+        """Check if variant is intrachromosomal
+            
+            If stop_chrom != CHROM return True
+            else return False
+        """
+        return self.get('stop_chrom', self['CHROM']) != self['CHROM']
 
     def add_frequency(self, name, value):
         """Add a frequency that will be displayed on the variant level

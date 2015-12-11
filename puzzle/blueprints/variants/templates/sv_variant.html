@@ -1,0 +1,128 @@
+{% extends "layouts/base.html" %}
+{% from "macros/sv_variant.html" import compounds_table, gt_call, gene_table, omim_links %}
+
+{% block nav_left %}
+	<li>
+		<a href="{{ url_for('variants.variants', case_id=case_id) }}">
+			Variants
+		</a>
+	</li>
+{% endblock %}
+
+{% block body_content %}
+	{# Overview #}
+	<div class="row">
+		<div class="col-md-6">
+			<ul class="list-group">
+				<li class="list-group-item">
+					<span class="badge">{{ variant.index }}</span>
+					Ranking
+				</li>
+
+				{% if variant.rank_score %}
+					<li class="list-group-item">
+						<span class="badge">{{ variant.rank_score }}</span>
+						Rank score
+					</li>
+				{% endif %}
+
+				{% if variant.sv_type %}
+					<li class="list-group-item">
+						<span class="badge">
+							{{ variant.sv_type }}
+						</span>
+						SV Type
+					</li>
+				{% endif %}
+
+				{% if variant.sv_len %}
+					<li class="list-group-item">
+						<span class="badge">{{ variant.sv_len }}</span>
+						Length of SV
+					</li>
+				{% endif %}
+			</ul>
+		</div>
+
+		<div class="col-md-6">
+			<ul class="list-group">
+				<li class="list-group-item">
+					Position
+					<div class="pull-right">
+						<a href=http://localhost:60151/goto?locus={{ variant.CHROM }}:{{ variant.POS }}>
+						  {{ variant.CHROM }}:{{ variant.POS }}</a>
+						{% if not variant.is_intrachromosomal %}
+							<a href=http://localhost:60151/goto?locus={{ variant.CHROM }}:{{ variant.POS }}-{{ variant.stop }}>
+							<span class="glyphicon glyphicon-arrow-right"></span> </a>
+						{% else %}
+							<span class="glyphicon glyphicon-arrow-right"></span>
+						{% endif %}
+						<a href=http://localhost:60151/goto?locus={{ variant.stop_chrom }}:{{ variant.stop }}>
+						{{ variant.stop_chrom or '-' }}:{{ variant.stop or '-' }}
+					</div>
+				</li>
+
+			</ul>
+		</div>
+	</div>
+
+	{# Genotype and frequency #}
+	<div class="row">
+		<div class="col-md-3">
+			<div class="panel panel-default">
+				<div class="panel-heading">Frequencies</div>
+
+				<ul class="list-group">
+					{% for frequency in variant.frequencies %}
+						<li class="list-group-item">
+							<span class="badge">
+								{% if frequency.value %}
+									{{ frequency.value|round(4) }}
+								{% else %}
+									—
+								{% endif %}
+							</span>
+							{{ frequency.label }}
+						</li>
+					{% endfor %}
+				</ul>
+			</div>
+		</div>
+
+		<div class="col-md-6">{{ gt_call(variant.individuals) }}</div>
+
+	</div>
+
+	{# External links #}
+	<div class="row">
+		<div class="col-md-12">
+			<div class="panel panel-default">
+				<div class="panel-heading">External links</div>
+				<div class="panel-body">
+					<div class="btn-group" role="group">
+						<a class="btn btn-default" href="http://grch37.ensembl.org/Homo_sapiens/Location/View?db=core;r={{ variant.CHROM }}:{{ variant.start }}-{{ variant.stop }}" target="_blank">Ensembl</a>
+
+						<a class="btn btn-default" href="http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr{{ variant.CHROM }}:{{ variant.start }}-{{ variant.stop }}&dgv=pack&knownGene=pack&omimGene=pack" target="_blank">UCSC</a>
+
+						<a class="btn btn-default" href="https://www.solvebio.com/variant/GRCh37-chr{{ variant.CHROM }}-{{ variant.start }}-{{ variant.stop }}-{{ variant.ALT }}" target="_blank">SolveBio</a>
+
+						{% if variant.ID %}
+							<a class="btn btn-default" href="http://snpedia.com/index.php/{{ variant.ID }}" target="_blank">SNPedia</a>
+						{% endif %}
+
+						<a class="btn btn-default" href="http://tools.genes.toronto.edu/" target="_blank">SPANR</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	{% if variant.genes %}
+		<div class="row">
+			<div class="col-md-12">
+				{{ gene_table(variant.genes) }}
+			</div>
+		</div>
+	{% endif %}
+{% endblock %}
+
