@@ -43,7 +43,13 @@
 						<td>{{ variant.cytoband_stop or '-' }}</td>
 						<td>{{ variant.sv_len }}</td>
 						<td>{{ variant.nr_genes }}</td>
-						<td>{{ omim_links(variant.genes[:2]) }}</td>
+						<td>
+							{% if variant.genes|length >= 5 %}
+								{{ omim_links(variant.genes[:2]) }} [...] {{ omim_links(variant.genes[-2:]) }}
+							{% else %}
+								{{ omim_links(variant.genes) }}
+							{% endif %}
+					</td>
 					</tr>
 				{% else %}
 					<p>No more variants to show.</p>
