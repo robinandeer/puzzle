@@ -26,9 +26,8 @@
 					<th>Rank#</th>
 					<th>Score</th>
 					<th>Type</th>
-					<th>Chr</th>
-					<th>Start</th>
-					<th>Stop</th>
+					<th>Start Loc</th>
+					<th>Stop Loc</th>
 					<th>Length</th>
 					<th>Nr Genes</th>
 					<th>Gene</th>
@@ -40,9 +39,8 @@
 						<td><a href="{{ url_for('variants.variant', case_id=case_id, variant_id=variant.variant_id) }}">{{ variant.index }}</a></td>
 						<td>{{ variant.rank_score or '-' }}</td>
 						<td>{{ variant.sv_type or '-' }}</td>
-						<td>{{ variant.CHROM }}</td>
-						<td>{{ variant.start or '-' }}</td>
-						<td>{{ variant.stop or '-' }}</td>
+						<td>{{ variant.cytoband_start or '-' }}</td>
+						<td>{{ variant.cytoband_stop or '-' }}</td>
 						<td>{{ variant.sv_len }}</td>
 						<td>{{ variant.nr_genes }}</td>
 						<td>{{ omim_links(variant.genes[:2]) }}</td>

@@ -13,4 +13,4 @@ recursive-exclude * *.py[co]
 
 recursive-include puzzle *.html
 
-recursive-include puzzle/recources/*
+recursive-include puzzle/resources/*

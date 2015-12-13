@@ -73,6 +73,8 @@ class Variant(dict):
         self['sv_len'] = None
         self['stop_chrom'] = None
         self['stop'] = None
+        self['cytoband_start'] = None
+        self['cytoband_stop'] = None
     
     @property
     def nr_genes(self):

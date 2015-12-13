@@ -74,6 +74,7 @@ def cli(ctx, plugin, verbose, root, family_file, family_type, mode):
                 logger.error("root has to be a vcf file when running with family file")
                 logger.info("Exiting")
                 sys.exit(1)
+        logger.info("Initialzing VCF plugin")
         ctx.plugin = VcfPlugin()
         
             
@@ -89,6 +90,7 @@ def cli(ctx, plugin, verbose, root, family_file, family_type, mode):
                 logger.info("root has to point to a gemini databse")
                 logger.info("Exiting")
                 sys.exit(1)
+            logger.info("Initialzing GEMINI plugin")
             ctx.plugin = GeminiPlugin()
         except ImportError:
             logger.error("Need to have gemini installed to use gemini plugin")
@@ -106,7 +108,7 @@ def cli(ctx, plugin, verbose, root, family_file, family_type, mode):
 @click.pass_context
 def view(ctx, host, port, debug, pattern):
     """Visualize DNA variant resources."""
-    logger.debug('Set puzzle root to {0}'.format(ctx.parent.root))
+    logger.info('Set puzzle root to {0}'.format(ctx.parent.root))
     BaseConfig.PUZZLE_ROOT = ctx.parent.root
     logger.debug('Set puzzle pattern to {0}'.format(pattern))
     BaseConfig.PUZZLE_PATTERN = pattern

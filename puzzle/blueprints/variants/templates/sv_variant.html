@@ -58,10 +58,35 @@
 							<span class="glyphicon glyphicon-arrow-right"></span>
 						{% endif %}
 						<a href=http://localhost:60151/goto?locus={{ variant.stop_chrom }}:{{ variant.stop }}>
-						{{ variant.stop_chrom or '-' }}:{{ variant.stop or '-' }}
+						{{ variant.stop_chrom or '-' }}:{{ variant.stop or '-' }} </a>
 					</div>
 				</li>
-
+				
+				<li class="list-group-item">
+					Cytoband
+					<div class="pull-right">
+						{{ variant.cytoband_start }}
+						<span class="glyphicon glyphicon-arrow-right"></span>
+						{{ variant.cytoband_stop }}
+					</div>
+				</li>
+				
+				<li class="list-group-item">
+						SV location
+					<div class="pull-right">
+						{% if variant.is_intrachromosomal %}
+							<span class="badge">
+								Intrachromosomal
+							</span>
+						{% else %}
+							<span class="badge">
+								Interchromosomal
+							</span>
+						{% endif %}
+					</div>
+				</li>
+				
+				
 			</ul>
 		</div>
 	</div>
@@ -77,7 +102,7 @@
 						<li class="list-group-item">
 							<span class="badge">
 								{% if frequency.value %}
-									{{ frequency.value|round(4) }}
+									{{ frequency.value }}
 								{% else %}
 									—
 								{% endif %}
