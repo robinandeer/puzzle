@@ -25,10 +25,14 @@ def variants(case_id):
             'genetic_models': filters['selected_models']
         }
     )
-
-    return render_template('variants.html', variants=variants, case_id=case_id,
-                           filters=filters, consequences=SO_TERMS,
-                           inheritance_models=INHERITANCE_MODELS_SHORT)
+    if app.db.mode == 'sv':
+        return render_template('sv_variants.html', variants=variants, case_id=case_id,
+                               filters=filters, consequences=SO_TERMS,
+                               inheritance_models=INHERITANCE_MODELS_SHORT)
+    else:
+        return render_template('variants.html', variants=variants, case_id=case_id,
+                               filters=filters, consequences=SO_TERMS,
+                               inheritance_models=INHERITANCE_MODELS_SHORT)
 
 
 @blueprint.route('/<case_id>/<variant_id>')
@@ -41,7 +45,12 @@ def variant(case_id, variant_id):
     # sort compounds by score
     sorted_compounds = sorted(variant['compounds'],
                               key=lambda compound: compound['combined_score'])
-    return render_template('variant.html', variant=variant,
+    
+    if app.db.mode == 'sv':
+        return render_template('sv_variant.html', variant=variant, 
+                            compounds=sorted_compounds, case_id=case_id)
+    else:
+        return render_template('variant.html', variant=variant,
                            compounds=sorted_compounds, case_id=case_id)
 
 

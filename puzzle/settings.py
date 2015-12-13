@@ -16,6 +16,8 @@ class BaseConfig:
     SECRET_KEY = 'secret key'
     PUZZLE_BACKEND = VcfPlugin()
 
+    PUZZLE_MODE = 'snv'
+
     # default blueprints
     BLUEPRINTS = [public_bp, variants_bp]
 

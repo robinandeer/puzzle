@@ -13,13 +13,15 @@ individuals = [
 
 class MockApp(object):
     """Mock a flask app"""
-    def __init__(self, db=None, family=None, family_type='ped', pattern='*.vcf'):
+    def __init__(self, db=None, family=None, family_type='ped', 
+                pattern='*.vcf', mode='snv'):
         super(MockApp, self).__init__()
         self.config = {
             'PUZZLE_ROOT': db,
             'PUZZLE_PATTERN': pattern,
             'FAMILY_FILE': family,
-            'FAMILY_TYPE': family_type
+            'FAMILY_TYPE': family_type,
+            'PUZZLE_MODE': 'snv',
             }
 
 

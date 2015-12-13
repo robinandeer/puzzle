@@ -1,5 +1,6 @@
 import logging
-from .constants import SEVERITY_DICT, HGNC_TO_OMIM
+from .constants import (SEVERITY_DICT, HGNC_TO_OMIM, CYTOBAND_READER)
+from tabix import TabixError
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +41,28 @@ def get_most_severe_consequence(transcripts):
 
     return most_severe_consequence
 
+def get_cytoband_coord(chrom, pos):
+    """Get the cytoband coordinate for a position
+    
+        Args:
+            chrom(str): A chromosome
+            pos(int): The position
+        
+        Returns:
+            cytoband
+    """
+    chrom = "chr{0}".format(chrom.lstrip('chr'))
+    pos = int(pos)
+    result = None
+    logger.debug("Finding Cytoband for chrom:{0} pos:{1}".format(chrom, pos))
+    try:
+        for record in CYTOBAND_READER.query(chrom, pos, pos+1):
+            record_chrom = record[0].lstrip('chr')
+            coord = record[3]
+            result = "{0}.{1}".format(record_chrom, coord)
+    except TabixError:
+        pass
+    return result
 
 def get_hgnc_symbols(transcripts):
     """Get the hgnc symbols

@@ -2,6 +2,7 @@
 import json
 import os
 import pkg_resources
+import tabix
 
 import puzzle
 
@@ -53,6 +54,12 @@ for severity, term in enumerate(SO_TERMS):
     SEVERITY_DICT[term] = severity
 
 resource_package = puzzle.__name__
-resource_path = os.path.join('resources', 'hgnc_to_omim.json')
-converter_file = pkg_resources.resource_string(resource_package, resource_path)
+hgnc_to_omim_path = os.path.join('resources', 'hgnc_to_omim.json')
+cytoband_path = os.path.join('resources', 'cytoBand.txt.gz')
+
+converter_file = pkg_resources.resource_string(resource_package, hgnc_to_omim_path)
+cytoband_file = os.path.join(resource_package, cytoband_path)
+
+print('cytoband_file:',cytoband_file)
 HGNC_TO_OMIM = json.loads(converter_file.decode('utf-8'))
+CYTOBAND_READER = tabix.open(cytoband_file)

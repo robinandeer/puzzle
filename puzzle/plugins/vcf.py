@@ -7,7 +7,7 @@ from path import path
 from puzzle.models import (Case, Compound, Variant, Gene, Genotype, Transcript,
                             Individual)
 from puzzle.utils import (get_most_severe_consequence, get_hgnc_symbols,
-                          get_omim_number, get_ensembl_id)
+                          get_omim_number, get_ensembl_id, get_cytoband_coord)
 
 from puzzle.plugins import Plugin
 
@@ -39,6 +39,7 @@ class VcfPlugin(Plugin):
         ))
         self.pattern = app.config['PUZZLE_PATTERN']
         
+        self.mode = app.config['PUZZLE_MODE']
         
         if app.config.get('FAMILY_FILE'):
             #If ped file we know there is only one vcf
@@ -121,10 +122,15 @@ class VcfPlugin(Plugin):
             Returns:
                 case_objs (list): List with Case objects
         """
+        internal_vcf = vcf.replace('/', '|')
+        logger.debug("Looking for cases in {0}".format(internal_vcf))
         
-        case = Case(case_id=vcf.replace('/', '|'),
+        case = Case(case_id=internal_vcf,
                     name=vcf.basename())
-
+        
+        logger.debug("Found case with case_id: {0} and name: {1}".format(
+            case['id'], case['name']))
+        
         for individual in self._get_individuals(vcf):
             case.add_individual(individual)
 
@@ -151,11 +157,16 @@ class VcfPlugin(Plugin):
                         head.parse_header_line(line)
                 else:
                     break
-
-        individuals = (Individual(
-            ind_id=ind, case_id=vcf.replace('/', '|'), 
-            index=index, variant_source=vcf) 
-            for index, ind in enumerate(head.individuals))
+        
+        for index, ind in enumerate(head.individuals):
+            individual = Individual(
+                        ind_id=ind, 
+                        case_id=vcf.replace('/', '|'), 
+                        index=index, 
+                        variant_source=vcf)
+            individuals.append(individual)
+            logger.debug("Found individual {0} in {1}".format(
+                individual['ind_id'], vcf))
         
         return individuals
 
@@ -335,17 +346,53 @@ class VcfPlugin(Plugin):
                         index))
 
                     variant['start'] = int(variant_dict['POS'])
-
-                    variant['stop'] = int(variant_dict['POS']) + \
-                        (len(variant_dict['REF']) - len(variant_dict['ALT']))
-
+                    
+                    
+                    if self.mode == 'sv':
+                        other_chrom = variant['CHROM']
+                        # If we have a translocation:
+                        if ':' in variant_dict['ALT']:
+                            other_coordinates = variant_dict['ALT'].strip('ACGTN[]').split(':')
+                            other_chrom = other_coordinates[0].lstrip('chrCHR')
+                            other_position = other_coordinates[1]
+                            variant['stop'] = other_position
+                            
+                            #Set 'infinity' to length if translocation
+                            variant['sv_len'] = float('inf')
+                        else:
+                            variant['stop'] = int(info_dict.get('END', variant_dict['POS']))
+                            variant['sv_len'] = variant['stop'] - variant['start']
+                        
+                        variant['stop_chrom'] = other_chrom
+                        
+                    else:
+                        variant['stop'] = int(variant_dict['POS']) + \
+                            (len(variant_dict['REF']) - len(variant_dict['ALT']))
+                    
+                    variant['sv_type'] = info_dict.get('SVTYPE')
+                    variant['cytoband_start'] = get_cytoband_coord(
+                                                    chrom=variant['CHROM'], 
+                                                    pos=variant['start'])
+                    if variant.get('stop_chrom'):
+                        variant['cytoband_stop'] = get_cytoband_coord(
+                                                    chrom=variant['stop_chrom'], 
+                                                    pos=variant['stop'])
+                    
                     # It would be easy to update these keys...
                     thousand_g = info_dict.get('1000GAF')
                     if thousand_g:
                         logger.debug("Updating thousand_g to: {0}".format(
                             thousand_g))
                         variant['thousand_g'] = float(thousand_g)
-                    variant.add_frequency('1000GAF', variant.get('thousand_g'))
+                        variant.add_frequency('1000GAF', variant.get('thousand_g'))
+                    
+                    #SV specific tag for number of occurances
+                    occurances = info_dict.get('OCC')
+                    if occurances:
+                        logger.debug("Updating occurances to: {0}".format(
+                            occurances))
+                        variant['occurances'] = float(occurances)
+                        variant.add_frequency('OCC', occurances)
 
                     cadd_score = info_dict.get('CADD')
                     if cadd_score:
@@ -388,7 +435,10 @@ class VcfPlugin(Plugin):
                                 ref_depth = raw_call.get('AD', ',').split(',')[0],
                                 alt_depth = raw_call.get('AD', ',').split(',')[1],
                                 genotype_quality = raw_call.get('GQ', '.'),
-                                depth = raw_call.get('DP', '.')
+                                depth = raw_call.get('DP', '.'),
+                                supporting_evidence = raw_call.get('SU', '0'),
+                                pe_support = raw_call.get('PE', '0'),
+                                sr_support = raw_call.get('SR', '0'),
                             ))
 
                     # Add transcript information:
