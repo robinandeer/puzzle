@@ -10,3 +10,4 @@ Flask-Script
 vcftoolbox>=1.0
 path.py
 ped-parser
+pytabix
