@@ -122,10 +122,15 @@ class VcfPlugin(Plugin):
             Returns:
                 case_objs (list): List with Case objects
         """
+        internal_vcf = vcf.replace('/', '|')
+        logger.debug("Looking for cases in {0}".format(internal_vcf))
         
-        case = Case(case_id=vcf.replace('/', '|'),
+        case = Case(case_id=internal_vcf,
                     name=vcf.basename())
-
+        
+        logger.debug("Found case with case_id: {0} and name: {1}".format(
+            case['id'], case['name']))
+        
         for individual in self._get_individuals(vcf):
             case.add_individual(individual)
 
@@ -152,11 +157,16 @@ class VcfPlugin(Plugin):
                         head.parse_header_line(line)
                 else:
                     break
-
-        individuals = (Individual(
-            ind_id=ind, case_id=vcf.replace('/', '|'), 
-            index=index, variant_source=vcf) 
-            for index, ind in enumerate(head.individuals))
+        
+        for index, ind in enumerate(head.individuals):
+            individual = Individual(
+                        ind_id=ind, 
+                        case_id=vcf.replace('/', '|'), 
+                        index=index, 
+                        variant_source=vcf)
+            individuals.append(individual)
+            logger.debug("Found individual {0} in {1}".format(
+                individual['ind_id'], vcf))
         
         return individuals
 
