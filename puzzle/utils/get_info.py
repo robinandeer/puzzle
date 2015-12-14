@@ -59,7 +59,7 @@ def get_cytoband_coord(chrom, pos):
         for record in CYTOBAND_READER.query(chrom, pos, pos+1):
             record_chrom = record[0].lstrip('chr')
             coord = record[3]
-            result = "{0}.{1}".format(record_chrom, coord)
+            result = "{0}{1}".format(record_chrom, coord)
     except TabixError:
         pass
     return result
