@@ -40,7 +40,7 @@ class Plugin(object):
         """Load a case to the database"""
         raise NotImplementedError
     
-    def connect(self, db_name, host='localhost', port=27017, username=None
+    def connect(self, db_name, host='localhost', port=27017, username=None,
                 password=None):
         """Connect to a database
         

@@ -42,7 +42,7 @@ class GeminiPlugin(Plugin):
         self.can_filter_consequence = True
 
     
-    def connect(self, db_name, host='localhost', port=27017, username=None
+    def connect(self, db_name, host='localhost', port=27017, username=None,
                 password=None):
         """Connect to a database with cases and comments"""
         pass
