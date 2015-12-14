@@ -41,7 +41,7 @@
 						<td>{{ variant.sv_type or '-' }}</td>
 						<td>{{ variant.cytoband_start or '-' }}</td>
 						<td>{{ variant.cytoband_stop or '-' }}</td>
-						<td>{{ variant.sv_len }}</td>
+						<td align="right">{{ '{0:,}'.format(variant.sv_len) }}</td>
 						<td>{{ variant.nr_genes }}</td>
 						<td>
 							{% if variant.genes|length >= 5 %}

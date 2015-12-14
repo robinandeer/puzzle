@@ -37,7 +37,7 @@
 
 				{% if variant.sv_len %}
 					<li class="list-group-item">
-						<span class="badge">{{ variant.sv_len }}</span>
+						<span class="pull-right">{{ '{0:,}'.format(variant.sv_len) }} bp</span>
 						Length of SV
 					</li>
 				{% endif %}
