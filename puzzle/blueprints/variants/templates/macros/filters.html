@@ -1,43 +1,70 @@
-{% macro filters_form(case_id, inheritance_models, consequences, filters) %}
+{% macro filters_form(case_id, app, inheritance_models, consequences, filters, sv_types) %}
 <form method="get" action="{{ url_for('variants.variants', case_id=case_id) }}">
 	<div class="form-group">
 		<div class="row">
-			<div class="col-xs-6">
-				<label class="control-label">Frequency</label>
-				<input type="text" class="form-control" name="frequency" type="number" placeholder="0.0004" step="0.0001" value="{{ filters.frequency or '' }}">
-			</div>
-			<div class="col-xs-6">
-				<label class="control-label">CADD</label>
-				<input type="text" class="form-control" name="cadd" type="number" placeholder="23.4" step="0.1" value="{{ filters.cadd or '' }}">
-			</div>
+			{% if app.can_filter_frequency %}
+				<div class="col-xs-6">
+					<label class="control-label">Frequency</label>
+					<input type="text" class="form-control" name="frequency" type="number" placeholder="0.0004" step="0.0001" value="{{ filters.frequency or '' }}">
+				</div>
+			{% endif %}
+			{% if app.can_filter_cadd %}
+				<div class="col-xs-6">
+					<label class="control-label">CADD</label>
+					<input type="text" class="form-control" name="cadd" type="number" placeholder="23.4" step="0.1" value="{{ filters.cadd or '' }}">
+				</div>
+			{% endif %}
+			{% if app.can_filter_sv_len %}
+				<div class="col-xs-4">
+					<label class="control-label">SV Len</label>
+					<input type="text" class="form-control" name="sv_len" type="number" placeholder="23.4" step="0.1" value="{{ filters.sv_len or '' }}">
+				</div>
+			{% endif %}
+			
 		</div>
 	</div>
 
 	<div class="form-group">
 		<div class="row">
-			<div class="col-xs-12">
-				<label class="control-label">Genes</label>
-    			<input type="text" class="form-control" name="gene_symbol" type="text" placeholder="ADK,LPP" value="{{ (filters.gene_symbols or '')|join(',') }}">
-			</div>	
+			{% if app.can_filter_gene %}
+				<div class="col-xs-12">
+					<label class="control-label">Genes</label>
+    				<input type="text" class="form-control" name="gene_symbol" type="text" placeholder="ADK,LPP" value="{{ (filters.gene_symbols or '')|join(',') }}">
+				</div>	
+			{% endif %}
 		</div>
 	</div>
 
 	<div class="form-group">
 		<div class="row">
-			<div class="col-xs-5">
-				<label class="control-label">Inheritance models</label>
-				{{ select_input('inheritance_models', inheritance_models, filters.selected_models) }}
-			</div>
-			<div class="col-xs-5">
-				<label class="control-label">Consequences</label>
-				{{ select_input('consequences', consequences, filters.selected_consequences) }}
-			</div>
-			<div class="col-xs-2">
-				<label class="control-label">Submit</label>
-				<button class="btn btn-default form-control" type="submit">Filter</button>
-			</div>
+			{% if app.can_filter_inheritance %}
+				<div class="col-xs-5">
+					<label class="control-label">Inheritance models</label>
+					{{ select_input('inheritance_models', inheritance_models, filters.selected_models) }}
+				</div>
+			{% endif %}
+			{% if app.can_filter_consequence %}
+				<div class="col-xs-5">
+					<label class="control-label">Consequences</label>
+					{{ select_input('consequences', consequences, filters.selected_consequences) }}
+				</div>
+			{% endif %}
+			{% if app.can_filter_sv %}
+				<div class="col-xs-5">
+					<label class="control-label">SV Types</label>
+					{{ select_input('sv_types', sv_types, filters.selected_sv_types) }}
+				</div>
+			{% endif %}
 		</div>
 	</div>
+	
+	<div class="form-group">
+		<div class="col-xs-2 col-lg-offset-5">
+			<label class="control-label">Submit</label>
+			<button class="btn btn-default form-control" type="submit">Filter</button>
+		</div>
+	</div>
+	
 </form>
 {% endmacro %}
 

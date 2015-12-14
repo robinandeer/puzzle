@@ -2,7 +2,7 @@
 from flask import (abort, current_app as app, Blueprint, render_template,
                    request)
 
-from puzzle.constants import INHERITANCE_MODELS_SHORT, SO_TERMS
+from puzzle.constants import INHERITANCE_MODELS_SHORT, SO_TERMS, SV_TYPES
 
 BP_NAME = __name__.split('.')[-2]
 blueprint = Blueprint(BP_NAME, __name__, url_prefix='/variants',
@@ -14,6 +14,7 @@ blueprint = Blueprint(BP_NAME, __name__, url_prefix='/variants',
 def variants(case_id):
     """Show all variants for a case."""
     filters = parse_filters()
+    print(filters)
     variants = app.db.variants(
         case_id,
         skip=filters['skip'],
@@ -21,18 +22,22 @@ def variants(case_id):
             'gene_list': filters['gene_symbols'],
             'frequency': filters.get('frequency'),
             'cadd': filters.get('cadd'),
+            'sv_len': filters.get('sv_len'),
             'consequence': filters['selected_consequences'],
-            'genetic_models': filters['selected_models']
+            'genetic_models': filters['selected_models'],
+            'sv_types': filters['selected_sv_types'],
         }
     )
     if app.db.mode == 'sv':
         return render_template('sv_variants.html', variants=variants, case_id=case_id,
-                               filters=filters, consequences=SO_TERMS,
-                               inheritance_models=INHERITANCE_MODELS_SHORT)
+                               app=app.db, filters=filters, consequences=SO_TERMS,
+                               inheritance_models=INHERITANCE_MODELS_SHORT, 
+                               sv_types=SV_TYPES)
     else:
         return render_template('variants.html', variants=variants, case_id=case_id,
-                               filters=filters, consequences=SO_TERMS,
-                               inheritance_models=INHERITANCE_MODELS_SHORT)
+                               app=app.db, filters=filters, consequences=SO_TERMS,
+                               inheritance_models=INHERITANCE_MODELS_SHORT, 
+                               sv_types=SV_TYPES)
 
 
 @blueprint.route('/<case_id>/<variant_id>')
@@ -58,7 +63,7 @@ def parse_filters():
     """Parse variant filters from the request object."""
     genes_str = request.args.get('gene_symbol')
     filters = {}
-    for key in ('frequency', 'cadd'):
+    for key in ('frequency', 'cadd', 'sv_len'):
         try:
             filters[key] = float(request.args.get(key))
         except (ValueError, TypeError):
@@ -67,8 +72,11 @@ def parse_filters():
     filters['gene_symbols'] = genes_str.split(',') if genes_str else None
     filters['selected_models'] = request.args.getlist('inheritance_models')
     filters['selected_consequences'] = request.args.getlist('consequences')
+    filters['selected_sv_types'] = request.args.getlist('sv_types')
     filters['skip'] = int(request.args.get('skip', 0))
+    
     filters['query_dict'] = {key: request.args.getlist(key) for key
                              in request.args.keys()}
     filters['query_dict'].update({'skip': (filters['skip'] + 30)})
+    
     return filters

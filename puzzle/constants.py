@@ -1,5 +1,16 @@
 # -*- coding: utf-8 -*-
 
+SV_TYPES = (
+    'DEL',
+    'DUP',
+    'INV',
+    'INS',
+    'CNV',
+    'BND',
+    'TDUP',
+)
+
+
 INHERITANCE_MODELS = (
     ('AR_hom', 'Autosomal Recessive Homozygote'),
     ('AR_hom_dn', 'Autosomal Recessive Homozygote De Novo'),
