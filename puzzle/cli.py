@@ -5,7 +5,6 @@ import logging
 import yaml
 
 import click
-import dataset
 
 from codecs import open
 
@@ -21,6 +20,7 @@ except ImportError:
 from sqlite3 import OperationalError
 from .settings import BaseConfig
 from puzzle import resource_package
+from .utils import init_db
 
 logger = logging.getLogger(__name__)
 
@@ -121,8 +121,11 @@ def cli(ctx, plugin, verbose, root, family_file, family_type, mode, bam_path):
 @click.version_option(puzzle.__version__)
 @click.pass_context
 def init(ctx, db_location):
-    """Initialize a database that store information about cases, comments etc
-    
+    """Initialize a database that store metadata
+        
+        Builds the database at --db_location. If a database already exists, 
+        do nothing.
+        
         The behaviour will be different with different plugins. A config file
         in YAML format will be created in puzzle/configs with information about
         the database.
@@ -171,7 +174,7 @@ def init(ctx, db_location):
 @click.version_option(puzzle.__version__)
 @click.pass_context
 def load(ctx, puzzle_config, case_config):
-    """Load a case into the database
+    """Load a case into the database.  
     
         This can be done with a config file or from command line.
         If no database was found run puzzle init first.
