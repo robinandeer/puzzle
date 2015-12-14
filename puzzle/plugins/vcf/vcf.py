@@ -42,11 +42,11 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
             logger.debug("Setting can_filter_frequency to 'True'")
             self.can_filter_frequency = True
             logger.debug("Setting can_filter_cadd to 'True'")
-            self.can_filter_cadd = False
+            self.can_filter_cadd = True
             logger.debug("Setting can_filter_consequence to 'True'")
-            self.can_filter_consequence = False
+            self.can_filter_consequence = True
             logger.debug("Setting can_filter_inheritance to 'True'")
-            self.can_filter_inheritance = False
+            self.can_filter_inheritance = True
 
         if app.config.get('FAMILY_FILE'):
             #If ped file we know there is only one vcf

@@ -29,13 +29,23 @@ def variants(case_id):
         }
     )
     if app.db.mode == 'sv':
+        print(app.db)
+        print(app.db.can_filter_gene)
+        print(app.db.can_filter_frequency)
+        print(app.db.can_filter_cadd)
+        print(app.db.can_filter_consequence)
         return render_template('sv_variants.html', variants=variants, case_id=case_id,
-                               app=app.db, filters=filters, consequences=SO_TERMS,
+                               db=app.db, filters=filters, consequences=SO_TERMS,
                                inheritance_models=INHERITANCE_MODELS_SHORT, 
                                sv_types=SV_TYPES)
     else:
+        print(app.db)
+        print(app.db.can_filter_gene)
+        print(app.db.can_filter_frequency)
+        print(app.db.can_filter_cadd)
+        print(app.db.can_filter_consequence)
         return render_template('variants.html', variants=variants, case_id=case_id,
-                               app=app.db, filters=filters, consequences=SO_TERMS,
+                               db=app.db, filters=filters, consequences=SO_TERMS,
                                inheritance_models=INHERITANCE_MODELS_SHORT, 
                                sv_types=SV_TYPES)
 

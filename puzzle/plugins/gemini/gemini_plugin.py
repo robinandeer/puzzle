@@ -27,6 +27,19 @@ class GeminiPlugin(Plugin):
         ))
         self.individuals = self._get_individuals()
         self.case_objs = self._get_cases(self.individuals)
+        
+        logger.debug("Setting can_filter_gene to 'True'")
+        self.can_filter_gene = True
+        # logger.debug("Setting can_filter_sv to 'True'")
+        # self.can_filter_sv = True
+        # logger.debug("Setting can_filter_sv_len to 'True'")
+        # self.can_filter_sv_len = True
+        logger.debug("Setting can_filter_frequency to 'True'")
+        self.can_filter_frequency = True
+        logger.debug("Setting can_filter_cadd to 'True'")
+        self.can_filter_cadd = True
+        logger.debug("Setting can_filter_consequence to 'True'")
+        self.can_filter_consequence = True
 
     def _get_cases(self, individuals):
         """Return the cases found in the database

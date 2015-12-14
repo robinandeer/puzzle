@@ -8,7 +8,7 @@ class Plugin(object):
         self.db = None
         self.individuals = None
         self.case_obj = None
-        self.mode = 'sv'
+        self.mode = 'snv'
         self.can_filter_frequency = False
         self.can_filter_cadd = False
         self.can_filter_consequence = False
