@@ -1,19 +1,5 @@
 import logging
 
-<<<<<<< HEAD:puzzle/plugins/vcf/variant_mixin.py
-=======
-import dataset
-
-from path import path
-
-from puzzle.models import (Case, Compound, Variant, Gene, Genotype, Transcript,
-                            Individual)
-from puzzle.utils import (get_most_severe_consequence, get_hgnc_symbols,
-                          get_omim_number, get_ensembl_id)
-
-from puzzle.plugins import Plugin
-
->>>>>>> Started to prepare for puzzle database:puzzle/plugins/vcf.py
 from vcftoolbox import (get_variant_dict, HeaderParser, get_info_dict,
                         get_vep_info)
 
