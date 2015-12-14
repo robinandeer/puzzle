@@ -1,218 +1,111 @@
-# -*- coding: utf-8 -*-
-import os
 import logging
-
-from path import path
-
-from puzzle.models import (Case, Compound, Variant, Gene, Genotype, Transcript,
-                            Individual)
-from puzzle.utils import (get_most_severe_consequence, get_hgnc_symbols,
-                          get_omim_number, get_ensembl_id, get_cytoband_coord)
-
-from puzzle.plugins import Plugin
 
 from vcftoolbox import (get_variant_dict, HeaderParser, get_info_dict,
                         get_vep_info)
 
-from ped_parser import FamilyParser
+from puzzle.models import (Compound, Variant, Gene, Genotype, Transcript,)
+
+from puzzle.utils import (get_most_severe_consequence, get_hgnc_symbols,
+                          get_omim_number, get_ensembl_id, get_cytoband_coord)
+
 
 logger = logging.getLogger(__name__)
 
+class VariantMixin(object):
+    """Class to store variant specific functions for vcf plugin"""
 
-class VcfPlugin(Plugin):
-    """docstring for Plugin"""
+    def variant(self, case_id, variant_id):
+        """Return a specific variant.
 
-    def __init__(self):
-        super(VcfPlugin, self).__init__()
-        self.db = None
-        self.individuals = None
-        self.case_obj = None
-
-    def init_app(self, app):
-        """Initialize plugin via Flask."""
-        logger.debug("Updating root path to {0}".format(
-            app.config['PUZZLE_ROOT']
-        ))
-        self.root_path = app.config['PUZZLE_ROOT']
-        logger.debug("Updating pattern to {0}".format(
-            app.config['PUZZLE_PATTERN']
-        ))
-        self.pattern = app.config['PUZZLE_PATTERN']
-        
-        self.mode = app.config['PUZZLE_MODE']
-        
-        if app.config.get('FAMILY_FILE'):
-            #If ped file we know there is only one vcf
-            self.db = app.config['PUZZLE_ROOT'].replace('/', '|')
-            self.individuals = self._get_family_individuals(
-                app.config['FAMILY_FILE'], app.config['FAMILY_TYPE'])
-            self.case_obj = self._get_family_case(self.individuals)
-            
-    
-    def _get_family_individuals(self, lines, family_type):
-        """Get the individuals found in family file
-        
             Args:
-                lines (iterable(str)): iterable with individuals
-                family_type (str): The family type
-            Returns:
-                individuals(list(Individual))
-        """
-        individuals = []
-        family_parser = FamilyParser(lines, family_type)
-        families = family_parser.families
-        logger.info("Found families".format(
-                        ','.join(list(families.keys()))))
-        if len(families) != 1:
-            logger.error("Only one family can be used with vcf adapter")
-            raise IOError
-        
-        logger.info("Family used in analysis: {0}".format(
-                        ','.join(list(families.keys()))))
-        for ind_id in family_parser.individuals:
-            individual_object = family_parser.individuals[ind_id]
-            logger.info("Adding individual {0} to adapter".format(
-                individual_object.individual_id))
-            
-            individuals.append(
-                Individual(
-                    ind_id=individual_object.individual_id,
-                    case_id=individual_object.family,
-                    mother=individual_object.mother,
-                    father=individual_object.father,
-                    sex=str(individual_object.sex),
-                    phenotype=str(individual_object.phenotype),
-                    variant_source=self.db,
-                    bam_path=None)
-            )
-            
-        logger.info("Individuals included in analysis: {0}".format(
-                        ','.join(list(family_parser.individuals.keys()))))
-        
-        return individuals
-        
-    def _get_family_case(self, individuals):
-        """Get a Case object from the family file info
-        
-            Args:
-                individuals (list(Individual))
-            
-            Returns:
-                case(Case)
-        """
-        first_individual = individuals[0]
-        case_id = first_individual['case_id']
-        case = Case(case_id=self.db, name=case_id)
+                case_id (str): Path to vcf file
+                variant_id (str): A variant id
 
-        for individual in individuals:
-            case.add_individual(individual)
-        
-        return case
-        
-    def _find_vcfs(self, pattern='*.vcf'):
-        """Walk subdirectories and return VCF files."""
-        return path(self.root_path).walkfiles(pattern)
-    
-    def _get_case(self, vcf):
-        """Create a cases and populate it with individuals
-        
-            Args:
-                vcfs (str): Path to vcf files
-            
             Returns:
-                case_objs (list): List with Case objects
+                variant (Variant): The variant object for the given id
         """
-        internal_vcf = vcf.replace('/', '|')
-        logger.debug("Looking for cases in {0}".format(internal_vcf))
-        
-        case = Case(case_id=internal_vcf,
-                    name=vcf.basename())
-        
-        logger.debug("Found case with case_id: {0} and name: {1}".format(
-            case['id'], case['name']))
-        
-        for individual in self._get_individuals(vcf):
-            case.add_individual(individual)
+        for variant_obj in self.variants(case_id, count=float('inf')):
+            if variant_obj['variant_id'] == variant_id:
+                return variant_obj
+        return None
 
-        return case
-        
-    def _get_individuals(self, vcf):
-        """Get the individuals from a vcf file
-        
+    def variants(self, case_id, skip=0, count=30, filters={}):
+        """Return all variants in the VCF.
+
             Args:
-                vcf (str): Path to a vcf
-            
-            Returns:
-                individuals (generator): generator with Individuals
+                case_id (str): Path to a vcf file (for this adapter)
+                skip (int): Skip first variants
+                count (int): The number of variants to return
+                filters (dict): A dictionary with filters. Currently this will
+                look like: {
+                    gene_list: [] (list of hgnc ids),
+                    frequency: None (float),
+                    cadd: None (float),
+                    sv_len: None (float),
+                    consequence: [] (list of consequences),
+                    is_lof: None (Bool),
+                    genetic_models [] (list of genetic models)
+                    sv_type: List (list of sv types),
+                }
         """
-        individuals = []
-        head = HeaderParser()
-        with open(vcf, 'r') as vcf_file:
-            for line in vcf_file:
-                line = line.rstrip()
-                if line.startswith('#'):
-                    if line.startswith('##'):
-                        head.parse_meta_data(line)
-                    else:
-                        head.parse_header_line(line)
+
+        vcf_path = case_id.replace('|', '/')
+        limit = count + skip
+
+        filtered_variants = self._variants(vcf_path)
+
+        if filters.get('gene_list'):
+            gene_list = set([gene_id.strip() for gene_id in filters['gene_list']])
+            
+            filtered_variants = (variant for variant in filtered_variants
+                                 if (set(gene['symbol'] for gene in variant['genes'])
+                                     .intersection(gene_list)))
+
+        if filters.get('frequency'):
+            frequency = float(filters['frequency'])
+            filtered_variants = (variant for variant in filtered_variants
+                                 if variant['max_freq'] <= frequency)
+
+        if filters.get('cadd'):
+            cadd_score = float(filters['cadd'])
+            filtered_variants = (variant for variant in filtered_variants
+                                 if variant['max_freq'] <= cadd_score)
+        
+        if filters.get('consequence'):
+            consequences = set(filters['consequence'])
+            cons_variants = []
+            for variant in filtered_variants:
+                for transcript in variant.get('transcripts', []):
+                    if transcript['Consequence'] in consequences:
+                        cons_variants.append(variant)
+                        break
+            
+            filtered_variants = cons_variants
+        
+        if filters.get('genetic_models'):
+            genetic_models = set(filters['genetic_models'])
+            filtered_variants = (variant for variant in filtered_variants
+            if set(variant.get('genetic_models',[])).intersection(genetic_models))
+        
+        if filters.get('sv_types'):
+            sv_types = set(filters['sv_types'])
+            filtered_variants = (variant for variant in filtered_variants
+                                    if variant.get('sv_type') in sv_types)
+
+        if filters.get('sv_len'):
+            sv_len = float(filters['sv_len'])
+            filtered_variants = (variant for variant in filtered_variants
+                                    if variant.get('sv_len') >= sv_len)
+
+        for index, variant_obj in enumerate(filtered_variants):
+            if index >= skip:
+                if index <= limit:
+                    yield variant_obj
                 else:
                     break
-        
-        for index, ind in enumerate(head.individuals):
-            individual = Individual(
-                        ind_id=ind, 
-                        case_id=vcf.replace('/', '|'), 
-                        index=index, 
-                        variant_source=vcf)
-            individuals.append(individual)
-            logger.debug("Found individual {0} in {1}".format(
-                individual['ind_id'], vcf))
-        
-        return individuals
 
-    def cases(self, pattern=None):
-        """Return all VCF file paths."""
-        pattern = pattern or self.pattern
-        
-        if self.case_obj:
-            case_objs = [self.case_obj]
-        else:
-            # if pointing to a single file
-            if os.path.isfile(self.root_path):
-                vcfs = [path(self.root_path)]
-            else:
-                vcfs = self._find_vcfs(pattern)
-        
-            case_objs = (self._get_case(vcf) for vcf in vcfs)
-                    
-        return case_objs
-
-    def case(self, case_id=None):
-        """Return a Case object
-
-            If no case_id is given return one case
-
-            Args:
-                case_id (str): A case id
-
-            Returns:
-                A Case object
-        """
-        if self.case_obj:
-            return self.case_obj
-        
-        cases = self.cases()
-
-        if case_id:
-            for case in cases:
-                if case['case_id'] == case_id:
-                    return case
-        else:
-            if cases:
-                return list(cases)[0]
-
-        return Case(case_id='unknown')
-
+    
+    
     def _add_compounds(self, variant, info_dict):
         """Check if there are any compounds and add them to the variant
 
@@ -456,80 +349,3 @@ class VcfPlugin(Plugin):
 
                     yield variant
 
-    def variants(self, case_id, skip=0, count=30, filters={}):
-        """Return all variants in the VCF.
-
-            Args:
-                case_id (str): Path to a vcf file (for this adapter)
-                skip (int): Skip first variants
-                count (int): The number of variants to return
-                filters (dict): A dictionary with filters. Currently this will
-                look like: {
-                    gene_list: [] (list of hgnc ids),
-                    frequency: None (float),
-                    cadd: None (float),
-                    consequence: [] (list of consequences),
-                    is_lof: None (Bool),
-                    genetic_models [] (list of genetic models)
-                }
-        """
-
-        vcf_path = case_id.replace('|', '/')
-        limit = count + skip
-
-        filtered_variants = self._variants(vcf_path)
-
-        if filters.get('gene_list'):
-            gene_list = set([gene_id.strip() for gene_id in filters['gene_list']])
-            
-            filtered_variants = (variant for variant in filtered_variants
-                                 if (set(gene['symbol'] for gene in variant['genes'])
-                                     .intersection(gene_list)))
-
-        if filters.get('frequency'):
-            frequency = float(filters['frequency'])
-            filtered_variants = (variant for variant in filtered_variants
-                                 if variant['max_freq'] <= frequency)
-
-        if filters.get('cadd'):
-            cadd_score = float(filters['cadd'])
-            filtered_variants = (variant for variant in filtered_variants
-                                 if variant['max_freq'] <= cadd_score)
-        
-        if filters.get('consequence'):
-            consequences = set(filters['consequence'])
-            cons_variants = []
-            for variant in filtered_variants:
-                for transcript in variant.get('transcripts', []):
-                    if transcript['Consequence'] in consequences:
-                        cons_variants.append(variant)
-                        break
-            
-            filtered_variants = cons_variants
-        
-        if filters.get('genetic_models'):
-            genetic_models = set(filters['genetic_models'])
-            filtered_variants = (variant for variant in filtered_variants
-            if set(variant.get('genetic_models',[])).intersection(genetic_models))
-
-        for index, variant_obj in enumerate(filtered_variants):
-            if index >= skip:
-                if index <= limit:
-                    yield variant_obj
-                else:
-                    break
-
-    def variant(self, case_id, variant_id):
-        """Return a specific variant.
-
-            Args:
-                case_id (str): Path to vcf file
-                variant_id (str): A variant id
-
-            Returns:
-                variant (Variant): The variant object for the given id
-        """
-        for variant_obj in self.variants(case_id, count=float('inf')):
-            if variant_obj['variant_id'] == variant_id:
-                return variant_obj
-        return None

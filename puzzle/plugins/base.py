@@ -8,7 +8,13 @@ class Plugin(object):
         self.db = None
         self.individuals = None
         self.case_obj = None
-        self.mode = 'sv'
+        self.mode = 'snv'
+        self.can_filter_frequency = False
+        self.can_filter_cadd = False
+        self.can_filter_consequence = False
+        self.can_filter_gene = False
+        self.can_filter_inheritance = False
+        self.can_filter_sv = False
     
     def init_app(self, app):
         """Initialize plugin via Flask."""
@@ -19,7 +25,7 @@ class Plugin(object):
         """Return all cases."""
         raise NotImplementedError
 
-    def variants(self, case_id, skip=0, count=30, gene_list=None):
+    def variants(self, case_id, skip=0, count=30, filters=None):
         """Return count variants for a case.
 
         """

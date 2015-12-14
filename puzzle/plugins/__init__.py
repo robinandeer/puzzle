@@ -2,6 +2,6 @@
 from .base import Plugin
 from .vcf import VcfPlugin
 try:
-    from .gemini_plugin import GeminiPlugin
+    from .gemini import GeminiPlugin
 except ImportError as e:
     pass
