@@ -56,9 +56,11 @@ for severity, term in enumerate(SO_TERMS):
 resource_package = puzzle.__name__
 hgnc_to_omim_path = os.path.join('resources', 'hgnc_to_omim.json')
 cytoband_path = os.path.join('resources', 'cytoBand.txt.gz')
+schema_path = os.path.join('configs', 'schema.sql')
 
 converter_file = pkg_resources.resource_string(resource_package, hgnc_to_omim_path)
 cytoband_file = os.path.join(resource_package, cytoband_path)
 
 HGNC_TO_OMIM = json.loads(converter_file.decode('utf-8'))
 CYTOBAND_READER = tabix.open(cytoband_file)
+SCHEMA = os.path.join(resource_package, schema_path)
