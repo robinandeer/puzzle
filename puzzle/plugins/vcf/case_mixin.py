@@ -24,7 +24,8 @@ class CaseMixin(object):
         logger.info("Inserting case {0} into databse".format(case['case_id']))
         if self.case(case_id=case['case_id']):
             logger.warning("Case already inserted!")
-            return
+            logger.info("Deleting old case")
+            self._delete_case(case_id=case['case_id'])
         
         case_table.insert(dict(
             case_id=case['case_id'],
@@ -34,6 +35,22 @@ class CaseMixin(object):
             )
         )
         logger.debug("Case inserted")
+        return
+
+    def _delete_case(self, case_id):
+        """Delete a case and the individuals from database"""
+        if not self.puzzle_db:
+            logger.error("Need to be connected to database!")
+            return
+        
+        case_table = self.puzzle_db['cases']
+        individual_table = self.puzzle_db['individuals']
+        logger.info("Deleting case {0} from database".format(case_id))
+        case_table.delete(case_id=case_id)
+        
+        logger.info("Deleting individuals in case {0} from database".format(
+                    case_id))
+        individual_table.delete(case_id=case_id)
         return
 
     def _insert_individual(self, individual):
@@ -201,7 +218,7 @@ class CaseMixin(object):
     def _find_vcfs(self, pattern='*.vcf'):
         """Walk subdirectories and return VCF files."""
         return path(self.root_path).walkfiles(pattern)
-
+    
     def cases(self, pattern=None):
         """Return all VCF file paths."""
         pattern = pattern or self.pattern

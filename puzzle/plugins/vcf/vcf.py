@@ -16,6 +16,7 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
         super(VcfPlugin, self).__init__()
         self.individuals = None
         self.case_obj = None
+        self.pattern = None
 
     def connect(self, db_name, host='localhost', port=27017, username=None,
                 password=None, dialect='sqlite'):
