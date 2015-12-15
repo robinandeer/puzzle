@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
+import dataset
 
 from puzzle.plugins import Plugin
 from . import VariantMixin, CaseMixin
@@ -13,7 +14,6 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
 
     def __init__(self):
         super(VcfPlugin, self).__init__()
-        self.db = None
         self.individuals = None
         self.case_obj = None
 
@@ -22,11 +22,11 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
         """Connect to a database with cases and comments"""
         ##TODO make this more intelligent
         if dialect == 'sqlite':
-            db_string = "sqlite:///{0}".format(dbname)
+            db_string = "sqlite:///{0}".format(db_name)
         ##TODO add support for more dialects
         elif dialect == 'mysql':
             db_string = "mysql://{0}:{1}@{2}/{3}".format(
-                user, password, host, dbname)
+                user, password, host, db_name)
             
         logger.info("Connecting to database {0}".format(db_string))
         self.puzzle_db = dataset.connect(db_string)
@@ -43,6 +43,9 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
         self.pattern = app.config['PUZZLE_PATTERN']
         
         self.mode = app.config['PUZZLE_MODE']
+        if app.config.get('PUZZLE_DATABASE'):
+            self.connect(app.config['PUZZLE_DATABASE'])
+        
         logger.info("Setting ")
         logger.debug("Setting can_filter_gene to 'True'")
         self.can_filter_gene = True
@@ -63,8 +66,9 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
 
         if app.config.get('FAMILY_FILE'):
             #If ped file we know there is only one vcf
-            self.db = app.config['PUZZLE_ROOT'].replace('/', '|')
-            self.individuals = self._get_family_individuals(
-                app.config['FAMILY_FILE'], app.config['FAMILY_TYPE'])
-            self.case_obj = self._get_family_case(self.individuals)
+            self.case_obj = self._get_case(
+                variant_source=self.root_path, 
+                case_lines = app.config['FAMILY_FILE'], 
+                case_type=app.config.get('FAMILY_TYPE'),
+                bam_paths=app.config.get('BAM_PATHS', {}))
 

@@ -3,8 +3,9 @@
 
 class Case(dict):
     """Case representation."""
-    def __init__(self, case_id, name=None):
-        super(Case, self).__init__(id=case_id, name=name or case_id)
+    def __init__(self, case_id, name=None, variant_source=None):
+        super(Case, self).__init__(case_id=case_id, name=name or case_id,
+        variant_source=variant_source)
         self['individuals'] = []
 
     def add_individual(self, individual):
