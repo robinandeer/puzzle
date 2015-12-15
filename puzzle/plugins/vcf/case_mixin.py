@@ -218,7 +218,6 @@ class CaseMixin(object):
     def _find_vcfs(self, pattern='*.vcf'):
         """Walk subdirectories and return VCF files."""
         return path(self.root_path).walkfiles(pattern)
-    
     def cases(self, pattern=None):
         """Return all VCF file paths."""
         pattern = pattern or self.pattern

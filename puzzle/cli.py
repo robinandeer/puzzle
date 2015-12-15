@@ -26,7 +26,6 @@ from .utils import init_db
 
 logger = logging.getLogger(__name__)
 
-
 @click.group()
 @click.option('-p', '--plugin',
     type=click.Choice(['vcf', 'gemini']),
@@ -82,7 +81,6 @@ def cli(ctx, plugin, verbose, root, family_file, family_type, mode, bam_path):
                     logger.error("root has to be a vcf file when running with family file")
                     logger.info("Exiting")
                     sys.exit(1)
-
             if os.path.isfile(root):
                 if not root.endswith(valid_vcf_suffixes):
                     logger.error("Vcf file has to end with with .vcf or .vcf.gz")
@@ -140,18 +138,19 @@ def init(ctx, db_location):
     logger.info("Plugin type: {0}".format(plugin_type))
     if plugin_type in ['vcf', 'gemini']:
         db_location = str(os.path.join(db_location, '.puzzle.db'))
-        logger.info("Path to database: {0}".format(db_location))
         config_path = os.path.join('configs', 'sqlite_config.ini')
         config_file = os.path.join(resource_package, config_path)
         
+        logger.info("Path to database: {0}".format(db_location))
+        logger.info("Path to config: {0}".format(config_file))
+                
         if not os.path.exists(db_location):
-            logger.info("Creating database")
-            db = dataset.connect("sqlite:///{0}".format(db_location))
+            init_db(db_location)
             logger.info("Database created")
             ##TODO add username, password etc
             configs = {
                 'dialect': 'sqlite',
-                'location': db_location,
+                'db_name': db_location,
             }
 
 @cli.command()
@@ -245,7 +244,6 @@ def load(ctx, variant_source, family_file):
         bam_paths=ctx.parent.bam_paths,
     )
 
-
 @cli.command()
 @click.option('--host', default='0.0.0.0')
 @click.option('--port', default=5000)
@@ -268,7 +266,6 @@ def view(ctx, host, port, debug, pattern, database):
             puzzle_config = os.path.join(resource_package, config_path)
             db_configs = yaml.load(open(puzzle_config, 'r'))
             BaseConfig.PUZZLE_DATABASE = db_configs['db_name']
-
     logger.info('Set puzzle root to {0}'.format(ctx.parent.root))
     BaseConfig.PUZZLE_ROOT = ctx.parent.root
     logger.debug('Set puzzle pattern to {0}'.format(pattern))
