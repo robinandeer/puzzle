@@ -47,8 +47,8 @@ class VariantMixin(object):
                     sv_type: List (list of sv types),
                 }
         """
-
-        vcf_path = case_id.replace('|', '/')
+        case = self.case(case_id=case_id)
+        vcf_path = case['variant_source']
         limit = count + skip
 
         filtered_variants = self._variants(vcf_path)

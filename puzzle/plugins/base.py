@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
+import logging
+from puzzle.models import (Case, Individual)
 
+logger = logging.getLogger(__name__)
 
 class Plugin(object):
     """docstring for Plugin"""
@@ -47,3 +50,52 @@ class Plugin(object):
             For vcf and gemini this is the database with cases and comments.
         """
         raise NotImplementedError
+    
+    def _get_individual_object(self, ind_id, case_id, mother=None, father=None, 
+                        sex=None, phenotype=None, index=None, bam_path=None):
+        """Create and return an Individual object
+        
+            Args:
+                ind_id(str)
+                case_id(str)
+                mother(str)
+                father(str)
+                sex(str)
+                phenotype(str)
+                variant_source(str): Path to variant source
+                index(int)
+                bam_path(str)
+            
+            Returns:
+                individual(Individual)
+            
+        """
+        individual = Individual(
+                ind_id=ind_id,
+                case_id=case_id,
+                mother=mother,
+                father=father,
+                sex=str(sex),
+                phenotype=str(phenotype),
+                bam_path=None
+        )
+        return individual
+    
+    def _get_case_object(self, case_id, variant_source=None, name=None):
+        """Create and return a Case object
+        
+            Args:
+                case_id(str)
+                variant_source(str)
+                name(str)
+        """
+        case = Case(
+            case_id=case_id,
+            variant_source=variant_source,
+            name=name or case_id
+        )
+        return case
+
+
+
+
