@@ -102,21 +102,59 @@
 					<th>Description</th>
 					<th>Omim</th>
 					<th>Morbid</th>
-					<th>DDGP2</th>
+					<th>Constraint LoF Score</th>
 					<th>HI</th>
 				</tr>
 			</thead>
 			<tbody>
 				{% for gene in genes %}
 					<tr>
-						<td>{{ gene.symbol }}</td>
-						<td>{{ gene.ensembl_id or '-' }}</td>
+						<td>
+							{% if gene.hgnc_id %}
+								<a href="http://www.genenames.org/cgi-bin/gene_symbol_report?hgnc_id={{ gene.hgnc_id }}" target="_blank">
+									{{ gene.symbol }}
+								</a>
+							{% else %}
+								{{ gene.symbol }}
+							{% endif %}
+						</td>	
+						<td>
+							{% if gene.ensembl_id %}
+								<a href="http://www.ensembl.org/Homo_sapiens/Gene/Summary?db=core;g={{ gene.ensembl_id }}" target="_blank">
+									{{ gene.ensembl_id }}
+								</a>
+							{% else %}
+								{{ '-' }}
+							{% endif %}
+						</td>
 						<td>{{ gene.location or '-' }}</td>
 						<td>{{ gene.description or '-' }}</td>
-						<td>{{ gene.omim or '-' }}</td>
+						<td>
+							{% if gene.omim_number %}
+								<a href="http://www.omim.org/entry/{{ gene.omim_number }}" target="_blank">
+										{{ gene.symbol }}
+								</a>
+							{% else %}
+								{{ '-' }}
+							{% endif %}
+						</td>
 						<td>{{ gene.morbid or '-' }}</td>
-						<td>{{ gene.ddgp2 or '-' }}</td>
-						<td>{{ gene.hi or '-' }}</td>
+						<td>
+							{% if gene.constraint_score %}
+								<a href="http://exac.broadinstitute.org/gene/{{ gene.ensembl_id }}" target="_blank">
+									{{ gene.constraint_score|round(4) }}
+								</a>
+							{% else %}
+								{{ '-' }}
+							{% endif %}
+						</td>
+						<td>
+							{% if gene.hi_score %}
+								{{ gene.hi_score|round(2) }}
+							{% else %}
+								{{ '-' }}
+							{% endif %}
+						</td>
 					</tr>
 				{% endfor %}
 			</tbody>

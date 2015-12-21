@@ -2,8 +2,61 @@ import logging
 from .constants import (SEVERITY_DICT, HGNC_TO_OMIM, CYTOBAND_READER)
 from tabix import TabixError
 
+from phizz.utils import query_gene
+
+from puzzle.models import Gene
+
 logger = logging.getLogger(__name__)
 
+
+def get_gene_info(transcripts):
+    """Return the genes info based on the transcripts found
+    
+        Args:
+            transcript(Transcript): A dictionary with transcript info
+        
+        Returns:
+            genes (iterable): An iterable with Genes
+    """
+    ensembl_ids = set([transcript['Gene'] for transcript in transcripts])
+    hgnc_symbols = set([transcript['SYMBOL'] for transcript in transcripts])
+    genes = []
+    
+    if ensembl_ids:
+        for ensembl_id in ensembl_ids:
+            if ensembl_id:
+                for gene in query_gene(ensembl_id=ensembl_id):
+                    genes.append(Gene(
+                        symbol=gene['hgnc_symbol'],
+                        hgnc_id=gene['hgnc_symbol'],
+                        ensembl_id=gene['ensembl_id'],
+                        description=gene['description'],
+                        chrom=gene['chrom'],
+                        start=gene['start'],
+                        stop=gene['stop'],
+                        location=get_cytoband_coord(gene['chrom'], gene['start']),
+                        hi_score=gene['hi_score'],
+                        constraint_score=gene['constraint_score'],
+                        omim_number=get_omim_number(gene['hgnc_symbol']),
+                    ))
+    elif hgnc_symbols:
+        for hgnc_symbol in hgnc_symbols:
+            if hgnc_symbol:
+                for gene in query_gene(hgnc_symbol=hgnc_symbol):
+                    genes.append(Gene(
+                        symbol=gene['hgnc_symbol'],
+                        hgnc_id=gene['hgnc_symbol'],
+                        ensembl_id=gene['ensembl_id'],
+                        description=gene['description'],
+                        chrom=gene['chrom'],
+                        start=gene['start'],
+                        stop=gene['stop'],
+                        location=get_cytoband_coord(gene['chrom'], gene['start']),
+                        hi_score=gene['hi_score'],
+                        constraint_score=gene['constraint_score'],
+                        omim_number=get_omim_number(gene['hgnc_symbol']),
+                    ))
+    return genes
 
 def get_most_severe_consequence(transcripts):
     """Get the most severe consequence

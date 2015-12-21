@@ -8,24 +8,27 @@ logger = logging.getLogger(__name__)
 
 class Transcript(dict):
     """Class that holds information about a transcript"""
-    def __init__(self, SYMBOL, Feature, Consequence, BIOTYPE=None, STRAND=None,
-                SIFT=None, PolyPhen=None, EXON=None, HGVSc=None, HGVSp=None):
+    def __init__(self, SYMBOL, Feature, Consequence, Gene=None, BIOTYPE=None, 
+                STRAND=None, SIFT=None, PolyPhen=None, EXON=None, HGVSc=None, 
+                HGVSp=None):
         super(Transcript, self).__init__(
             SYMBOL=SYMBOL, Feature=Feature, BIOTYPE=BIOTYPE,
-            Consequence=Consequence, STRAND=STRAND, SIFT=SIFT,
+            Consequence=Consequence, Gene=Gene, STRAND=STRAND, SIFT=SIFT,
             PolyPhen=PolyPhen, EXON=EXON, HGVSc=HGVSc, HGVSp=HGVSp)
 
 
 class Gene(dict):
     """Class that holds information about a Gene"""
-    def __init__(self, symbol, omim_number=None, ensembl_id=None):
+    def __init__(self, symbol, omim_number=None, ensembl_id=None, 
+                description=None, chrom=None, start=None, stop=None,
+                location=None, hi_score=None, constraint_score=None,
+                hgnc_id=None):
         super(Gene, self).__init__(symbol=symbol, omim_number=omim_number,
-        ensembl_id=ensembl_id)
-        self['location'] = None
-        self['description'] = None
+        ensembl_id=ensembl_id, description=description, chrom=chrom, 
+        start=start, stop=stop, location=location, hi_score=hi_score, 
+        constraint_score=constraint_score, hgnc_id=hgnc_id)
+        
         self['morbid'] = None
-        self['ddgp2'] = None
-        self['hi'] = None
 
 class Compound(dict):
     """Class that holds information about a compound variant"""
