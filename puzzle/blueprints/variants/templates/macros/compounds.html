@@ -1,0 +1,19 @@
+{% macro compounds_table(compound_variants, case_id) -%}
+	<table class="table table-bordered table-hover">
+		<caption>Compounds</caption>
+		<thead>
+			<tr>
+				<th>Variant</th>
+				<th>Score</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for compound in compound_variants %}
+				<tr>
+					<td><a href="{{ url_for('variants.variant', case_id=case_id, variant_id=compound.variant_id) }}">{{ compound.variant_id|truncate(20) }}</a></td>
+					<td>{{ compound.combined_score }}</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{%- endmacro %}
