@@ -28,7 +28,7 @@ def get_gene_info(transcripts):
                 for gene in query_gene(ensembl_id=ensembl_id):
                     genes.append(Gene(
                         symbol=gene['hgnc_symbol'],
-                        hgnc_id=gene['hgnc_symbol'],
+                        hgnc_id=gene['hgnc_id'],
                         ensembl_id=gene['ensembl_id'],
                         description=gene['description'],
                         chrom=gene['chrom'],
@@ -45,7 +45,7 @@ def get_gene_info(transcripts):
                 for gene in query_gene(hgnc_symbol=hgnc_symbol):
                     genes.append(Gene(
                         symbol=gene['hgnc_symbol'],
-                        hgnc_id=gene['hgnc_symbol'],
+                        hgnc_id=gene['hgnc_id'],
                         ensembl_id=gene['ensembl_id'],
                         description=gene['description'],
                         chrom=gene['chrom'],
