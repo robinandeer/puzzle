@@ -1,0 +1,37 @@
+{% macro vep_transcripts(transcripts) %}
+	<div class="table-responsive">
+		<table class="table table-bordered table-hover">
+			<caption>Transcripts</caption>
+			<thead>
+				<tr>
+					<th>Gene</th>
+					<th>Transcript</th>
+					<th>Biotype</th>
+					<th>Consequence</th>
+					<th>Strand</th>
+					<th>Sift</th>
+					<th>PolyPhen</th>
+					<th>Exon</th>
+					<th>cDNA</th>
+					<th>Amino acid</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for transcript in transcripts %}
+					<tr>
+						<td>{{ transcript.SYMBOL }}</td>
+						<td>{{ transcript.Feature }}</td>
+						<td>{{ transcript.BIOTYPE }}</td>
+						<td>{{ transcript.Consequence }}</td>
+						<td>{{ transcript.STRAND }}</td>
+						<td>{{ transcript.SIFT }}</td>
+						<td>{{ transcript.PolyPhen }}</td>
+						<td>{{ transcript.EXON }}</td>
+						<td>{{ transcript.HGVSc }}</td>
+						<td>{{ transcript.HGVSp }}</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{% endmacro %}
