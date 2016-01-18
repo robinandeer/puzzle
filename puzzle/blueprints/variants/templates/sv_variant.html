@@ -1,5 +1,6 @@
 {% extends "layouts/base.html" %}
-{% from "macros/sv_variant.html" import compounds_table, gt_call, gene_table, omim_links %}
+{% from "macros/sv_variant.html" import compounds_table, gene_table, omim_links %}
+{% from "macros/gt_calls.html" import sv_gt_call %}
 
 {% block nav_left %}
 	<li>
@@ -114,7 +115,7 @@
 			</div>
 		</div>
 
-		<div class="col-md-6">{{ gt_call(variant.individuals) }}</div>
+		<div class="col-md-6">{{ sv_gt_call(variant.individuals) }}</div>
 
 	</div>
 

@@ -1,39 +1,3 @@
-{% macro gt_call(individuals) -%}
-    <table class="table table-bordered table-hover">
-		<thead>
-			<tr>
-				<th rowspan="2">Case</th>
-				<th rowspan="2">Sample</th>
-				<th rowspan="2">Genotype (GT)</th>
-				<th colspan="2">Allele depth (AD)</th>
-				<th rowspan="2">Quality (GQ)</th>
-			</tr>
-			<tr>
-				<th>Ref</th>
-				<th>Alt</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for individual in individuals %}
-				<tr>
-					<td>{{ individual.case_id }}</td>
-					<td>
-						{% if individual.is_affected %}
-							<strong><mark>{{ individual.sample_id }}</mark></strong>
-						{% else %}
-							{{ individual.sample_id }}
-						{% endif %}
-					</td>
-					<td>{{ individual.genotype }}</td>
-					<td>{{ individual.ref_depth }}</td>
-					<td>{{ individual.alt_depth }}</td>
-					<td>{{ individual.genotype_quality }}</td>
-				</tr>
-			{% endfor %}
-		</tbody>
-	</table>
-{%- endmacro %}
-
 {% macro compounds_table(compound_variants, case_id) -%}
 	<table class="table table-bordered table-hover">
 		<caption>Compounds</caption>
