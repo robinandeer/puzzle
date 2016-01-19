@@ -1,0 +1,11 @@
+{% macro omim_links(genes) %}
+	{% for gene in genes %}
+		{% if gene.omim_number %}
+			<a href="http://www.omim.org/entry/{{ gene.omim_number }}" target="_blank">
+				{{ gene.symbol }}
+			</a>
+		{% else %}
+			{{ gene.symbol }}
+		{% endif %}
+	{% endfor %}
+{% endmacro %}

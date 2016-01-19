@@ -6,7 +6,8 @@ from vcftoolbox import (get_variant_dict, HeaderParser, get_info_dict,
 from puzzle.models import (Compound, Variant, Gene, Genotype, Transcript,)
 
 from puzzle.utils import (get_most_severe_consequence, get_hgnc_symbols,
-                          get_omim_number, get_ensembl_id, get_cytoband_coord)
+                          get_omim_number, get_ensembl_id, get_cytoband_coord,
+                          get_gene_info)
 
 
 logger = logging.getLogger(__name__)
@@ -139,17 +140,7 @@ class VariantMixin(object):
             Returns:
                 genes (list): A list of Genes
         """
-        genes = []
-        hgnc_symbols = get_hgnc_symbols(
-            transcripts = variant['transcripts']
-        )
-        for hgnc_id in hgnc_symbols:
-            genes.append(Gene(
-                symbol=hgnc_id,
-                omim_number=get_omim_number(hgnc_id),
-                ensembl_id=get_ensembl_id(hgnc_id)
-                )
-            )
+        genes = get_gene_info(variant['transcripts'])        
         return genes
 
     def _get_transcripts(self, variant, vep_info):
@@ -166,6 +157,7 @@ class VariantMixin(object):
             transcripts.append(Transcript(
                 SYMBOL = transcript_info.get('SYMBOL'),
                 Feature = transcript_info.get('Feature'),
+                Gene = transcript_info.get('Gene'),
                 BIOTYPE = transcript_info.get('BIOTYPE'),
                 Consequence = transcript_info.get('Consequence'),
                 STRAND = transcript_info.get('STRAND'),

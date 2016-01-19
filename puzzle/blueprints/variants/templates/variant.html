@@ -1,5 +1,10 @@
 {% extends "layouts/base.html" %}
-{% from "macros/variant.html" import compounds_table, gt_call, vep_transcripts, omim_links %}
+{% from "macros/links.html" import omim_links %}
+{% from "macros/gt_calls.html" import gt_call %}
+{% from "macros/compounds.html" import compounds_table %}
+{% from "macros/transcripts.html" import vep_transcripts %}
+{% from "macros/genes.html" import gene_table %}
+
 
 {% block nav_left %}
 	<li>
@@ -132,6 +137,14 @@
 			</div>
 		</div>
 	</div>
+
+	{% if variant.genes %}
+		<div class="row">
+			<div class="col-md-12">
+				{{ gene_table(variant.genes) }}
+			</div>
+		</div>
+	{% endif %}
 
 	{% if variant.transcripts %}
 		<div class="row">
