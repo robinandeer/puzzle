@@ -269,7 +269,6 @@ class VariantMixin(object):
             'FILTER':gemini_variant['filter']
         }
         
-        print(variant_dict)
         variant = Variant(**variant_dict)
         variant['index'] = index
 
@@ -288,9 +287,9 @@ class VariantMixin(object):
         for transcript in self._get_transcripts(gemini_variant):
             variant.add_transcript(transcript)
 
-        variant['most_severe_consequence'] = get_most_severe_consequence(
-            variant['transcripts']
-        )
+        #Add the most severe consequence
+        variant['most_severe_consequence'] = gemini_variant['impact_so']
+        
         for gene in self._get_genes(variant):
             variant.add_gene(gene)
         
@@ -304,7 +303,7 @@ class VariantMixin(object):
                 other_chrom = other_coordinates[0].lstrip('chrCHR')
                 other_position = other_coordinates[1]
                 variant['stop'] = other_position
-       
+
                 #Set 'infinity' to length if translocation
                 variant['sv_len'] = float('inf')
                 variant['sv_type'] = 'BND'
