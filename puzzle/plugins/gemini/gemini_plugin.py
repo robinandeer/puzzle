@@ -29,6 +29,9 @@ class GeminiPlugin(CaseMixin, VariantMixin, Plugin):
         self.individuals = self._get_individuals()
         self.case_objs = self._get_cases(self.individuals)
         
+        self.mode = app.config['PUZZLE_MODE']
+        logger.info("Setting mode to {0}".format(self.mode))
+        
         logger.debug("Setting can_filter_gene to 'True'")
         self.can_filter_gene = True
         # logger.debug("Setting can_filter_sv to 'True'")

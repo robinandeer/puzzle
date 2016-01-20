@@ -30,7 +30,7 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
         self.pattern = app.config['PUZZLE_PATTERN']
         
         self.mode = app.config['PUZZLE_MODE']
-        logger.info("Setting ")
+        logger.info("Setting mode to {0}".format(self.mode))
         logger.debug("Setting can_filter_gene to 'True'")
         self.can_filter_gene = True
         if self.mode == 'sv':

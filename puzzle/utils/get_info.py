@@ -18,8 +18,8 @@ def get_gene_info(transcripts):
         Returns:
             genes (iterable): An iterable with Genes
     """
-    ensembl_ids = set([transcript['Gene'] for transcript in transcripts])
-    hgnc_symbols = set([transcript['SYMBOL'] for transcript in transcripts])
+    ensembl_ids = set([transcript['Gene'] for transcript in transcripts if transcript['Gene']])
+    hgnc_symbols = set([transcript['SYMBOL'] for transcript in transcripts if transcript['SYMBOL']])
     genes = []
     
     if ensembl_ids:

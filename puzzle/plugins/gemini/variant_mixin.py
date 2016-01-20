@@ -172,7 +172,7 @@ class VariantMixin(object):
             Returns:
                 genes (list): A list of Genes
         """
-        genes = get_gene_info(variant['transcripts'])        
+        genes = get_gene_info(variant['transcripts'])
         return genes
 
     def _get_transcripts(self, gemini_variant):
@@ -268,7 +268,8 @@ class VariantMixin(object):
             'QUAL':gemini_variant['qual'],
             'FILTER':gemini_variant['filter']
         }
-
+        
+        print(variant_dict)
         variant = Variant(**variant_dict)
         variant['index'] = index
 
@@ -292,7 +293,42 @@ class VariantMixin(object):
         )
         for gene in self._get_genes(variant):
             variant.add_gene(gene)
+        
+        variant['start'] = int(variant_dict['POS'])
+        
+        if self.mode == 'sv':
+            other_chrom = variant['CHROM']
+            # If we have a translocation:
+            if ':' in variant_dict['ALT']:
+                other_coordinates = variant_dict['ALT'].strip('ACGTN[]').split(':')
+                other_chrom = other_coordinates[0].lstrip('chrCHR')
+                other_position = other_coordinates[1]
+                variant['stop'] = other_position
+       
+                #Set 'infinity' to length if translocation
+                variant['sv_len'] = float('inf')
+                variant['sv_type'] = 'BND'
+            else:
+                variant['stop'] = int(gemini_variant['end'])
+                variant['sv_len'] = variant['stop'] - variant['start']
+                variant['sv_type'] = gemini_variant['sub_type']
+       
+            variant['stop_chrom'] = other_chrom
+            
+        else:
+            variant['stop'] = int(variant_dict['POS']) + \
+                (len(variant_dict['REF']) - len(variant_dict['ALT']))
+        
+        variant['cytoband_start'] = get_cytoband_coord(
+                                        chrom=variant['CHROM'], 
+                                        pos=variant['start'])
 
+        if variant.get('stop_chrom'):
+            variant['cytoband_stop'] = get_cytoband_coord(
+                                        chrom=variant['stop_chrom'], 
+                                        pos=variant['stop'])
+        
+        
         #### Check the impact annotations ####
         if gemini_variant['cadd_scaled']:
             variant['cadd_score'] = gemini_variant['cadd_scaled']
