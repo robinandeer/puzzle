@@ -125,6 +125,8 @@ def cli(ctx, plugin, verbose, root, family_file, family_type, mode, bam_path):
 def init(ctx, db_location):
     """Initialize a database that store metadata
         
+        Check if $USER/.puzzle exists, otherwise create the directory and
+        
         Builds the database at --db_location. If a database already exists, 
         do nothing.
         
@@ -137,32 +139,41 @@ def init(ctx, db_location):
         GEMINI:
             A sqlite database will be built in the home directory of the user
     """
-    plugin_type = ctx.parent.type
-    logger.info("Plugin type: {0}".format(plugin_type))
-    if plugin_type in ['vcf', 'gemini']:
-        db_location = str(os.path.join(db_location, '.puzzle.db'))
-        config_path = os.path.join('configs', 'sqlite_config.ini')
-        config_file = os.path.join(resource_package, config_path)
-        
-        logger.info("Path to database: {0}".format(db_location))
-        logger.info("Path to config: {0}".format(config_file))
-                
-        if not os.path.exists(db_location):
-            init_db(db_location)
-            logger.info("Database created")
-            ##TODO add username, password etc
-            configs = {
-                'dialect': 'sqlite',
-                'db_name': db_location,
-            }
-
-            stream = open(config_file, 'w')
-            logger.info("Write config file for database to {0}".format(
-                config_file))
-            yaml.dump(configs, stream)
-            logger.debug("Config written")
-        else:
-            logger.warning("Database already exists!")
+    # import subprocess
+    puzzle_dir = os.path.join(db_location, '.puzzle')
+    # subprocess.call(['ls', '-alh', db_location])
+    if os.path.exists(puzzle_dir):
+        logger.info("Found puzzle directory: {0}".format(puzzle_dir))
+    else:
+        logger.info("Creating directory {0}".format(puzzle_dir))
+        os.makedirs(puzzle_dir)
+        logger.debug("Directory {0} created".format(puzzle_dir))
+    # plugin_type = ctx.parent.type
+    # logger.info("Plugin type: {0}".format(plugin_type))
+    # if plugin_type in ['vcf', 'gemini']:
+    #     db_location = str(os.path.join(db_location, '.puzzle.db'))
+    #     config_path = os.path.join('configs', 'sqlite_config.ini')
+    #     config_file = os.path.join(resource_package, config_path)
+    #
+    #     logger.info("Path to database: {0}".format(db_location))
+    #     logger.info("Path to config: {0}".format(config_file))
+    #
+    #     if not os.path.exists(db_location):
+    #         init_db(db_location)
+    #         logger.info("Database created")
+    #         ##TODO add username, password etc
+    #         configs = {
+    #             'dialect': 'sqlite',
+    #             'db_name': db_location,
+    #         }
+    #
+    #         stream = open(config_file, 'w')
+    #         logger.info("Write config file for database to {0}".format(
+    #             config_file))
+    #         yaml.dump(configs, stream)
+    #         logger.debug("Config written")
+    #     else:
+    #         logger.warning("Database already exists!")
 
 @cli.command()
 @click.option('-c', '--puzzle_config',
