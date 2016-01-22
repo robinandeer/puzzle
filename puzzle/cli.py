@@ -122,6 +122,8 @@ def cli(ctx, plugin, verbose, root, family_file, family_type, mode, bam_path):
 def init(ctx, db_location):
     """Initialize a database that store metadata
         
+        Check if $USER/.puzzle exists, otherwise create the directory and
+        
         Builds the database at --db_location. If a database already exists, 
         do nothing.
         
@@ -209,7 +211,6 @@ def init(ctx):
     #         logger.debug("Config written")
     #     else:
     #         logger.warning("Database already exists!")
-
 
 @cli.command()
 @click.option('-i', '--variant-source', type=click.Path(exists=True),
