@@ -26,6 +26,7 @@ from .utils import init_db
 
 logger = logging.getLogger(__name__)
 
+
 @click.group()
 @click.option('-p', '--plugin',
     type=click.Choice(['vcf', 'gemini']),
@@ -52,12 +53,12 @@ logger = logging.getLogger(__name__)
     help="Path to where to find variant source(s)"
 )
 @click.pass_context
-def cli(ctx, plugin, verbose, root, family_file, family_type, mode, bam_path):
+def cli(ctx, plugin, verbose, root, family_file, family_type, mode):
     """Puzzle: manage DNA variant resources."""
     # configure root logger to print to STDERR
     loglevel = LEVELS.get(min(verbose, 3))
     configure_stream(level=loglevel)
-    
+
     # launch the command line interface
     logger.debug('Booting up command line interface')
     if root is None:
@@ -112,25 +113,20 @@ def cli(ctx, plugin, verbose, root, family_file, family_type, mode, bam_path):
             logger.info("Exiting")
             sys.exit(1)
 
+
 @cli.command()
-@click.option("--db_location", 
-    envvar='HOME',
-    help="Path to where database should be located. Default is $HOME"
-)
 @click.version_option(puzzle.__version__)
 @click.pass_context
-def init(ctx, db_location):
+def init(ctx):
     """Initialize a database that store metadata
-        
-        Check if $USER/.puzzle exists, otherwise create the directory and
-        
-        Builds the database at --db_location. If a database already exists, 
-        do nothing.
-        
+
+        Check if "root" dir exists, otherwise create the directory and
+        build the database. If a database already exists, do nothing.
+
         The behaviour will be different with different plugins. A config file
         in YAML format will be created in puzzle/configs with information about
         the database.
-        
+
         VCF:
             A sqlite database will be built in the home directory of the user
         GEMINI:
@@ -212,6 +208,7 @@ def init(ctx):
     #     else:
     #         logger.warning("Database already exists!")
 
+
 @cli.command()
 @click.option('-i', '--variant-source', type=click.Path(exists=True),
               required=True)
@@ -244,6 +241,7 @@ def load(ctx, variant_source, family_file):
         case_type=ctx.parent.family_type,
         bam_paths=ctx.parent.bam_paths,
     )
+
 
 @cli.command()
 @click.option('--host', default='0.0.0.0')
