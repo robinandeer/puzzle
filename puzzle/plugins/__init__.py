@@ -5,3 +5,4 @@ try:
     from .gemini import GeminiPlugin
 except ImportError as e:
     pass
+from .sql import Store as SqlStore

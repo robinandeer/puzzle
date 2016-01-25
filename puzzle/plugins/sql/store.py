@@ -3,6 +3,7 @@
 puzzle.plugins.sql.store
 ~~~~~~~~~~~~~~~~~~
 """
+import logging
 import os
 
 from sqlalchemy import create_engine
@@ -11,6 +12,8 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.sql.expression import ClauseElement
 
 from puzzle.models.sql import (BASE, Case, Individual)
+
+logger = logging.getLogger(__name__)
 
 
 class Store(object):
@@ -42,7 +45,7 @@ class Store(object):
 
     def connect(self, db_uri, debug=False):
         """Configure connection to a SQL database.
-        
+
         Args:
             db_uri (str): path/URI to the database to connect to
             debug (Optional[bool]): whether to output logging information
@@ -52,11 +55,12 @@ class Store(object):
         if 'mysql' in db_uri:
             kwargs['pool_recycle'] = 3600
         elif '://' not in db_uri:
-            # expect only a path to a sqlite database
+            logger.debug("detected sqlite path URI: {}".format(db_uri))
             db_path = os.path.abspath(os.path.expanduser(db_uri))
             db_uri = "sqlite:///{}".format(db_path)
 
         self.engine = create_engine(db_uri, **kwargs)
+        logger.debug('connection established successfully')
         # make sure the same engine is propagated to the BASE classes
         BASE.metadata.bind = self.engine
         # start a session
