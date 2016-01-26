@@ -5,11 +5,11 @@ import logging
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from puzzle.factory import create_app
+# from puzzle.factory import create_app
 from puzzle.models import Variant
 from puzzle.models.sql import BASE
 from puzzle.plugins import VcfPlugin, SqlStore
-from puzzle.settings import TestConfig
+# from puzzle.settings import TestConfig
 
 from puzzle.log import configure_stream
 
