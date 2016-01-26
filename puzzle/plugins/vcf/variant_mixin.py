@@ -1,7 +1,7 @@
 import logging
 
 from vcftoolbox import (get_variant_dict, HeaderParser, get_info_dict,
-                        get_vep_info)
+                        get_vep_info, get_vcf_handle)
 
 from puzzle.models import (Compound, Variant, Gene, Genotype, Transcript,)
 
@@ -171,173 +171,176 @@ class VariantMixin(object):
 
     def _variants(self, vcf_file_path):
         head = HeaderParser()
+        handle = get_vcf_handle(infile=vcf_file_path)
         # Parse the header
-        with open(vcf_file_path, 'r') as variant_file:
-            for line in variant_file:
-                line = line.rstrip()
-                if line.startswith('#'):
-                    if line.startswith('##'):
-                        head.parse_meta_data(line)
-                    else:
-                        head.parse_header_line(line)
+        for line in handle:
+            line = line.rstrip()
+            if line.startswith('#'):
+                if line.startswith('##'):
+                    head.parse_meta_data(line)
                 else:
-                    break
-
+                    head.parse_header_line(line)
+            else:
+                break
+        
+        handle.close()
+        
         header_line = head.header
         
         if self.individuals:
             individuals = self.individuals
         else:
-            individuals = self._get_individuals(vcf_file_path)
+            individuals = self._get_individuals(vcf=vcf_file_path)
 
         variant_columns = ['CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER']
 
         vep_header = head.vep_columns
 
-        with open(vcf_file_path, 'r') as vcf_file:
-            index = 0
-            for variant_line in vcf_file:
-                if not variant_line.startswith('#'):
-                    index += 1
-                    #Create a variant dict:
-                    variant_dict =  get_variant_dict(
-                        variant_line = variant_line,
-                        header_line = header_line
+        handle = get_vcf_handle(infile=vcf_file_path)
+
+        index = 0
+        for variant_line in handle:
+            if not variant_line.startswith('#'):
+                index += 1
+                #Create a variant dict:
+                variant_dict =  get_variant_dict(
+                    variant_line = variant_line,
+                    header_line = header_line
+                )
+                #Crreate a info dict:
+                info_dict = get_info_dict(
+                    info_line = variant_dict['INFO']
+                )
+                #Check if vep annotation:
+                vep_string = info_dict.get('CSQ')
+
+                if vep_string:
+                    #Get the vep annotations
+                    vep_info = get_vep_info(
+                        vep_string = vep_string,
+                        vep_header = vep_header
                     )
-                    #Crreate a info dict:
-                    info_dict = get_info_dict(
-                        info_line = variant_dict['INFO']
+
+                variant = Variant(
+                    **{column: variant_dict.get(column, '.')
+                        for column in variant_columns}
                     )
-                    #Check if vep annotation:
-                    vep_string = info_dict.get('CSQ')
 
-                    if vep_string:
-                        #Get the vep annotations
-                        vep_info = get_vep_info(
-                            vep_string = vep_string,
-                            vep_header = vep_header
-                        )
+                logger.debug("Creating a variant object of variant {0}".format(
+                    variant.get('variant_id')))
 
-                    variant = Variant(
-                        **{column: variant_dict.get(column, '.')
-                            for column in variant_columns}
-                        )
+                variant['index'] = index
+                logger.debug("Updating index to: {0}".format(
+                    index))
 
-                    logger.debug("Creating a variant object of variant {0}".format(
-                        variant.get('variant_id')))
-
-                    variant['index'] = index
-                    logger.debug("Updating index to: {0}".format(
-                        index))
-
-                    variant['start'] = int(variant_dict['POS'])
-                    
-                    
-                    if self.mode == 'sv':
-                        other_chrom = variant['CHROM']
-                        # If we have a translocation:
-                        if ':' in variant_dict['ALT']:
-                            other_coordinates = variant_dict['ALT'].strip('ACGTN[]').split(':')
-                            other_chrom = other_coordinates[0].lstrip('chrCHR')
-                            other_position = other_coordinates[1]
-                            variant['stop'] = other_position
-                            
-                            #Set 'infinity' to length if translocation
-                            variant['sv_len'] = float('inf')
-                        else:
-                            variant['stop'] = int(info_dict.get('END', variant_dict['POS']))
-                            variant['sv_len'] = variant['stop'] - variant['start']
+                variant['start'] = int(variant_dict['POS'])
+                
+                
+                if self.mode == 'sv':
+                    other_chrom = variant['CHROM']
+                    # If we have a translocation:
+                    if ':' in variant_dict['ALT']:
+                        other_coordinates = variant_dict['ALT'].strip('ACGTN[]').split(':')
+                        other_chrom = other_coordinates[0].lstrip('chrCHR')
+                        other_position = other_coordinates[1]
+                        variant['stop'] = other_position
                         
-                        variant['stop_chrom'] = other_chrom
-                        
+                        #Set 'infinity' to length if translocation
+                        variant['sv_len'] = float('inf')
                     else:
-                        variant['stop'] = int(variant_dict['POS']) + \
-                            (len(variant_dict['REF']) - len(variant_dict['ALT']))
+                        variant['stop'] = int(info_dict.get('END', variant_dict['POS']))
+                        variant['sv_len'] = variant['stop'] - variant['start']
                     
-                    variant['sv_type'] = info_dict.get('SVTYPE')
-                    variant['cytoband_start'] = get_cytoband_coord(
-                                                    chrom=variant['CHROM'], 
-                                                    pos=variant['start'])
-                    if variant.get('stop_chrom'):
-                        variant['cytoband_stop'] = get_cytoband_coord(
-                                                    chrom=variant['stop_chrom'], 
-                                                    pos=variant['stop'])
+                    variant['stop_chrom'] = other_chrom
                     
-                    # It would be easy to update these keys...
-                    thousand_g = info_dict.get('1000GAF')
-                    if thousand_g:
-                        logger.debug("Updating thousand_g to: {0}".format(
-                            thousand_g))
-                        variant['thousand_g'] = float(thousand_g)
-                        variant.add_frequency('1000GAF', variant.get('thousand_g'))
-                    
-                    #SV specific tag for number of occurances
-                    occurances = info_dict.get('OCC')
-                    if occurances:
-                        logger.debug("Updating occurances to: {0}".format(
-                            occurances))
-                        variant['occurances'] = float(occurances)
-                        variant.add_frequency('OCC', occurances)
+                else:
+                    variant['stop'] = int(variant_dict['POS']) + \
+                        (len(variant_dict['REF']) - len(variant_dict['ALT']))
+                
+                variant['sv_type'] = info_dict.get('SVTYPE')
+                variant['cytoband_start'] = get_cytoband_coord(
+                                                chrom=variant['CHROM'], 
+                                                pos=variant['start'])
+                if variant.get('stop_chrom'):
+                    variant['cytoband_stop'] = get_cytoband_coord(
+                                                chrom=variant['stop_chrom'], 
+                                                pos=variant['stop'])
+                
+                # It would be easy to update these keys...
+                thousand_g = info_dict.get('1000GAF')
+                if thousand_g:
+                    logger.debug("Updating thousand_g to: {0}".format(
+                        thousand_g))
+                    variant['thousand_g'] = float(thousand_g)
+                    variant.add_frequency('1000GAF', variant.get('thousand_g'))
+                
+                #SV specific tag for number of occurances
+                occurances = info_dict.get('OCC')
+                if occurances:
+                    logger.debug("Updating occurances to: {0}".format(
+                        occurances))
+                    variant['occurances'] = float(occurances)
+                    variant.add_frequency('OCC', occurances)
 
-                    cadd_score = info_dict.get('CADD')
-                    if cadd_score:
-                        logger.debug("Updating cadd_score to: {0}".format(
-                            cadd_score))
-                        variant['cadd_score'] = float(cadd_score)
+                cadd_score = info_dict.get('CADD')
+                if cadd_score:
+                    logger.debug("Updating cadd_score to: {0}".format(
+                        cadd_score))
+                    variant['cadd_score'] = float(cadd_score)
 
-                    rank_score_entry = info_dict.get('RankScore')
-                    if rank_score_entry:
-                        for family_annotation in rank_score_entry.split(','):
-                            rank_score = family_annotation.split(':')[-1]
-                        logger.debug("Updating rank_score to: {0}".format(
-                            rank_score))
-                        variant['rank_score'] = float(rank_score)
+                rank_score_entry = info_dict.get('RankScore')
+                if rank_score_entry:
+                    for family_annotation in rank_score_entry.split(','):
+                        rank_score = family_annotation.split(':')[-1]
+                    logger.debug("Updating rank_score to: {0}".format(
+                        rank_score))
+                    variant['rank_score'] = float(rank_score)
 
-                    genetic_models_entry = info_dict.get('GeneticModels')
-                    if genetic_models_entry:
-                        genetic_models = []
-                        for family_annotation in genetic_models_entry.split(','):
-                            for genetic_model in family_annotation.split(':')[-1].split('|'):
-                                genetic_models.append(genetic_model)
-                        logger.debug("Updating rank_score to: {0}".format(
-                            rank_score))
-                        variant['genetic_models'] = genetic_models
+                genetic_models_entry = info_dict.get('GeneticModels')
+                if genetic_models_entry:
+                    genetic_models = []
+                    for family_annotation in genetic_models_entry.split(','):
+                        for genetic_model in family_annotation.split(':')[-1].split('|'):
+                            genetic_models.append(genetic_model)
+                    logger.debug("Updating rank_score to: {0}".format(
+                        rank_score))
+                    variant['genetic_models'] = genetic_models
 
-                    #Add genotype calls:
-                    if individuals:
-                        for individual in individuals:
-                            sample_id = individual['ind_id']
-                            
-                            raw_call = dict(zip(
-                                variant_dict['FORMAT'].split(':'),
-                                variant_dict[sample_id].split(':'))
-                            )
-                            variant.add_individual(Genotype(
-                                sample_id = sample_id,
-                                genotype = raw_call.get('GT', './.'),
-                                case_id = individual.get('case_id'),
-                                phenotype = individual.get('phenotype'),
-                                ref_depth = raw_call.get('AD', ',').split(',')[0],
-                                alt_depth = raw_call.get('AD', ',').split(',')[1],
-                                genotype_quality = raw_call.get('GQ', '.'),
-                                depth = raw_call.get('DP', '.'),
-                                supporting_evidence = raw_call.get('SU', '0'),
-                                pe_support = raw_call.get('PE', '0'),
-                                sr_support = raw_call.get('SR', '0'),
-                            ))
+                #Add genotype calls:
+                if individuals:
+                    for individual in individuals:
+                        sample_id = individual['ind_id']
+                        
+                        raw_call = dict(zip(
+                            variant_dict['FORMAT'].split(':'),
+                            variant_dict[sample_id].split(':'))
+                        )
+                        variant.add_individual(Genotype(
+                            sample_id = sample_id,
+                            genotype = raw_call.get('GT', './.'),
+                            case_id = individual.get('case_id'),
+                            phenotype = individual.get('phenotype'),
+                            ref_depth = raw_call.get('AD', ',').split(',')[0],
+                            alt_depth = raw_call.get('AD', ',').split(',')[1],
+                            genotype_quality = raw_call.get('GQ', '.'),
+                            depth = raw_call.get('DP', '.'),
+                            supporting_evidence = raw_call.get('SU', '0'),
+                            pe_support = raw_call.get('PE', '0'),
+                            sr_support = raw_call.get('SR', '0'),
+                        ))
 
-                    # Add transcript information:
-                    if vep_string:
-                        for transcript in self._get_transcripts(variant, vep_info):
-                            variant.add_transcript(transcript)
+                # Add transcript information:
+                if vep_string:
+                    for transcript in self._get_transcripts(variant, vep_info):
+                        variant.add_transcript(transcript)
 
-                    variant['most_severe_consequence'] = get_most_severe_consequence(
-                        variant['transcripts']
-                    )
-                    for gene in self._get_genes(variant):
-                        variant.add_gene(gene)
+                variant['most_severe_consequence'] = get_most_severe_consequence(
+                    variant['transcripts']
+                )
+                for gene in self._get_genes(variant):
+                    variant.add_gene(gene)
 
-                    self._add_compounds(variant=variant, info_dict=info_dict)
+                self._add_compounds(variant=variant, info_dict=info_dict)
 
-                    yield variant
+                yield variant
 

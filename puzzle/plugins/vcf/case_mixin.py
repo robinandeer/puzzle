@@ -1,10 +1,8 @@
 import os
 import logging
 
-from path import path
-
 from ped_parser import FamilyParser
-from vcftoolbox import HeaderParser
+from vcftoolbox import HeaderParser,get_vcf_handle
 
 from puzzle.models import (Case, Individual)
 
@@ -14,113 +12,21 @@ logger = logging.getLogger(__name__)
 class CaseMixin(object):
     """Class to store methods that deal with Cases in vcf plugin"""
 
-    def _insert_case(self, case, pedigree=None):
-        """Insert a case into the puzzle database
-        
-            Args:
-                case(Case)
-        """
-        case_table = self.puzzle_db['cases']
-        logger.info("Inserting case {0} into databse".format(case['case_id']))
-        if self.case(case_id=case['case_id']):
-            logger.warning("Case already inserted!")
-            logger.info("Deleting old case")
-            self._delete_case(case_id=case['case_id'])
-        
-        case_table.insert(dict(
-            case_id=case['case_id'],
-            name=case['name'],
-            variant_source=case['variant_source'],
-            pedigree=pedigree
-            )
-        )
-        logger.debug("Case inserted")
-        return
-
-    def _delete_case(self, case_id):
-        """Delete a case and the individuals from database"""
-        if not self.puzzle_db:
-            logger.error("Need to be connected to database!")
-            return
-        
-        case_table = self.puzzle_db['cases']
-        individual_table = self.puzzle_db['individuals']
-        logger.info("Deleting case {0} from database".format(case_id))
-        case_table.delete(case_id=case_id)
-        
-        logger.info("Deleting individuals in case {0} from database".format(
-                    case_id))
-        individual_table.delete(case_id=case_id)
-        return
-
-    def _insert_individual(self, individual):
-        """Insert a case into the puzzle database
-        
-            Args:
-                case(Case)
-        """
-        individual_table = self.puzzle_db['individuals']
-        logger.info("Inserting individual {0} into databse".format(
-            individual['ind_id']))
-        
-        individual_table.insert(dict(
-            ind_id=individual['ind_id'],
-            case_id=individual['case_id'],
-            mother=individual['mother'],
-            father=individual['father'],
-            sex=individual['sex'],
-            phenotype=individual['phenotype'],
-            variant_source=individual['variant_source'],
-            bam_path=individual['bam_path']
-            )
-        )
-        logger.debug("Individual inserted")
-    
-    def load_case(self, case_lines, variant_source, case_type, bam_paths,
-                    pedigree=None):
-        """Load a case to the case database
-        
-            Args:
-                lines (iterable(str)): iterable with individuals
-                variant_soure (str): Path to vcf
-                family_type (str): The family type
-                bam_paths (dict): Dictionary with case_id as key and bam 
-                                  path as value
-        
-        """
-        if not self.puzzle_db:
-            logger.error("Connect to database before loading case!")
-            ##TODO raise proper exception
-            raise SyntaxError
-        
-        case = self._get_case(
-            variant_source=variant_source,
-            case_lines=case_lines,
-            case_type=case_type,
-            bam_paths=bam_paths
-        )
-        
-        self._insert_case(case, pedigree)
-        
-        for individual in case['individuals']:
-            self._insert_individual(individual)
-    
-    
-    def _get_case(self, variant_source, case_lines = None, case_type='ped',
-                    bam_paths={}):
+    def _get_case(self, variant_source, case_lines = None, case_type='ped'):
         """Create a cases and populate it with individuals
-        
+            
             Args:
-                vcfs (str): Path to vcf files
+                variant_source (str): Path to vcf files
+                case_lines (Iterable): Ped like lines
+                case_type (str): Format of case lines
             
             Returns:
                 case_objs (list): List with Case objects
         """
         individuals = self._get_individuals(
-            variant_source=variant_source,
+            vcf=variant_source,
             case_lines=case_lines,
             case_type=case_type,
-            bam_paths=bam_paths
         )
         
         if case_lines:
@@ -134,7 +40,7 @@ class CaseMixin(object):
         else:
             case_id = os.path.basename(variant_source)
         
-        case = self._get_case_object(
+        case = Case(
                     case_id=case_id,
                     variant_source=variant_source,
                     name=case_id
@@ -145,25 +51,27 @@ class CaseMixin(object):
         
         for individual in individuals:
             case.add_individual(individual)
-
-        return case
         
-    def _get_individuals(self, variant_source, case_lines=None, case_type='ped',
-                            bam_paths={}):
-        """Get the individuals from a vcf file
+        return case
+
+    def _get_individuals(self, vcf=None, case_lines=None, case_type='ped'):
+        """Get the individuals from a vcf file, and/or a ped file.
         
             Args:
                 vcf (str): Path to a vcf
+                case_lines(Iterable): Ped like lines
+                case_type(str): Format of ped lines 
             
             Returns:
                 individuals (generator): generator with Individuals
         """
         individuals = []
+        
         if case_lines:
             #Read individuals from ped file
             family_parser = FamilyParser(case_lines, family_type=case_type)
             families = family_parser.families
-            logger.info("Found families".format(
+            logger.info("Found families {0}".format(
                             ','.join(list(families.keys()))))
             if len(families) != 1:
                 logger.error("Only one family can be used with vcf adapter")
@@ -174,91 +82,53 @@ class CaseMixin(object):
         
             for ind_id in family_parser.individuals:
                 ind = family_parser.individuals[ind_id]
-                logger.info("Found individual {0}".format(
-                    ind.individual_id))
-            
-                individuals.append(self._get_individual_object(
+                logger.info("Found individual {0}".format(ind.individual_id))
+                
+                individual = Individual(
                     ind_id=ind.individual_id,
                     case_id=case_id,
                     mother=ind.mother,
                     father=ind.father, 
                     sex=str(ind.sex), 
                     phenotype=str(ind.phenotype), 
-                    bam_path=bam_paths.get(ind.individual_id)
-                    )
+                    
                 )
-                
-        else:
+                individuals.append(individual)
+                self.individuals.append(individual)
+        elif vcf:
             #Read individuals from vcf file
+            case_id = os.path.basename(vcf)
             head = HeaderParser()
-            with open(variant_source, 'r') as vcf_file:
-                for line in vcf_file:
-                    line = line.rstrip()
-                    if line.startswith('#'):
-                        if line.startswith('##'):
-                            head.parse_meta_data(line)
-                        else:
-                            head.parse_header_line(line)
+            handle = get_vcf_handle(infile=vcf)
+            for line in handle:
+                line = line.rstrip()
+                if line.startswith('#'):
+                    if line.startswith('##'):
+                        head.parse_meta_data(line)
                     else:
-                        break
-        
+                        head.parse_header_line(line)
+                else:
+                    break
+
             for index, ind in enumerate(head.individuals):
-                individuals.append(self._get_individual_object(
+                #If we only have a vcf file we can not get metadata about the
+                # individuals
+                individual = Individual(
                     ind_id=ind,
-                    case_id=os.path.basename(variant_source),
-                    bam_path=bam_paths.get(ind)
-                    )
+                    case_id=case_id,
                 )
+                individuals.append(individual)
+                self.individuals.append(individual)
                 
                 logger.debug("Found individual {0} in {1}".format(
-                    ind, variant_source))
+                    ind, vcf))
         
         return individuals
 
-    def _find_vcfs(self, pattern='*.vcf'):
-        """Walk subdirectories and return VCF files."""
-        return path(self.root_path).walkfiles(pattern)
-    
     def cases(self, pattern=None):
-        """Return all VCF file paths."""
-        pattern = pattern or self.pattern
-        case_objs = []
-        if self.puzzle_db:
-            result = []
-            for case in self.puzzle_db['cases'].all():
-                case_obj = self._get_case_object(
-                    case_id=case['case_id'], 
-                    variant_source=case['variant_source'], 
-                    name=case['name']
-                )
-                logger.info("Fetching individuals from puzzle database")
-                individuals = self.puzzle_db['individuals'].find(case_id=case['case_id'])
-                for individual in individuals:
-                    case_obj.add_individual(self._get_individual_object(
-                        ind_id=individual['ind_id'], 
-                        case_id=individual['case_id'], 
-                        mother=individual['mother'], 
-                        father=individual['father'], 
-                        sex=individual['sex'], 
-                        phenotype=individual['phenotype'], 
-                        index=individual['ind_index'], 
-                        bam_path=individual['bam_path']
-                    ))
-                case_objs.append(case_obj)
-
-        elif self.case_obj:
-            case_objs = [self.case_obj]
+        """Cases found for the adapter."""
         
-        else:
-            # if pointing to a single file
-            if os.path.isfile(self.root_path):
-                vcfs = [path(self.root_path)]
-            else:
-                vcfs = self._find_vcfs(pattern)
-        
-            case_objs = (self._get_case(vcf) for vcf in vcfs)
-        print(case_objs)
-        return case_objs
+        return self.case_objs
 
     def case(self, case_id=None):
         """Return a Case object
@@ -271,15 +141,13 @@ class CaseMixin(object):
             Returns:
                 A Case object
         """
-        cases = self.cases()
-
         if case_id:
-            for case in cases:
+            for case in self.case_objs:
                 if case['case_id'] == case_id:
                     return case
         else:
             if cases:
-                return list(cases)[0]
+                return list(self.case_objs)[0]
 
         return Case(case_id='unknown')
         
