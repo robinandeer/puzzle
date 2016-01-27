@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
-import sys
 import os
 import logging
-import yaml
 
 import click
-
-from codecs import open
 
 import puzzle
 from .factory import create_app
@@ -16,11 +12,9 @@ try:
 except ImportError:
     pass
 
-from sqlite3 import (OperationalError, DatabaseError)
+from sqlite3 import DatabaseError
 from .settings import BaseConfig
-from puzzle import resource_package
 from puzzle.plugins import SqlStore, VcfPlugin
-from .utils import init_db
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +35,7 @@ logger = logging.getLogger(__name__)
     default=2
 )
 @click.option('--root', '-r',
-    type=click.Path(exists=True),
+    type=click.Path(),
     help="Path to where to find variant source(s)"
 )
 @click.pass_context
@@ -53,21 +47,21 @@ def cli(ctx, plugin, verbose, mode, root):
 
     # launch the command line interface
     logger.debug('Booting up command line interface')
-    
+
     if root is None:
         root = os.path.join(os.environ['HOME'], '.puzzle')
-        # if not os.path.exists(db_path):
-        #     logger.error("Please set up a database with puzzle init or point"\
-        #                   " to file(s) with '--root'")
-        # ctx.abort()
-    db_path = os.path.join(root, 'puzzle_db.sqlite3')
-    
-    logger.info("Root directory is: {}".format(root))
-    ctx.root = root
-    # ctx.obj['db_path'] = db_path
 
-    ctx.mode = mode
-    ctx.type = plugin
+    if os.path.isfile(root):
+        logger.error("'root' can't be a file")
+        ctx.abort()
+
+    logger.info("Root directory is: {}".format(root))
+    ctx.obj = {
+        'root': root,
+        'db_path': os.path.join(root, 'puzzle_db.sqlite3'),
+        'mode': mode,
+        'plugin': plugin
+    }
 
 
 @cli.command()
@@ -88,18 +82,17 @@ def init(ctx):
         GEMINI:
             A sqlite database will be built in the home directory of the user
     """
-    puzzle_dir = ctx.parent.root
+    puzzle_dir = ctx.obj['root']
     if os.path.exists(puzzle_dir):
         logger.debug("Found puzzle directory: {0}".format(puzzle_dir))
     else:
-        logger.info("Creating directory {0}".format(puzzle_dir))
+        logger.info("Create directory: {0}".format(puzzle_dir))
         os.makedirs(puzzle_dir)
-        logger.debug("Directory {0} created".format(puzzle_dir))
+        logger.debug('Directory created')
 
-    logger.debug('Connecting to database and creating tables')
+    logger.debug('Connect to database and create tables')
     store = SqlStore(ctx.obj['db_path'])
     store.set_up()
-
 
 
 @cli.command()
@@ -111,7 +104,7 @@ def init(ctx):
                 default='ped',
                 help='If the analysis use one of the known setups, please specify which one.'
 )
-@click.option('-i', '--variant-source', 
+@click.option('-i', '--variant-source',
     type=click.Path(exists=True),
     required=True
 )
@@ -127,12 +120,12 @@ def load(ctx, variant_source, family_file, family_type):
     if not os.path.exists(db_path):
         logger.warn("database not initialized, run 'puzzle init'")
         ctx.abort()
-    
+
     logger.debug('Set puzzle backend to {0}'.format(ctx.parent.type))
     plugin = ctx.parent.type
     logger.debug('Set puzzle mode to {0}'.format(ctx.parent.mode))
     mode = ctx.parent.mode
-    
+
     if plugin == 'vcf':
         logger.info("Initialzing VCF plugin")
         if not family_file:
@@ -140,10 +133,10 @@ def load(ctx, variant_source, family_file, family_type):
             ctx.abort()
         try:
             plugin = VcfPlugin(
-                root_path=variant_source, 
-                case_lines=family_file, 
-                case_type=family_type, 
-                pattern=pattern, 
+                root_path=variant_source,
+                case_lines=family_file,
+                case_type=family_type,
+                pattern=pattern,
                 mode=mode
             )
         except SyntaxError as e:
@@ -161,7 +154,7 @@ def load(ctx, variant_source, family_file, family_type):
             logger.error("{0} is not a valid gemini db".format(variant_source))
             logger.info("variant-source has to point to a gemini databse")
             ctx.abort()
-    
+
     logger.debug("Plugin setup was succesfull")
     # from gemini can create multiple cases
     store = SqlStore(db_path)
@@ -177,63 +170,6 @@ def load(ctx, variant_source, family_file, family_type):
         case_type=ctx.parent.family_type,
         bam_paths=ctx.parent.bam_paths,
     )
-
-@cli.command()
-@click.version_option(puzzle.__version__)
-@click.pass_context
-def init(ctx):
-    """Initialize a database that store metadata
-
-        Check if "root" dir exists, otherwise create the directory and
-        build the database. If a database already exists, do nothing.
-
-        The behaviour will be different with different plugins. A config file
-        in YAML format will be created in puzzle/configs with information about
-        the database.
-
-        VCF:
-            A sqlite database will be built in the home directory of the user
-        GEMINI:
-            A sqlite database will be built in the home directory of the user
-    """
-    puzzle_dir = ctx.parent.root
-    if os.path.exists(puzzle_dir):
-        logger.debug("Found puzzle directory: {0}".format(puzzle_dir))
-    else:
-        logger.info("Creating directory {0}".format(puzzle_dir))
-        os.makedirs(puzzle_dir)
-        logger.debug("Directory {0} created".format(puzzle_dir))
-
-    logger.debug('Connecting to database and creating tables')
-    store = SqlStore(ctx.obj['db_path'])
-    store.set_up()
-
-    # plugin_type = ctx.parent.type
-    # logger.info("Plugin type: {0}".format(plugin_type))
-    # if plugin_type in ['vcf', 'gemini']:
-    #     db_location = str(os.path.join(db_location, '.puzzle.db'))
-    #     config_path = os.path.join('configs', 'sqlite_config.ini')
-    #     config_file = os.path.join(resource_package, config_path)
-    #
-    #     logger.info("Path to database: {0}".format(db_location))
-    #     logger.info("Path to config: {0}".format(config_file))
-    #
-    #     if not os.path.exists(db_location):
-    #         init_db(db_location)
-    #         logger.info("Database created")
-    #         ##TODO add username, password etc
-    #         configs = {
-    #             'dialect': 'sqlite',
-    #             'db_name': db_location,
-    #         }
-    #
-    #         stream = open(config_file, 'w')
-    #         logger.info("Write config file for database to {0}".format(
-    #             config_file))
-    #         yaml.dump(configs, stream)
-    #         logger.debug("Config written")
-    #     else:
-    #         logger.warning("Database already exists!")
 
 
 @cli.command()
@@ -271,19 +207,19 @@ def load(ctx, variant_source, family_file):
 
 
 @cli.command()
-@click.option('--host', 
+@click.option('--host',
     default='0.0.0.0'
 )
-@click.option('--port', 
+@click.option('--port',
     default=5000
 )
-@click.option('--debug', 
+@click.option('--debug',
     is_flag=True
 )
-@click.option('-p', '--pattern', 
+@click.option('-p', '--pattern',
     default='*.vcf'
 )
-@click.option('-f', '--family_file', 
+@click.option('-f', '--family_file',
     type=click.File('r')
 )
 @click.option('-t' ,'--family_type',
@@ -291,13 +227,13 @@ def load(ctx, variant_source, family_file):
                 default='ped',
                 help='If the analysis use one of the known setups, please specify which one.'
 )
-@click.option('-i', '--variant-source', 
+@click.option('-i', '--variant-source',
     type=click.Path(exists=True),
     required=True
 )
 @click.version_option(puzzle.__version__)
 @click.pass_context
-def view(ctx, host, port, debug, pattern, family_file, family_type, 
+def view(ctx, host, port, debug, pattern, family_file, family_type,
 variant_source):
     """Visualize DNA variant resources.
 
@@ -308,15 +244,15 @@ variant_source):
     plugin = ctx.parent.type
     logger.debug('Set puzzle mode to {0}'.format(ctx.parent.mode))
     mode = ctx.parent.mode
-    
+
     if plugin == 'vcf':
         logger.info("Initialzing VCF plugin")
         try:
             plugin = VcfPlugin(
-                root_path=variant_source, 
-                case_lines=family_file, 
-                case_type=family_type, 
-                pattern=pattern, 
+                root_path=variant_source,
+                case_lines=family_file,
+                case_type=family_type,
+                pattern=pattern,
                 mode=mode
             )
         except SyntaxError as e:
@@ -334,11 +270,11 @@ variant_source):
             logger.error("{0} is not a valid gemini db".format(variant_source))
             logger.info("variant-source has to point to a gemini databse")
             ctx.abort()
-    
+
     logger.debug("Plugin setup was succesfull")
-    
+
     BaseConfig.PUZZLE_BACKEND = plugin
-    
+
     app = create_app(config_obj=BaseConfig)
 
     app.run(host=host, port=port, debug=debug)
