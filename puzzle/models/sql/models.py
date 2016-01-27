@@ -13,7 +13,7 @@ BASE = declarative_base()
 class Case(BASE):
     """
     This is the class for storing cases in the database.
-    
+
     A case will be related to Individuals
     """
     __tablename__ = "case"
@@ -26,7 +26,7 @@ class Case(BASE):
     pedigree = Column(String) # For storing madeline info
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
-    
+
     def __repr__(self):
         return("<Case({self.id}, {self.case_id}, {self.name}, {self.id},"\
                 " {self.variant_source}, {self.variant_mode})>".format(self=self))
@@ -34,7 +34,7 @@ class Case(BASE):
 class Individual(BASE):
     """
     This is the class for storing individuals in the database.
-    
+
     A Individual belongs to a case
     """
     __tablename__ = "individual"

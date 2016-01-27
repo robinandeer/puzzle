@@ -60,7 +60,7 @@ def cli(ctx, plugin, verbose, mode, root):
         'root': root,
         'db_path': os.path.join(root, 'puzzle_db.sqlite3'),
         'mode': mode,
-        'plugin': plugin
+        'type': plugin
     }
 
 
@@ -111,10 +111,11 @@ def init(ctx):
 @click.version_option(puzzle.__version__)
 @click.pass_context
 def load(ctx, variant_source, family_file, family_type):
-    """Load a case into the database.
+    """
+    Load a case into the database.
 
-        This can be done with a config file or from command line.
-        If no database was found run puzzle init first.
+    This can be done with a config file or from command line.
+    If no database was found run puzzle init first.
     """
     db_path = ctx.obj['db_path']
     if not os.path.exists(db_path):
@@ -122,9 +123,9 @@ def load(ctx, variant_source, family_file, family_type):
         ctx.abort()
 
     logger.debug('Set puzzle backend to {0}'.format(ctx.parent.type))
-    plugin = ctx.parent.type
+    plugin = ctx.obj['type']
     logger.debug('Set puzzle mode to {0}'.format(ctx.parent.mode))
-    mode = ctx.parent.mode
+    mode = ctx.obj['mode']
 
     if plugin == 'vcf':
         logger.info("Initialzing VCF plugin")
@@ -136,7 +137,6 @@ def load(ctx, variant_source, family_file, family_type):
                 root_path=variant_source,
                 case_lines=family_file,
                 case_type=family_type,
-                pattern=pattern,
                 mode=mode
             )
         except SyntaxError as e:
@@ -144,7 +144,7 @@ def load(ctx, variant_source, family_file, family_type):
             ctx.abort()
 
     elif plugin == 'gemini':
-        logger.info("Initialzing GEMINI plugin")
+        logger.debug("Initialzing GEMINI plugin")
         try:
             plugin = GeminiPlugin(db=variant_source, mode=mode)
         except NameError:
@@ -152,7 +152,7 @@ def load(ctx, variant_source, family_file, family_type):
             ctx.abort()
         except DatabaseError as e:
             logger.error("{0} is not a valid gemini db".format(variant_source))
-            logger.info("variant-source has to point to a gemini databse")
+            logger.info("variant-source has to point to a gemini database")
             ctx.abort()
 
     logger.debug("Plugin setup was succesfull")
@@ -163,43 +163,8 @@ def load(ctx, variant_source, family_file, family_type):
         ctx.abort()
 
     # extract case information
-
     ctx.parent.plugin.load_case(
-        case_lines=case_lines,
-        variant_source=variant_source,
-        case_type=ctx.parent.family_type,
-        bam_paths=ctx.parent.bam_paths,
-    )
-
-
-@cli.command()
-@click.option('-i', '--variant-source', type=click.Path(exists=True),
-              required=True)
-@click.option('-f', '--family_file', type=click.File('r'))
-@click.version_option(puzzle.__version__)
-@click.pass_context
-def load(ctx, variant_source, family_file):
-    """Load a case into the database.
-
-        This can be done with a config file or from command line.
-        If no database was found run puzzle init first.
-    """
-    db_path = ctx.obj['db_path']
-    if not os.path.exists(db_path):
-        logger.warn("database not initialized, run 'puzzle init'")
-        ctx.abort()
-
-    # TODO: initialize the correct adapter
-    # from gemini can create multiple cases
-    store = SqlStore(db_path)
-    if ctx.parent.mode == 'vcf' and family_file is None:
-        logger.error("Please provide a family file")
-        ctx.abort()
-
-    # extract case information
-
-    ctx.parent.plugin.load_case(
-        case_lines=case_lines,
+        case_lines=family_file,
         variant_source=variant_source,
         case_type=ctx.parent.family_type,
         bam_paths=ctx.parent.bam_paths,
