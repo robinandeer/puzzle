@@ -106,9 +106,18 @@ def init(ctx):
 @click.option('-i', '--variant-source', type=click.Path(exists=True),
               required=True)
 @click.option('-f', '--family_file', type=click.File('r'))
+@click.option('-t' ,'--family_type',
+                type=click.Choice(['ped', 'alt']),
+                default='ped',
+                help='If the analysis use one of the known setups, please specify which one.'
+)
+@click.option('-i', '--variant-source', 
+    type=click.Path(exists=True),
+    required=True
+)
 @click.version_option(puzzle.__version__)
 @click.pass_context
-def load(ctx, variant_source, family_file):
+def load(ctx, variant_source, family_file, family_type):
     """Load a case into the database.
 
         This can be done with a config file or from command line.
@@ -118,8 +127,42 @@ def load(ctx, variant_source, family_file):
     if not os.path.exists(db_path):
         logger.warn("database not initialized, run 'puzzle init'")
         ctx.abort()
+    
+    logger.debug('Set puzzle backend to {0}'.format(ctx.parent.type))
+    plugin = ctx.parent.type
+    logger.debug('Set puzzle mode to {0}'.format(ctx.parent.mode))
+    mode = ctx.parent.mode
+    
+    if plugin == 'vcf':
+        logger.info("Initialzing VCF plugin")
+        if not family_file:
+            logger.error("Please provide a ped like file")
+            ctx.abort()
+        try:
+            plugin = VcfPlugin(
+                root_path=variant_source, 
+                case_lines=family_file, 
+                case_type=family_type, 
+                pattern=pattern, 
+                mode=mode
+            )
+        except SyntaxError as e:
+            logger.error(e.message)
+            ctx.abort()
 
-    # TODO: initialize the correct adapter
+    elif plugin == 'gemini':
+        logger.info("Initialzing GEMINI plugin")
+        try:
+            plugin = GeminiPlugin(db=variant_source, mode=mode)
+        except NameError:
+            logger.error("Need to have gemini installed to use gemini plugin")
+            ctx.abort()
+        except DatabaseError as e:
+            logger.error("{0} is not a valid gemini db".format(variant_source))
+            logger.info("variant-source has to point to a gemini databse")
+            ctx.abort()
+    
+    logger.debug("Plugin setup was succesfull")
     # from gemini can create multiple cases
     store = SqlStore(db_path)
     if ctx.parent.mode == 'vcf' and family_file is None:
