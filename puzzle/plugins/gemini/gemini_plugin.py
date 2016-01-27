@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
 
+from gemini import GeminiQuery
+
 from puzzle.plugins import Plugin
 from puzzle.models import (Variant, Genotype, Gene, Transcript, Case, Individual)
 from puzzle.utils import (get_omim_number, get_ensembl_id, get_hgnc_symbols,
@@ -21,8 +23,16 @@ class GeminiPlugin(CaseMixin, VariantMixin, Plugin):
         logger.debug("Setting mode to {0}".format(mode))
         self.mode = mode
         
+        logger.info("Check if database if in correct format")
+        self.test_gemini_db()
+        
         self.individuals = self._get_individuals()
         self.case_objs = self._get_cases(self.individuals)
+    
+    def test_gemini_db(self):
+        """Check if self.db is a valid gemini database"""
+        gq = GeminiQuery(self.db)
+        return
 
     def init_app(self, app):
         """Initialize plugin via Flask."""

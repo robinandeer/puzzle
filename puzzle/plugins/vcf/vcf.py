@@ -34,6 +34,8 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
         logger.debug("Updating root path to {0}".format(root_path))
         self.root_path = root_path
         
+        self.check_setup(case_lines)
+        
         self.mode = mode
         logger.info("Setting mode to {0}".format(self.mode))
         logger.debug("Updating pattern to {0}".format(pattern))
@@ -74,6 +76,21 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
             self.can_filter_consequence = True
             logger.debug("Setting can_filter_inheritance to 'True'")
             self.can_filter_inheritance = True
+    
+    def check_setup(self, case_lines):
+        """Make some small tests to see if setup is correct"""
+        valid_vcf_suffixes = ('.vcf', '.vcf.gz')
+        if self.root_path:
+            if case_lines:
+                # If family file we only allow one vcf file as input
+                if not os.path.isfile(self.root_path):
+                    raise SyntaxError("Variant source has to be a vcf file when"\
+                                     " running with family file")
+            if os.path.isfile(self.root_path):
+                if not self.root_path.endswith(valid_vcf_suffixes):
+                    raise SyntaxError("Vcf file has to end with with .vcf or .vcf.gz")
+        return
+        
     
     def _find_vcfs(self, pattern='*.vcf'):
         """Walk subdirectories and return VCF files.

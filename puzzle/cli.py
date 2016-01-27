@@ -16,7 +16,7 @@ try:
 except ImportError:
     pass
 
-from sqlite3 import OperationalError
+from sqlite3 import (OperationalError, DatabaseError)
 from .settings import BaseConfig
 from puzzle import resource_package
 from puzzle.plugins import SqlStore, VcfPlugin
@@ -175,47 +175,33 @@ variant_source):
     logger.debug('Set puzzle mode to {0}'.format(ctx.parent.mode))
     mode = ctx.parent.mode
     
-    valid_vcf_suffixes = ('.vcf', '.vcf.gz')
     if plugin == 'vcf':
-        #If root is a file we need to check that it has the correct ending
-        if variant_source:
-            if family_file:
-                # If family file we only allow one vcf file as input
-                if not os.path.isfile(variant_source):
-                    logger.error("root has to be a vcf file when running with family file")
-                    logger.info("Exiting")
-                    ctx.abort()
-
-            if os.path.isfile(variant_source):
-                if not root.endswith(valid_vcf_suffixes):
-                    logger.error("Vcf file has to end with with .vcf or .vcf.gz")
-                    logger.info("Please check vcf file {0} or use other"\
-                                " plugin".format(variant_source))
-                    logger.info("Exiting")
-                    ctx.abort()
-
-            logger.info("Initialzing VCF plugin")
-        plugin = VcfPlugin(root_path=variant_source, case_lines=family_file, 
-                                case_type=family_type, pattern=pattern, mode=mode)
+        logger.info("Initialzing VCF plugin")
+        try:
+            plugin = VcfPlugin(
+                root_path=variant_source, 
+                case_lines=family_file, 
+                case_type=family_type, 
+                pattern=pattern, 
+                mode=mode
+            )
+        except SyntaxError as e:
+            logger.error(e.message)
+            ctx.abort()
 
     elif plugin == 'gemini':
+        logger.info("Initialzing GEMINI plugin")
         try:
-            #First check if gemini is properly installed:
-            from gemini import GeminiQuery
-            #Then check if we are looking at a proper database
-            if variant_source:
-                try:
-                    gq = GeminiQuery(variant_source)
-                except OperationalError as e:
-                    logger.error("{0} is not a valid gemini db".format(variant_source))
-                    logger.info("root has to point to a gemini databse")
-                    ctx.abort()
-            
-            logger.info("Initialzing GEMINI plugin")
             plugin = GeminiPlugin(db=variant_source, mode=mode)
-        except ImportError:
+        except NameError:
             logger.error("Need to have gemini installed to use gemini plugin")
             ctx.abort()
+        except DatabaseError as e:
+            logger.error("{0} is not a valid gemini db".format(variant_source))
+            logger.info("variant-source has to point to a gemini databse")
+            ctx.abort()
+    
+    logger.debug("Plugin setup was succesfull")
     
     BaseConfig.PUZZLE_BACKEND = plugin
     
