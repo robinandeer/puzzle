@@ -122,9 +122,9 @@ def load(ctx, variant_source, family_file, family_type):
         logger.warn("database not initialized, run 'puzzle init'")
         ctx.abort()
 
-    logger.debug('Set puzzle backend to {0}'.format(ctx.parent.type))
+    logger.debug('Set puzzle backend to {0}'.format(ctx.obj['mode']))
     mode = ctx.obj['mode']
-    logger.debug('Set puzzle mode to {0}'.format(ctx.parent.mode))
+    logger.debug('Set puzzle mode to {0}'.format(ctx.obj['variant_type']))
     variant_type = ctx.obj['variant_type']
 
     if mode == 'vcf':
@@ -161,6 +161,7 @@ def load(ctx, variant_source, family_file, family_type):
 
     for case_obj in plugin.cases():
         # extract case information
+        logger.debug("adding case: {}".format(case_obj['case_id']))
         store.add_case(case_obj, vtype=variant_type, mode=mode)
 
 
@@ -185,25 +186,29 @@ def load(ctx, variant_source, family_file, family_type):
                 default='ped',
                 help='If the analysis use one of the known setups, please specify which one.'
 )
-@click.option('-i', '--variant-source',
-    type=click.Path(exists=True),
-    required=True
-)
+@click.option('-i', '--variant-source', type=click.Path(exists=True))
 @click.version_option(puzzle.__version__)
 @click.pass_context
 def view(ctx, host, port, debug, pattern, family_file, family_type,
-variant_source):
+         variant_source):
     """Visualize DNA variant resources.
 
     1. Look for variant source(s) to visualize and inst. the right plugin
     2.
     """
-    logger.debug('Set puzzle backend to {0}'.format(ctx.parent.type))
-    plugin = ctx.parent.type
-    logger.debug('Set puzzle mode to {0}'.format(ctx.parent.mode))
-    mode = ctx.parent.mode
+    logger.debug('Set puzzle backend to {0}'.format(ctx.obj['mode']))
+    mode = ctx.obj['mode']
+    logger.debug('Set puzzle mode to {0}'.format(ctx.obj['variant_type']))
+    variant_type = ctx.obj['variant_type']
 
-    if plugin == 'vcf':
+    if variant_source is None:
+        if not os.path.exists(ctx.obj['db_path']):
+            logger.warn("database not initialized, run 'puzzle init'")
+            ctx.abort()
+
+        plugin = SqlStore(ctx.obj['db_path'])
+
+    elif mode == 'vcf':
         logger.info("Initialzing VCF plugin")
         try:
             plugin = VcfPlugin(
@@ -211,16 +216,16 @@ variant_source):
                 case_lines=family_file,
                 case_type=family_type,
                 pattern=pattern,
-                mode=mode
+                vtype=variant_type
             )
         except SyntaxError as e:
             logger.error(e.message)
             ctx.abort()
 
-    elif plugin == 'gemini':
+    elif mode == 'gemini':
         logger.info("Initialzing GEMINI plugin")
         try:
-            plugin = GeminiPlugin(db=variant_source, mode=mode)
+            plugin = GeminiPlugin(db=variant_source, vtype=variant_type)
         except NameError:
             logger.error("Need to have gemini installed to use gemini plugin")
             ctx.abort()
