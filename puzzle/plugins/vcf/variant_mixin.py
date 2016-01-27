@@ -57,7 +57,7 @@ class VariantMixin(object):
 
         if filters.get('gene_list'):
             gene_list = set([gene_id.strip() for gene_id in filters['gene_list']])
-            
+
             filtered_variants = (variant for variant in filtered_variants
                                  if (set(gene['symbol'] for gene in variant['genes'])
                                      .intersection(gene_list)))
@@ -71,7 +71,7 @@ class VariantMixin(object):
             cadd_score = float(filters['cadd'])
             filtered_variants = (variant for variant in filtered_variants
                                  if variant['max_freq'] <= cadd_score)
-        
+
         if filters.get('consequence'):
             consequences = set(filters['consequence'])
             cons_variants = []
@@ -80,14 +80,14 @@ class VariantMixin(object):
                     if transcript['Consequence'] in consequences:
                         cons_variants.append(variant)
                         break
-            
+
             filtered_variants = cons_variants
-        
+
         if filters.get('genetic_models'):
             genetic_models = set(filters['genetic_models'])
             filtered_variants = (variant for variant in filtered_variants
             if set(variant.get('genetic_models',[])).intersection(genetic_models))
-        
+
         if filters.get('sv_types'):
             sv_types = set(filters['sv_types'])
             filtered_variants = (variant for variant in filtered_variants
@@ -105,8 +105,8 @@ class VariantMixin(object):
                 else:
                     break
 
-    
-    
+
+
     def _add_compounds(self, variant, info_dict):
         """Check if there are any compounds and add them to the variant
 
@@ -140,7 +140,7 @@ class VariantMixin(object):
             Returns:
                 genes (list): A list of Genes
         """
-        genes = get_gene_info(variant['transcripts'])        
+        genes = get_gene_info(variant['transcripts'])
         return genes
 
     def _get_transcripts(self, variant, vep_info):
@@ -182,13 +182,13 @@ class VariantMixin(object):
                     head.parse_header_line(line)
             else:
                 break
-        
+
         handle.close()
-        
+
         header_line = head.header
-        
+
         #Get the individual ids for individuals in vcf file
-        vcf_individuals = set([ind['ind_id'] for ind in 
+        vcf_individuals = set([ind['ind_id'] for ind in
                                 self._get_individuals(vcf=vcf_file_path)])
 
         variant_columns = ['CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER']
@@ -233,9 +233,9 @@ class VariantMixin(object):
                     index))
 
                 variant['start'] = int(variant_dict['POS'])
-                
-                
-                if self.mode == 'sv':
+
+
+                if self.variant_type == 'sv':
                     other_chrom = variant['CHROM']
                     # If we have a translocation:
                     if ':' in variant_dict['ALT']:
@@ -243,28 +243,28 @@ class VariantMixin(object):
                         other_chrom = other_coordinates[0].lstrip('chrCHR')
                         other_position = other_coordinates[1]
                         variant['stop'] = other_position
-                        
+
                         #Set 'infinity' to length if translocation
                         variant['sv_len'] = float('inf')
                     else:
                         variant['stop'] = int(info_dict.get('END', variant_dict['POS']))
                         variant['sv_len'] = variant['stop'] - variant['start']
-                    
+
                     variant['stop_chrom'] = other_chrom
-                    
+
                 else:
                     variant['stop'] = int(variant_dict['POS']) + \
                         (len(variant_dict['REF']) - len(variant_dict['ALT']))
-                
+
                 variant['sv_type'] = info_dict.get('SVTYPE')
                 variant['cytoband_start'] = get_cytoband_coord(
-                                                chrom=variant['CHROM'], 
+                                                chrom=variant['CHROM'],
                                                 pos=variant['start'])
                 if variant.get('stop_chrom'):
                     variant['cytoband_stop'] = get_cytoband_coord(
-                                                chrom=variant['stop_chrom'], 
+                                                chrom=variant['stop_chrom'],
                                                 pos=variant['stop'])
-                
+
                 # It would be easy to update these keys...
                 thousand_g = info_dict.get('1000GAF')
                 if thousand_g:
@@ -272,7 +272,7 @@ class VariantMixin(object):
                         thousand_g))
                     variant['thousand_g'] = float(thousand_g)
                     variant.add_frequency('1000GAF', variant.get('thousand_g'))
-                
+
                 #SV specific tag for number of occurances
                 occurances = info_dict.get('OCC')
                 if occurances:
@@ -308,9 +308,9 @@ class VariantMixin(object):
                 #Add genotype calls:
                 for individual in self.individuals:
                     sample_id = individual['ind_id']
-                    
+
                     if sample_id in vcf_individuals:
-                        
+
                         raw_call = dict(zip(
                             variant_dict['FORMAT'].split(':'),
                             variant_dict[sample_id].split(':'))

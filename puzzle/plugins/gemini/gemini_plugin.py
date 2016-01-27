@@ -16,19 +16,19 @@ logger = logging.getLogger(__name__)
 class GeminiPlugin(CaseMixin, VariantMixin, Plugin):
     """This is the base class for puzzle plugins"""
 
-    def __init__(self, db, mode='vcf'):
+    def __init__(self, db, vtype='vcf'):
         super(GeminiPlugin, self).__init__()
         logger.debug("Setting self.db to {0}".format(db))
         self.db = db
-        logger.debug("Setting mode to {0}".format(mode))
-        self.mode = mode
-        
+        logger.debug("Setting mode to {0}".format(vtype))
+        self.variant_type = vtype
+
         logger.info("Check if database if in correct format")
         self.test_gemini_db()
-        
+
         self.individuals = self._get_individuals()
         self.case_objs = self._get_cases(self.individuals)
-    
+
     def test_gemini_db(self):
         """Check if self.db is a valid gemini database"""
         gq = GeminiQuery(self.db)
@@ -36,7 +36,7 @@ class GeminiPlugin(CaseMixin, VariantMixin, Plugin):
 
     def init_app(self, app):
         """Initialize plugin via Flask."""
-        
+
         logger.debug("Setting can_filter_gene to 'True'")
         self.can_filter_gene = True
         # logger.debug("Setting can_filter_sv to 'True'")

@@ -15,7 +15,7 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
     """docstring for Plugin"""
 
     def __init__(self, root_path=None, case_lines=None,
-                 case_type=None, pattern='*.vcf', mode='snv'):
+                 case_type=None, pattern='*.vcf', vtype='snv'):
         """Initialize a vcf adapter.
 
             When instansiating all cases are found.
@@ -25,7 +25,7 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
                 case_lines(Iterable) : Lines with ped like information
                 case_type(str) : Format of pedigreeinformation
                 patter(str) : What pattern to search for in directory
-                mode(str) : 'snv' or 'sv'
+                vtype(str) : 'snv' or 'sv'
         """
         super(VcfPlugin, self).__init__()
 
@@ -36,13 +36,10 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
 
         self.check_setup(case_lines)
 
-        self.mode = mode
-        logger.info("Setting mode to {0}".format(self.mode))
+        self.variant_type = vtype
+        logger.info("Setting variant type to {0}".format(vtype))
         logger.debug("Updating pattern to {0}".format(pattern))
         self.pattern = pattern
-
-        self.mode = mode
-        logger.info("Using mode {0}".format(mode))
 
         if root_path:
             if os.path.isdir(root_path):
@@ -65,7 +62,7 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
 
         logger.debug("Setting can_filter_gene to 'True'")
         self.can_filter_gene = True
-        if self.mode == 'sv':
+        if self.variant_type == 'sv':
             logger.debug("Setting can_filter_sv to 'True'")
             self.can_filter_sv = True
             logger.debug("Setting can_filter_sv_len to 'True'")

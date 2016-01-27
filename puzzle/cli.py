@@ -20,11 +20,11 @@ logger = logging.getLogger(__name__)
 
 
 @click.group()
-@click.option('-p', '--plugin',
+@click.option('-m', '--mode',
     type=click.Choice(['vcf', 'gemini']),
     default='vcf'
 )
-@click.option('-m', '--mode',
+@click.option('-t', '--variant-type',
     type=click.Choice(['snv', 'sv']),
     default='snv',
     help="If Structural Variantion or Single Nucleotide variant mode should"\
@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
     help="Path to where to find variant source(s)"
 )
 @click.pass_context
-def cli(ctx, plugin, verbose, mode, root):
+def cli(ctx, verbose, mode, variant_type, root):
     """Puzzle: manage DNA variant resources."""
     # configure root logger to print to STDERR
     loglevel = LEVELS.get(min(verbose, 3))
@@ -60,7 +60,7 @@ def cli(ctx, plugin, verbose, mode, root):
         'root': root,
         'db_path': os.path.join(root, 'puzzle_db.sqlite3'),
         'mode': mode,
-        'type': plugin
+        'variant_type': variant_type
     }
 
 
@@ -123,11 +123,11 @@ def load(ctx, variant_source, family_file, family_type):
         ctx.abort()
 
     logger.debug('Set puzzle backend to {0}'.format(ctx.parent.type))
-    plugin = ctx.obj['type']
-    logger.debug('Set puzzle mode to {0}'.format(ctx.parent.mode))
     mode = ctx.obj['mode']
+    logger.debug('Set puzzle mode to {0}'.format(ctx.parent.mode))
+    variant_type = ctx.obj['variant_type']
 
-    if plugin == 'vcf':
+    if mode == 'vcf':
         logger.info("Initialzing VCF plugin")
         if not family_file:
             logger.error("Please provide a ped like file")
@@ -137,16 +137,16 @@ def load(ctx, variant_source, family_file, family_type):
                 root_path=variant_source,
                 case_lines=family_file,
                 case_type=family_type,
-                mode=mode
+                vtype=variant_type
             )
         except SyntaxError as e:
             logger.error(e.message)
             ctx.abort()
 
-    elif plugin == 'gemini':
+    elif mode == 'gemini':
         logger.debug("Initialzing GEMINI plugin")
         try:
-            plugin = GeminiPlugin(db=variant_source, mode=mode)
+            plugin = GeminiPlugin(db=variant_source, vtype=variant_type)
         except NameError:
             logger.error("Need to have gemini installed to use gemini plugin")
             ctx.abort()
@@ -158,17 +158,10 @@ def load(ctx, variant_source, family_file, family_type):
     logger.debug("Plugin setup was succesfull")
     # from gemini can create multiple cases
     store = SqlStore(db_path)
-    if ctx.parent.mode == 'vcf' and family_file is None:
-        logger.error("Please provide a family file")
-        ctx.abort()
 
-    # extract case information
-    ctx.parent.plugin.load_case(
-        case_lines=family_file,
-        variant_source=variant_source,
-        case_type=ctx.parent.family_type,
-        bam_paths=ctx.parent.bam_paths,
-    )
+    for case_obj in plugin.cases():
+        # extract case information
+        store.add_case(case_obj, vtype=variant_type, mode=mode)
 
 
 @cli.command()
