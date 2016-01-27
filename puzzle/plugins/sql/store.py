@@ -44,6 +44,9 @@ class Store(object):
         # self.classes = {'gene': Gene, 'transcript': Transcript,
         #                 'exon': Exon, 'sample': Sample}
 
+    def init_app(self, app):
+        pass
+
     def connect(self, db_uri, debug=False):
         """Configure connection to a SQL database.
 
@@ -144,3 +147,7 @@ class Store(object):
         if case_obj is None:
             case_obj = BaseCase(case_id='unknown')
         return case_obj
+
+    def cases(self):
+        """Fetch all cases from the database."""
+        return self.query(Case)

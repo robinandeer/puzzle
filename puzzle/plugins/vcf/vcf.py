@@ -58,7 +58,7 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
                 )
 
             for case_obj in self.case_objs:
-                for ind in case_obj.individuals:
+                for ind in case_obj['individuals']:
                     self.individuals.append(ind)
 
         logger.debug("Setting can_filter_gene to 'True'")
