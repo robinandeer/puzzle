@@ -15,7 +15,7 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
     """docstring for Plugin"""
 
     def __init__(self, root_path=None, case_lines=None,
-        case_type=None, pattern='*.vcf', mode='vcf'):
+        case_type=None, pattern='*.vcf', mode='snv'):
         """Initialize a vcf adapter.
         
             When instansiating all cases are found.

@@ -42,18 +42,12 @@ logger = logging.getLogger(__name__)
     count=True,
     default=2
 )
-@click.option('-f', '--family_file', type=click.File('r'))
-@click.option('-t' ,'--family_type',
-                type=click.Choice(['ped', 'alt']),
-                default='ped',
-                help='If the analysis use one of the known setups, please specify which one.'
-)
 @click.option('--root', '-r',
     type=click.Path(exists=True),
     help="Path to where to find variant source(s)"
 )
 @click.pass_context
-def cli(ctx, plugin, verbose, root, family_file, family_type, mode):
+def cli(ctx, plugin, verbose, mode, root):
     """Puzzle: manage DNA variant resources."""
     # configure root logger to print to STDERR
     loglevel = LEVELS.get(min(verbose, 3))
@@ -61,17 +55,19 @@ def cli(ctx, plugin, verbose, root, family_file, family_type, mode):
 
     # launch the command line interface
     logger.debug('Booting up command line interface')
+    db_path = ""
     if root is None:
-        root = os.path.join(os.env['HOME'], '.puzzle')
+        root = os.path.join(os.environ['HOME'], '.puzzle')
         db_path = os.path.join(root, 'puzzle_db.sqlite3')
+        if not os.path.exists(db_path):
+            logger.error("Please set up a database with puzzle init or point"\
+                          " to file(s) with '--root'")
+        ctx.abort()
     logger.info("Root directory is: {}".format(root))
     ctx.root = root
-    ctx.obj['db_path'] = db_path
+    # ctx.obj['db_path'] = db_path
 
     ctx.mode = mode
-    ctx.family_file = family_file
-    ctx.family_type = family_type
-    valid_vcf_suffixes = ('.vcf', '.vcf.gz')
     ctx.type = plugin
     if plugin == 'vcf':
         #If root is a file we need to check that it has the correct ending
@@ -181,32 +177,6 @@ def init(ctx):
     store = SqlStore(ctx.obj['db_path'])
     store.set_up()
 
-    # plugin_type = ctx.parent.type
-    # logger.info("Plugin type: {0}".format(plugin_type))
-    # if plugin_type in ['vcf', 'gemini']:
-    #     db_location = str(os.path.join(db_location, '.puzzle.db'))
-    #     config_path = os.path.join('configs', 'sqlite_config.ini')
-    #     config_file = os.path.join(resource_package, config_path)
-    #
-    #     logger.info("Path to database: {0}".format(db_location))
-    #     logger.info("Path to config: {0}".format(config_file))
-    #
-    #     if not os.path.exists(db_location):
-    #         init_db(db_location)
-    #         logger.info("Database created")
-    #         ##TODO add username, password etc
-    #         configs = {
-    #             'dialect': 'sqlite',
-    #             'db_name': db_location,
-    #         }
-    #
-    #         stream = open(config_file, 'w')
-    #         logger.info("Write config file for database to {0}".format(
-    #             config_file))
-    #         yaml.dump(configs, stream)
-    #         logger.debug("Config written")
-    #     else:
-    #         logger.warning("Database already exists!")
 
 
 @cli.command()
@@ -244,14 +214,31 @@ def load(ctx, variant_source, family_file):
 
 
 @cli.command()
-@click.option('--host', default='0.0.0.0')
-@click.option('--port', default=5000)
-@click.option('--debug', is_flag=True)
-@click.option('-p', '--pattern', default='*.vcf')
+@click.option('--host', 
+    default='0.0.0.0'
+)
+@click.option('--port', 
+    default=5000
+)
+@click.option('--debug', 
+    is_flag=True
+)
+@click.option('-p', '--pattern', 
+    default='*.vcf'
+)
+@click.option('-f', '--family_file', 
+    type=click.File('r')
+)
+@click.option('-t' ,'--family_type',
+                type=click.Choice(['ped', 'alt']),
+                default='ped',
+                help='If the analysis use one of the known setups, please specify which one.'
+)
 @click.option('--database', type=str)
 @click.version_option(puzzle.__version__)
 @click.pass_context
-def view(ctx, host, port, debug, pattern, database):
+def view(ctx, host, port, debug, pattern, family_file, family_type, 
+database):
     """Visualize DNA variant resources.
 
     1. Look for variant source(s) to visualize and inst. the right plugin
@@ -272,12 +259,52 @@ def view(ctx, host, port, debug, pattern, database):
     logger.debug('Set puzzle backend to {0}'.format(ctx.parent.plugin))
     BaseConfig.PUZZLE_BACKEND = ctx.parent.plugin
     logger.debug('Set puzzle mode to {0}'.format(ctx.parent.mode))
-    BaseConfig.PUZZLE_MODE = ctx.parent.mode
+    mode = ctx.parent.mode
+    
+    root = ctx.parent.root
+    valid_vcf_suffixes = ('.vcf', '.vcf.gz')
+    if plugin == 'vcf':
+        #If root is a file we need to check that it has the correct ending
+        if root:
+            if family_file:
+                # If family file we only allow one vcf file as input
+                if not os.path.isfile(root):
+                    logger.error("root has to be a vcf file when running with family file")
+                    logger.info("Exiting")
+                    sys.exit(1)
 
-    if ctx.parent.family_file:
-        BaseConfig.FAMILY_FILE = ctx.parent.family_file
-        BaseConfig.FAMILY_TYPE = ctx.parent.family_type
+            if os.path.isfile(root):
+                if not root.endswith(valid_vcf_suffixes):
+                    logger.error("Vcf file has to end with with .vcf or .vcf.gz")
+                    logger.info("Please check vcf file {0} or use other"\
+                                " plugin".format(root))
+                    logger.info("Exiting")
+                    sys.exit(1)
 
+            logger.info("Initialzing VCF plugin")
+        ctx.plugin = VcfPlugin(root_path=root, case_lines=family_file, 
+                                case_type=family_type, pattern=pattern, mode=mode)
+
+    elif plugin == 'gemini':
+        try:
+            #First check if gemini is properly installed:
+            from gemini import GeminiQuery
+            #Then check if we are looking at a proper database
+            if root:
+                try:
+                    gq = GeminiQuery(root)
+                except OperationalError as e:
+                    logger.error("{0} is not a valid gemini db".format(root))
+                    logger.info("root has to point to a gemini databse")
+                    logger.info("Exiting")
+                    sys.exit(1)
+            logger.info("Initialzing GEMINI plugin")
+            ctx.plugin = GeminiPlugin()
+        except ImportError:
+            logger.error("Need to have gemini installed to use gemini plugin")
+            logger.info("Exiting")
+            sys.exit(1)
+    
     app = create_app(config_obj=BaseConfig)
 
     app.run(host=host, port=port, debug=debug)
