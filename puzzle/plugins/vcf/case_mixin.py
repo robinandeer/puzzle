@@ -29,16 +29,9 @@ class CaseMixin(object):
             case_type=case_type,
         )
         
-        if case_lines:
-            try:
-                first_individual = individuals[0]
-                case_id = first_individual['case_id']
-            except IndexError:
-                logger.error("No individuals found in pedigree file")
-                ##TODO Raise pedigree error
-                raise SyntaxError()
-        else:
-            case_id = os.path.basename(variant_source)
+        for individual in individuals:
+            self.individuals.append(individual)
+            case_id = individual['case_id']
         
         case = Case(
                     case_id=case_id,
@@ -90,11 +83,11 @@ class CaseMixin(object):
                     mother=ind.mother,
                     father=ind.father, 
                     sex=str(ind.sex), 
-                    phenotype=str(ind.phenotype), 
-                    
+                    phenotype=str(ind.phenotype),
+                    variant_source=vcf,
                 )
                 individuals.append(individual)
-                self.individuals.append(individual)
+        
         elif vcf:
             #Read individuals from vcf file
             case_id = os.path.basename(vcf)
@@ -116,9 +109,9 @@ class CaseMixin(object):
                 individual = Individual(
                     ind_id=ind,
                     case_id=case_id,
+                    variant_source=vcf,
                 )
                 individuals.append(individual)
-                self.individuals.append(individual)
                 
                 logger.debug("Found individual {0} in {1}".format(
                     ind, vcf))

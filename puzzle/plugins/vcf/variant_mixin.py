@@ -185,10 +185,9 @@ class VariantMixin(object):
         
         header_line = head.header
         
-        if self.individuals:
-            individuals = self.individuals
-        else:
-            individuals = self._get_individuals(vcf=vcf_file_path)
+        #Get the individual ids for individuals in vcf file
+        vcf_individuals = set([ind['ind_id'] for ind in 
+                                self._get_individuals(vcf=vcf_file_path)])
 
         variant_columns = ['CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER']
 
@@ -305,9 +304,10 @@ class VariantMixin(object):
                     variant['genetic_models'] = genetic_models
 
                 #Add genotype calls:
-                if individuals:
-                    for individual in individuals:
-                        sample_id = individual['ind_id']
+                for individual in self.individuals:
+                    sample_id = individual['ind_id']
+                    
+                    if sample_id in vcf_individuals:
                         
                         raw_call = dict(zip(
                             variant_dict['FORMAT'].split(':'),

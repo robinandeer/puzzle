@@ -22,7 +22,7 @@ from sqlite3 import OperationalError
 from .settings import BaseConfig
 from puzzle import resource_package
 from puzzle.plugins import SqlStore, VcfPlugin
-from .utils import init_db
+# from .utils import init_db
 
 logger = logging.getLogger(__name__)
 
@@ -55,14 +55,15 @@ def cli(ctx, plugin, verbose, mode, root):
 
     # launch the command line interface
     logger.debug('Booting up command line interface')
-    db_path = ""
+    
     if root is None:
         root = os.path.join(os.environ['HOME'], '.puzzle')
-        db_path = os.path.join(root, 'puzzle_db.sqlite3')
-        if not os.path.exists(db_path):
-            logger.error("Please set up a database with puzzle init or point"\
-                          " to file(s) with '--root'")
-        ctx.abort()
+        # if not os.path.exists(db_path):
+        #     logger.error("Please set up a database with puzzle init or point"\
+        #                   " to file(s) with '--root'")
+        # ctx.abort()
+    db_path = os.path.join(root, 'puzzle_db.sqlite3')
+    
     logger.info("Root directory is: {}".format(root))
     ctx.root = root
     # ctx.obj['db_path'] = db_path
@@ -234,11 +235,14 @@ def load(ctx, variant_source, family_file):
                 default='ped',
                 help='If the analysis use one of the known setups, please specify which one.'
 )
-@click.option('--database', type=str)
+@click.option('-i', '--variant-source', 
+    type=click.Path(exists=True),
+    required=True
+)
 @click.version_option(puzzle.__version__)
 @click.pass_context
 def view(ctx, host, port, debug, pattern, family_file, family_type, 
-database):
+variant_source):
     """Visualize DNA variant resources.
 
     1. Look for variant source(s) to visualize and inst. the right plugin
@@ -261,28 +265,27 @@ database):
     logger.debug('Set puzzle mode to {0}'.format(ctx.parent.mode))
     mode = ctx.parent.mode
     
-    root = ctx.parent.root
     valid_vcf_suffixes = ('.vcf', '.vcf.gz')
     if plugin == 'vcf':
         #If root is a file we need to check that it has the correct ending
-        if root:
+        if variant_source:
             if family_file:
                 # If family file we only allow one vcf file as input
-                if not os.path.isfile(root):
+                if not os.path.isfile(variant_source):
                     logger.error("root has to be a vcf file when running with family file")
                     logger.info("Exiting")
-                    sys.exit(1)
+                    ctx.abort()
 
-            if os.path.isfile(root):
+            if os.path.isfile(variant_source):
                 if not root.endswith(valid_vcf_suffixes):
                     logger.error("Vcf file has to end with with .vcf or .vcf.gz")
                     logger.info("Please check vcf file {0} or use other"\
-                                " plugin".format(root))
+                                " plugin".format(variant_source))
                     logger.info("Exiting")
-                    sys.exit(1)
+                    ctx.abort()
 
             logger.info("Initialzing VCF plugin")
-        ctx.plugin = VcfPlugin(root_path=root, case_lines=family_file, 
+        plugin = VcfPlugin(root_path=variant_source, case_lines=family_file, 
                                 case_type=family_type, pattern=pattern, mode=mode)
 
     elif plugin == 'gemini':
@@ -290,20 +293,21 @@ database):
             #First check if gemini is properly installed:
             from gemini import GeminiQuery
             #Then check if we are looking at a proper database
-            if root:
+            if variant_source:
                 try:
-                    gq = GeminiQuery(root)
+                    gq = GeminiQuery(variant_source)
                 except OperationalError as e:
-                    logger.error("{0} is not a valid gemini db".format(root))
+                    logger.error("{0} is not a valid gemini db".format(variant_source))
                     logger.info("root has to point to a gemini databse")
-                    logger.info("Exiting")
-                    sys.exit(1)
+                    ctx.abort()
+            
             logger.info("Initialzing GEMINI plugin")
-            ctx.plugin = GeminiPlugin()
+            plugin = GeminiPlugin(db=variant_source, mode=mode)
         except ImportError:
             logger.error("Need to have gemini installed to use gemini plugin")
-            logger.info("Exiting")
-            sys.exit(1)
+            ctx.abort()
+    
+    BaseConfig.PUZZLE_BACKEND = plugin
     
     app = create_app(config_obj=BaseConfig)
 
