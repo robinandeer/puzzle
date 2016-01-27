@@ -6,6 +6,8 @@ from sqlalchemy import (Column, DateTime, Float, ForeignKey, Integer, String,
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
 
+from puzzle.models.mixins import PedigreeHumanMixin
+
 # base for declaring a mapping
 BASE = declarative_base()
 
@@ -31,7 +33,7 @@ class Case(BASE):
         return("<Case({self.id}, {self.case_id}, {self.name}, {self.id},"\
                 " {self.variant_source}, {self.variant_mode})>".format(self=self))
 
-class Individual(BASE):
+class Individual(BASE, PedigreeHumanMixin):
     """
     This is the class for storing individuals in the database.
 
