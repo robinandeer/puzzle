@@ -19,12 +19,12 @@ __banner__ = r"""
 """
 
 __title__ = 'puzzle'
-__summary__ = 'A new secret project :P'
+__summary__ = 'A portable visualizer for DNA variations'
 __uri__ = 'https://github.com/robinandeer/puzzle'
 
 __version__ = '0.0.1'
 
-__author__ = 'Robin Andeer'
+__author__ = ['Robin Andeer', u'Måns Magnusson']
 __email__ = 'robin.andeer@gmail.com'
 
 __license__ = 'MIT'

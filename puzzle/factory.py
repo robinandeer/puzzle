@@ -6,6 +6,7 @@ from .settings import BaseConfig
 
 logger = logging.getLogger(__name__)
 
+
 def create_app(config=None, config_obj=None):
     """Flask app factory function."""
     app = Flask(__name__)
