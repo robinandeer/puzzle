@@ -187,9 +187,8 @@ class VariantMixin(object):
 
         header_line = head.header
 
-        #Get the individual ids for individuals in vcf file
-        vcf_individuals = set([ind['ind_id'] for ind in
-                                self._get_individuals(vcf=vcf_file_path)])
+        # Get the individual ids for individuals in vcf file
+        vcf_individuals = set([ind['ind_id'] for ind in self.individuals])
 
         variant_columns = ['CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER']
 
