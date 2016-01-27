@@ -25,3 +25,5 @@ class Individual(dict, PedigreeHumanMixin):
                 case_id=case_id, mother=mother, father=father, sex=sex,
                 phenotype=phenotype, index=index,
                 variant_source=variant_source, bam_path=bam_path)
+        self.sex = sex
+        self.phenotype = phenotype
