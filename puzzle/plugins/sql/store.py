@@ -13,6 +13,7 @@ from sqlalchemy.sql.expression import ClauseElement
 
 from puzzle.models import Case as BaseCase
 from puzzle.models.sql import (BASE, Case, Individual)
+from puzzle.plugins import VcfPlugin, GeminiPlugin
 
 logger = logging.getLogger(__name__)
 
@@ -34,11 +35,12 @@ class Store(object):
         classes (dict): bound ORM classes
     """
 
-    def __init__(self, uri=None, debug=False):
+    def __init__(self, uri=None, debug=False, vtype='snv'):
         super(Store, self).__init__()
         self.uri = uri
         if uri:
             self.connect(uri, debug=debug)
+        self.variant_type = vtype
 
         # ORM class shortcuts to enable fetching models dynamically
         # self.classes = {'gene': Gene, 'transcript': Transcript,
@@ -151,3 +153,31 @@ class Store(object):
     def cases(self):
         """Fetch all cases from the database."""
         return self.query(Case)
+
+    def variants(self, case_id, skip=0, count=30, filters=None):
+        """Fetch variants for a case."""
+        case_obj = self.case(case_id)
+        plugin, case_id = select_plugin(case_obj)
+        variants = plugin.variants(case_id, skip, count, filters)
+        return variants
+
+    def variant(self, case_id, variant_id):
+        """Fetch a single variant from variant source."""
+        case_obj = self.case(case_id)
+        plugin, case_id = select_plugin(case_obj)
+        variant = plugin.variant(case_id, variant_id)
+        return variant
+
+
+def select_plugin(case_obj):
+    """Select and initialize the correct plugin for the case."""
+    if case_obj.variant_mode == 'vcf':
+        plugin = VcfPlugin(case_obj.variant_source,
+                           vtype=case_obj.variant_type)
+        case_id = os.path.basename(case_obj.variant_source)
+    elif case_obj.variant_mode == 'gemini':
+        plugin = GeminiPlugin(db=case_obj.variant_source,
+                              vtype=case_obj.variant_type)
+        case_id = case_obj.case_id
+
+    return plugin, case_id

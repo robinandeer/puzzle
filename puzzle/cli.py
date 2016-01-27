@@ -243,15 +243,6 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
             ctx.abort()
 
         plugin = SqlStore(ctx.obj['db_path'])
-        
-        # for case in plugin.cases():
-        #     print(case)
-        #     print(case)
-        #     print(case.id)
-        #     print(case.case_id)
-        #     for ind in case.individuals:
-        #         print(ind.ind_id)
-        #         print(ind.sex)
 
     elif mode == 'vcf':
         logger.info("Initialzing VCF plugin")
