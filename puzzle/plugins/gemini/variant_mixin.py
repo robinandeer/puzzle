@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class VariantMixin(object):
     """Class to store variant specific functions for gemini plugin"""
-    
+
     def variants(self, case_id, skip=0, count=30, filters={}):
         """Return count variants for a case.
 
@@ -132,7 +132,7 @@ class VariantMixin(object):
             return variant
 
         return None
-    
+
     def _get_genotypes(self, gemini_variant, individual_objs):
         """Add the genotypes for a variant for all individuals
 
@@ -158,7 +158,7 @@ class VariantMixin(object):
             ))
 
         return individuals
-    
+
     def _get_genes(self, variant):
         """Add the genes for a variant
 
@@ -206,9 +206,9 @@ class VariantMixin(object):
                 HGVSp = transcript['aa_change']
                 )
             )
-        
+
         return transcripts
-    
+
     def _variants(self, case_id, gemini_query):
         """Return variants found in the gemini database
 
@@ -246,7 +246,7 @@ class VariantMixin(object):
                     index=index
                 )
                 yield variant
-    
+
     def _format_variant(self, gemini_variant, individual_objs, index=0):
         """Make a puzzle variant from a gemini variant
 
@@ -267,7 +267,7 @@ class VariantMixin(object):
             'QUAL':gemini_variant['qual'],
             'FILTER':gemini_variant['filter']
         }
-        
+
         variant = Variant(**variant_dict)
         variant['index'] = index
 
@@ -288,13 +288,13 @@ class VariantMixin(object):
 
         #Add the most severe consequence
         variant['most_severe_consequence'] = gemini_variant['impact_so']
-        
+
         for gene in self._get_genes(variant):
             variant.add_gene(gene)
-        
+
         variant['start'] = int(variant_dict['POS'])
-        
-        if self.mode == 'sv':
+
+        if self.variant_type == 'sv':
             other_chrom = variant['CHROM']
             # If we have a translocation:
             if ':' in variant_dict['ALT']:
@@ -310,23 +310,23 @@ class VariantMixin(object):
                 variant['stop'] = int(gemini_variant['end'])
                 variant['sv_len'] = variant['stop'] - variant['start']
                 variant['sv_type'] = gemini_variant['sub_type']
-       
+
             variant['stop_chrom'] = other_chrom
-            
+
         else:
             variant['stop'] = int(variant_dict['POS']) + \
                 (len(variant_dict['REF']) - len(variant_dict['ALT']))
-        
+
         variant['cytoband_start'] = get_cytoband_coord(
-                                        chrom=variant['CHROM'], 
+                                        chrom=variant['CHROM'],
                                         pos=variant['start'])
 
         if variant.get('stop_chrom'):
             variant['cytoband_stop'] = get_cytoband_coord(
-                                        chrom=variant['stop_chrom'], 
+                                        chrom=variant['stop_chrom'],
                                         pos=variant['stop'])
-        
-        
+
+
         #### Check the impact annotations ####
         if gemini_variant['cadd_scaled']:
             variant['cadd_score'] = gemini_variant['cadd_scaled']
@@ -360,8 +360,8 @@ class VariantMixin(object):
             variant.set_max_freq(max_freq)
 
         return variant
-    
-    
+
+
     def _is_variant(self, gemini_variant, indexes):
         """Check if the variants is a variation in any of the individuals
 
@@ -378,4 +378,4 @@ class VariantMixin(object):
                 return True
 
         return False
-    
+

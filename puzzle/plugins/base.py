@@ -12,14 +12,14 @@ class Plugin(object):
         self.puzzle_db = None
         self.individuals = None
         self.case_obj = None
-        self.mode = 'snv'
+        self.variant_type = 'snv'
         self.can_filter_frequency = False
         self.can_filter_cadd = False
         self.can_filter_consequence = False
         self.can_filter_gene = False
         self.can_filter_inheritance = False
         self.can_filter_sv = False
-    
+
     def init_app(self, app):
         """Initialize plugin via Flask."""
         self.root_path = app.config['PUZZLE_ROOT']
@@ -38,23 +38,23 @@ class Plugin(object):
     def variant(self, variant_id):
         """Return a specific variant."""
         raise NotImplementedError
-    
+
     def load_case(self, case_lines=None, bam_paths=None):
         """Load a case to the database"""
         raise NotImplementedError
-    
+
     def connect(self, db_name, host='localhost', port=27017, username=None,
                 password=None):
         """Connect to a database
-        
+
             For vcf and gemini this is the database with cases and comments.
         """
         raise NotImplementedError
-    
-    def _get_individual_object(self, ind_id, case_id, mother=None, father=None, 
+
+    def _get_individual_object(self, ind_id, case_id, mother=None, father=None,
                         sex=None, phenotype=None, index=None, bam_path=None):
         """Create and return an Individual object
-        
+
             Args:
                 ind_id(str)
                 case_id(str)
@@ -65,10 +65,10 @@ class Plugin(object):
                 variant_source(str): Path to variant source
                 index(int)
                 bam_path(str)
-            
+
             Returns:
                 individual(Individual)
-            
+
         """
         individual = Individual(
                 ind_id=ind_id,
@@ -80,10 +80,10 @@ class Plugin(object):
                 bam_path=None
         )
         return individual
-    
+
     def _get_case_object(self, case_id, variant_source=None, name=None):
         """Create and return a Case object
-        
+
             Args:
                 case_id(str)
                 variant_source(str)
