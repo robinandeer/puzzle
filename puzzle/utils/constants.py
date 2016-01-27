@@ -77,5 +77,3 @@ with gzip.open(cytoband_file, 'r') as cytobands:
             tree[start:stop] = cytoband
         else:
             CYTOBANDS[chrom] = IntervalTree([Interval(start, stop, cytoband)])
-
-print(CYTOBANDS['1'][1])
