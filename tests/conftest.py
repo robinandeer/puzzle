@@ -9,17 +9,13 @@ from sqlalchemy.orm import sessionmaker
 from puzzle.models import Variant
 from puzzle.models.sql import BASE
 from puzzle.plugins import VcfPlugin, SqlStore
+from puzzle.utils import get_case
 # from puzzle.settings import TestConfig
 
 from puzzle.log import configure_stream
 
 root_logger = configure_stream()
 logger = logging.getLogger(__name__)
-
-@pytest.fixture
-def app(request):
-    app = create_app(config_obj=TestConfig)
-    return app
 
 
 @pytest.fixture
@@ -35,6 +31,7 @@ def variant():
                 FILTER='PASS')
     variant = Variant(**data)
     return variant
+
 
 @pytest.fixture(scope='session')
 def session(request):
@@ -58,8 +55,26 @@ def session(request):
     return s
 
 
+@pytest.yield_fixture(scope='session')
+def ped_lines():
+    """Return an unformatted list of ped lines."""
+    _ped_lines = [
+        "636808\tADM1059A1\t0\t0\t1\t1",
+        "636808\tADM1059A2\tADM1059A1\tADM1059A3\t1\t2",
+        "636808\tADM1059A3\t0\t0\t2\t1"
+    ]
+    yield _ped_lines
+
+
+@pytest.yield_fixture(scope='session')
+def case_obj(ped_lines):
+    """Return a test case object with individuals."""
+    _case = get_case('test.vcf', case_lines=ped_lines)
+    yield _case
+
+
 @pytest.yield_fixture(scope='function')
-def test_session():
+def sql_store():
     """Setup an in-memory database."""
     _test_db = SqlStore('sqlite:///:memory:')
     _test_db.set_up()
@@ -68,6 +83,6 @@ def test_session():
 
 
 @pytest.yield_fixture(scope='function')
-def test_db(test_session):
+def test_db(sql_store):
     """Populate database with some sample data."""
-    test_session.add()
+    sql_store.add()

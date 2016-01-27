@@ -11,6 +11,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.sql.expression import ClauseElement
 
+from puzzle.models import Case as BaseCase
 from puzzle.models.sql import (BASE, Case, Individual)
 
 logger = logging.getLogger(__name__)
@@ -95,3 +96,51 @@ class Store(object):
         # drop/delete the tables
         BASE.metadata.drop_all(self.engine)
         return self
+
+    def save(self):
+        """Manually persist changes made to various elements. Chainable.
+
+        Returns:
+            Store: ``self`` for chainability
+        """
+        # commit/persist dirty changes to the database
+        self.session.flush()
+        self.session.commit()
+        return self
+
+    def add_case(self, case_obj, vtype='snv', mode='vcf', ped_svg=None):
+        """Load a case with individuals.
+
+        Args:
+            case_obj (puzzle.models.Case): initialized case model
+        """
+        new_case = Case(case_id=case_obj['case_id'],
+                        name=case_obj['name'],
+                        variant_source=case_obj['variant_source'],
+                        variant_type=vtype,
+                        variant_mode=mode,
+                        pedigree=ped_svg)
+
+        # build individuals
+        inds = [Individual(
+            ind_id=ind['ind_id'],
+            mother=ind['mother'],
+            father=ind['father'],
+            sex=ind['sex'],
+            phenotype=ind['phenotype'],
+            ind_index=ind['index'],
+            variant_source=ind['variant_source'],
+            bam_path=ind['bam_path'],
+        ) for ind in case_obj['individuals']]
+
+        new_case.individuals = inds
+        self.session.add(new_case)
+        self.save()
+        return new_case
+
+    def case(self, case_id):
+        """Fetch a case from the database."""
+        case_obj = self.query(Case).filter_by(case_id=case_id).first()
+        if case_obj is None:
+            case_obj = BaseCase(case_id='unknown')
+        return case_obj
