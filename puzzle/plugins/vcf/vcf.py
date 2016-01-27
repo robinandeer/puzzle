@@ -3,7 +3,6 @@ import os
 import logging
 
 from path import path
-import dataset
 
 from puzzle.plugins import Plugin
 from . import VariantMixin, CaseMixin
@@ -106,5 +105,4 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
     def init_app(self, app):
         """Initialize plugin via Flask."""
         pass
-
 

@@ -118,6 +118,10 @@ class CaseMixin(object):
         
         return individuals
 
+    def _find_vcfs(self, pattern='*.vcf'):
+        """Walk subdirectories and return VCF files."""
+        return path(self.root_path).walkfiles(pattern)
+    
     def cases(self, pattern=None):
         """Cases found for the adapter."""
         
