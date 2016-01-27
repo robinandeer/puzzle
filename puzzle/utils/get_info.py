@@ -1,6 +1,5 @@
 import logging
-from .constants import (SEVERITY_DICT, HGNC_TO_OMIM, CYTOBAND_READER)
-from tabix import TabixError
+from .constants import (SEVERITY_DICT, HGNC_TO_OMIM, CYTOBANDS)
 
 from phizz.utils import query_gene
 
@@ -104,40 +103,15 @@ def get_cytoband_coord(chrom, pos):
         Returns:
             cytoband
     """
-    chrom = "chr{0}".format(chrom.lstrip('chr'))
+    chrom = chrom.strip('chr')
     pos = int(pos)
     result = None
     logger.debug("Finding Cytoband for chrom:{0} pos:{1}".format(chrom, pos))
-    try:
-        for record in CYTOBAND_READER.query(chrom, pos, pos+1):
-            record_chrom = record[0].lstrip('chr')
-            coord = record[3]
-            result = "{0}{1}".format(record_chrom, coord)
-    except TabixError:
-        pass
+    if chrom in CYTOBANDS:
+        for interval in CYTOBANDS[chrom][pos]:
+            result = "{0}{1}".format(chrom, interval.data)
+    
     return result
-
-def get_hgnc_symbols(transcripts):
-    """Get the hgnc symbols
-
-        Go through all transcripts and get hgnc symbols
-
-        Args:
-            transcripts (list): A list of transcripts to evaluate
-
-        Returns:
-            hgnc_symbols (list): The hgnc symbols
-    """
-
-    hgnc_symbols = set()
-    for transcript in transcripts:
-        hgnc_symbol = transcript['SYMBOL']
-
-        if hgnc_symbol:
-            hgnc_symbols.add(hgnc_symbol)
-
-    return hgnc_symbols
-
 
 def get_omim_number(hgnc_symbol):
     """Get the omim number for a hgnc symbol
@@ -152,16 +126,3 @@ def get_omim_number(hgnc_symbol):
     omim_number = HGNC_TO_OMIM.get(hgnc_symbol,{}).get('mim_nr', None)
 
     return omim_number
-
-def get_ensembl_id(hgnc_symbol):
-    """Get the ensembl id for a hgnc symbol
-
-        Args:
-            hgnc_symbol (str): A hgnc symbol
-
-        Returns:
-            ensembl_id (int): The ensembl id
-    """
-    ensembl_id = HGNC_TO_OMIM.get(hgnc_symbol, {}).get('ensembl_id', None)
-
-    return ensembl_id

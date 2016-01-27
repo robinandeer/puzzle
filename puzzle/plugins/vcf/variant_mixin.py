@@ -5,10 +5,8 @@ from vcftoolbox import (get_variant_dict, HeaderParser, get_info_dict,
 
 from puzzle.models import (Compound, Variant, Gene, Genotype, Transcript,)
 
-from puzzle.utils import (get_most_severe_consequence, get_hgnc_symbols,
-                          get_omim_number, get_ensembl_id, get_cytoband_coord,
-                          get_gene_info)
-
+from puzzle.utils import (get_most_severe_consequence, get_omim_number, 
+                          get_cytoband_coord, get_gene_info)
 
 logger = logging.getLogger(__name__)
 

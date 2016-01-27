@@ -3,8 +3,6 @@ import logging
 
 from puzzle.plugins import Plugin
 from puzzle.models import (Variant, Genotype, Gene, Transcript, Case, Individual)
-from puzzle.utils import (get_omim_number, get_ensembl_id, get_hgnc_symbols,
-                          get_most_severe_consequence)
 
 from . import (CaseMixin, VariantMixin)
 

@@ -2,7 +2,8 @@
 import json
 import os
 import pkg_resources
-import tabix
+import gzip
+from intervaltree import Interval, IntervalTree
 
 import puzzle
 
@@ -61,4 +62,20 @@ converter_file = pkg_resources.resource_string(resource_package, hgnc_to_omim_pa
 cytoband_file = os.path.join(resource_package, cytoband_path)
 
 HGNC_TO_OMIM = json.loads(converter_file.decode('utf-8'))
-CYTOBAND_READER = tabix.open(cytoband_file)
+
+CYTOBANDS = {}
+
+with gzip.open(cytoband_file, 'r') as cytobands:
+    for line in cytobands:
+        line = line.rstrip().split('\t')
+        chrom = line[0].strip('chr')
+        start = int(line[1])
+        stop = int(line[2])
+        cytoband = line[3]
+        if chrom in CYTOBANDS:
+            tree = CYTOBANDS[chrom]
+            tree[start:stop] = cytoband
+        else:
+            CYTOBANDS[chrom] = IntervalTree([Interval(start, stop, cytoband)])
+
+print(CYTOBANDS['1'][1])
