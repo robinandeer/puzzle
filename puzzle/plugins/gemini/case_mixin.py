@@ -66,7 +66,10 @@ class CaseMixin(object):
             logger.info("Found case {0}".format(case_id))
             case = Case(
                 case_id=case_id,
-                name=case_id
+                name=case_id,
+                variant_source=self.db,
+                variant_type=self.variant_type,
+                variant_mode='gemini',
                 )
             # Add the individuals to the correct case
             for individual in individuals:
@@ -79,7 +82,7 @@ class CaseMixin(object):
             case_objs.append(case)
 
         return case_objs
-    
+
     def _get_individuals(self):
         """Return a list with the individual objects found in db
 
@@ -97,6 +100,7 @@ class CaseMixin(object):
         for individual in gq:
             logger.info("Found individual {0} with family id {1}".format(
                 individual['name'], individual['family_id']))
+            
             individuals.append(
                 Individual(
                     ind_id=individual['name'],

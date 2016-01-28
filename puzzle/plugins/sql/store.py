@@ -12,6 +12,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.sql.expression import ClauseElement
 
 from puzzle.models import Case as BaseCase
+from puzzle.models import Individual as BaseIndividual
 from puzzle.models.sql import (BASE, Case, Individual)
 from puzzle.plugins import VcfPlugin, GeminiPlugin
 
@@ -142,7 +143,31 @@ class Store(object):
         self.session.add(new_case)
         self.save()
         return new_case
+    
+    def delete_case(self, case_obj):
+        """Delete a case from the database
+        
+        Args:
+            case_obj (puzzle.models.Case): initialized case model
+        """
+        for ind_obj in case_obj.individuals:
+            self.delete_individual(ind_obj)
+        logger.info("Deleting case {0} from database".format(case_obj.case_id))
+        self.session.delete(case_obj)
+        self.save()
+        return case_obj
 
+    def delete_individual(self, ind_obj):
+        """Delete a case from the database
+        
+        Args:
+            ind_obj (puzzle.models.Individual): initialized individual model
+        """
+        logger.info("Deleting individual {0} from database".format(ind_obj.ind_id))
+        self.session.delete(ind_obj)
+        self.save()
+        return ind_obj
+    
     def case(self, case_id):
         """Fetch a case from the database."""
         case_obj = self.query(Case).filter_by(case_id=case_id).first()
@@ -150,9 +175,20 @@ class Store(object):
             case_obj = BaseCase(case_id='unknown')
         return case_obj
 
+    def individual(self, ind_id):
+        """Fetch a case from the database."""
+        ind_obj = self.query(Individual).filter_by(ind_id=ind_id).first()
+        if ind_obj is None:
+            ind_obj = BaseIndividual(ind_id='unknown')
+        return ind_obj
+
     def cases(self):
         """Fetch all cases from the database."""
         return self.query(Case)
+
+    def individuals(self):
+        """Fetch all individuals from the database."""
+        return self.query(Individual)
 
     def variants(self, case_id, skip=0, count=30, filters=None):
         """Fetch variants for a case."""

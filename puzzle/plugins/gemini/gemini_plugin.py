@@ -12,13 +12,19 @@ logger = logging.getLogger(__name__)
 
 
 class GeminiPlugin(CaseMixin, VariantMixin, Plugin):
-    """This is the base class for puzzle plugins"""
+    """This is the base class for puzzle plugins
+        
+        Args:
+            db(str): Path to gemini database
+            vtype: Variant type (snv or sv)
+        
+    """
 
-    def __init__(self, db, vtype='vcf'):
+    def __init__(self, db, vtype='snv'):
         super(GeminiPlugin, self).__init__()
         logger.debug("Setting self.db to {0}".format(db))
         self.db = db
-        logger.debug("Setting mode to {0}".format(vtype))
+        logger.debug("Setting variant type to {0}".format(vtype))
         self.variant_type = vtype
 
         logger.info("Check if database if in correct format")

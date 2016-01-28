@@ -202,6 +202,78 @@ def load(ctx, variant_source, family_file, family_type):
         store.add_case(case_obj, vtype=variant_type, mode=mode)
 
 @cli.command()
+@click.option('-f', '--family_id', 
+    type=str,
+)
+@click.option('-i', '--individual_id', 
+    type=str,
+)
+@click.version_option(puzzle.__version__)
+@click.pass_context
+def delete(ctx, family_id, individual_id):
+    """
+    Delete a case or individual from the database.
+
+    If no database was found run puzzle init first.
+    """
+    db_path = ctx.obj['db_path']
+    if not os.path.exists(db_path):
+        logger.warn("database not initialized, run 'puzzle init'")
+        ctx.abort()
+    
+    store = SqlStore(db_path)
+    if family_id:
+        case_obj = store.case(case_id=family_id)
+        if case_obj.case_id != family_id:
+            logger.warning("Family {0} does not exist in database".format(family_id))
+            ctx.abort() 
+        store.delete_case(case_obj)
+    elif individual_id:
+        ind_obj = store.individual(ind_id=individual_id)
+        if ind_obj.ind_id != individual_id:
+            logger.warning("Individual {0} does not exist in database".format(individual_id))
+            ctx.abort() 
+        store.delete_individual(ind_obj)
+        
+
+@cli.command()
+@click.version_option(puzzle.__version__)
+@click.pass_context
+def cases(ctx):
+    """
+    Show all cases in the database.
+
+    If no database was found run puzzle init first.
+    """
+    db_path = ctx.obj['db_path']
+    if not os.path.exists(db_path):
+        logger.warn("database not initialized, run 'puzzle init'")
+        ctx.abort()
+    
+    store = SqlStore(db_path)
+    for case in store.cases():
+        print(case)
+
+@cli.command()
+@click.version_option(puzzle.__version__)
+@click.pass_context
+def individuals(ctx):
+    """
+    Show all individuals in the database.
+
+    If no database was found run puzzle init first.
+    """
+    db_path = ctx.obj['db_path']
+    if not os.path.exists(db_path):
+        logger.warn("database not initialized, run 'puzzle init'")
+        ctx.abort()
+    
+    store = SqlStore(db_path)
+    for ind in store.individuals():
+        print(ind)
+    
+
+@cli.command()
 @click.option('--host',
     default='0.0.0.0'
 )

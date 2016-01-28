@@ -30,8 +30,9 @@ class Case(BASE):
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     def __repr__(self):
-        return("<Case({self.id}, {self.case_id}, {self.name}, {self.id},"\
-                " {self.variant_source}, {self.variant_mode})>".format(self=self))
+        return("<Case(id:{self.id}, case_id:{self.case_id}, name:{self.name},"\
+                " variant_source:{self.variant_source}, variant_type:"\
+                "{self.variant_type}, variant_mode:{self.variant_mode})>".format(self=self))
 
 class Individual(BASE, PedigreeHumanMixin):
     """
@@ -51,3 +52,9 @@ class Individual(BASE, PedigreeHumanMixin):
     bam_path = Column(String(32))
     case_id = Column(Integer, ForeignKey("case.id"))
     case = relationship(Case, backref=("individuals"))
+
+    def __repr__(self):
+        return("<Individual(id:{self.id}, ind_id:{self.ind_id}, mother:{self.mother},"\
+                " father{self.father}, sex:{self.sex}, phenotype.{self.phenotype}"\
+                ", ind_index:{self.ind_index}, variant_source:"\
+                "{self.variant_source}, case_id:{self.case_id})>".format(self=self))
