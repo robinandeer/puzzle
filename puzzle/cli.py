@@ -64,42 +64,6 @@ def cli(ctx, verbose, mode, variant_type, root):
         'variant_type': variant_type
     }
 
-@cli.command()
-@click.version_option(puzzle.__version__)
-@click.pass_context
-def init(ctx):
-    """Initialize a database that store metadata
-
-        Check if "root" dir exists, otherwise create the directory and
-        build the database. If a database already exists, do nothing.
-
-        The behaviour will be different with different plugins. A config file
-        in YAML format will be created in puzzle/configs with information about
-        the database.
-
-        VCF:
-            A sqlite database will be built in the home directory of the user
-        GEMINI:
-            A sqlite database will be built in the home directory of the user
-    """
-    plugin_type = ctx.parent.type
-    logger.info("Plugin type: {0}".format(plugin_type))
-    if plugin_type in ['vcf', 'gemini']:
-        db_location = str(os.path.join(db_location, '.puzzle.db'))
-        config_path = os.path.join('configs', 'sqlite_config.ini')
-        config_file = os.path.join(resource_package, config_path)
-        
-        logger.info("Path to database: {0}".format(db_location))
-        logger.info("Path to config: {0}".format(config_file))
-                
-        if not os.path.exists(db_location):
-            init_db(db_location)
-            logger.info("Database created")
-            ##TODO add username, password etc
-            configs = {
-                'dialect': 'sqlite',
-                'db_name': db_location,
-            }
 
 @cli.command()
 @click.version_option(puzzle.__version__)

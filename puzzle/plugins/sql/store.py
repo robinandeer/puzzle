@@ -12,7 +12,10 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.sql.expression import ClauseElement
 
 from puzzle.models import Case as BaseCase
+<<<<<<< HEAD
 from puzzle.models import Individual as BaseIndividual
+=======
+>>>>>>> 8b402384c7ec2c56e822bfa1f1222be5f52446d0
 from puzzle.models.sql import (BASE, Case, Individual)
 from puzzle.plugins import VcfPlugin, GeminiPlugin
 
