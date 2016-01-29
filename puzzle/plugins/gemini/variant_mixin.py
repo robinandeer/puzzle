@@ -196,12 +196,12 @@ class VariantMixin(object):
         transcripts = []
         for transcript in gq:
             transcripts.append(Transcript(
-                SYMBOL=transcript['gene'],
-                Feature=transcript['transcript'],
-                Consequence=transcript['impact_so'],
-                BIOTYPE=transcript['biotype'],
-                PolyPhen=transcript['polyphen_pred'],
-                SIFT=transcript['sift_pred'],
+                hgnc_symbol = transcript['gene'],
+                transcript_id = transcript['transcript'],
+                consequence=transcript['impact_so'],
+                biotype = transcript['biotype'],
+                polyphen = transcript['polyphen_pred'],
+                sift = transcript['sift_pred'],
                 HGVSc = transcript['codon_change'],
                 HGVSp = transcript['aa_change']
                 )

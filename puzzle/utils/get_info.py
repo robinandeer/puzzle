@@ -17,8 +17,10 @@ def get_gene_info(transcripts):
         Returns:
             genes (iterable): An iterable with Genes
     """
-    ensembl_ids = set([transcript['Gene'] for transcript in transcripts if transcript['Gene']])
-    hgnc_symbols = set([transcript['SYMBOL'] for transcript in transcripts if transcript['SYMBOL']])
+    ensembl_ids = set([transcript['ensembl_id'] for transcript in 
+                        transcripts if transcript['ensembl_id']])
+    hgnc_symbols = set([transcript['hgnc_symbol'] for transcript in 
+                        transcripts if transcript['hgnc_symbol']])
     genes = []
     
     if ensembl_ids:
@@ -72,7 +74,7 @@ def get_most_severe_consequence(transcripts):
     most_severe_score = None
 
     for transcript in transcripts:
-        for consequence in transcript['Consequence'].split('&'):
+        for consequence in transcript['consequence'].split('&'):
             logger.debug("Checking severity score for consequence: {0}".format(
                 consequence
             ))

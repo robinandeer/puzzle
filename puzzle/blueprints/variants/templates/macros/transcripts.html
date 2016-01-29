@@ -19,14 +19,14 @@
 			<tbody>
 				{% for transcript in transcripts %}
 					<tr>
-						<td>{{ transcript.SYMBOL }}</td>
-						<td>{{ transcript.Feature }}</td>
-						<td>{{ transcript.BIOTYPE }}</td>
-						<td>{{ transcript.Consequence }}</td>
-						<td>{{ transcript.STRAND }}</td>
-						<td>{{ transcript.SIFT }}</td>
-						<td>{{ transcript.PolyPhen }}</td>
-						<td>{{ transcript.EXON }}</td>
+						<td>{{ transcript.hgnc_symbol }}</td>
+						<td>{{ transcript.transcript_id }}</td>
+						<td>{{ transcript.biotype }}</td>
+						<td>{{ transcript.consequence }}</td>
+						<td>{{ transcript.strand }}</td>
+						<td>{{ transcript.sift }}</td>
+						<td>{{ transcript.polyphen }}</td>
+						<td>{{ transcript.exon }}</td>
 						<td>{{ transcript.HGVSc }}</td>
 						<td>{{ transcript.HGVSp }}</td>
 					</tr>
