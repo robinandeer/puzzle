@@ -6,6 +6,7 @@ puzzle.plugins.sql.store
 import logging
 import os
 
+import phizz
 from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -216,6 +217,25 @@ class Store(Plugin):
         plugin, case_id = select_plugin(case_obj)
         variant = plugin.variant(case_id, variant_id)
         return variant
+
+    def add_phenotype(self, case_obj, phenotype_id):
+        """Add a phenotype term to the case."""
+        if phenotype_id.startswith('HP:') or len(phenotype_id) == 7:
+            logger.debug('querying on HPO term')
+            hpo_results = phizz.query_hpo([phenotype_id])
+        else:
+            logger.debug('querying on OMIM term')
+            hpo_results = phizz.query_disease([phenotype_id])
+
+        for result in hpo_results:
+            term = PhenotypeTerm(phenotype_id=result['hpo_term'],
+                                 description=result['description'])
+            if term not in case_obj.phenotype_terms:
+                logger.info('adding new HPO term: %s', term.phenotype_id)
+                case_obj.append(term)
+
+        logger.debug('storing new HPO terms')
+        self.save()
 
 
 def select_plugin(case_obj):

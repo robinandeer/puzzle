@@ -17,3 +17,8 @@ def index():
 def case(case_id):
     """Show the overview for a case."""
     return render_template('case.html', case=app.db.case(case_id), case_id=case_id)
+
+
+@blueprint.route('/phenotypes/<case_id>', methods=['POST'])
+def add_phenotype(case_id):
+    """Add phenotype(s) to the case model."""
