@@ -47,7 +47,6 @@ class VariantMixin(object):
                     sv_type: List (list of sv types),
                 }
         """
-        print("First variants:", case_id)
         case_obj = self.case(case_id=case_id)
         limit = count + skip
 
@@ -168,8 +167,6 @@ class VariantMixin(object):
         return transcripts
 
     def _variants(self, case_obj):
-        print("Variants:")
-        print(case_obj)
         vcf_file_path = case_obj.variant_source
         logger.info("Parsing file {0}".format(vcf_file_path))
         head = HeaderParser()

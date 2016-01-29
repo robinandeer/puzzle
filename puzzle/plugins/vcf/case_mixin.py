@@ -25,11 +25,8 @@ class CaseMixin(object):
             Returns:
                 A Case object
         """
-        print("Case:", case_id)
         if case_id:
             for case in self.case_objs:
-                print("Case:")
-                print(case)
                 if case.case_id == case_id:
                     return case
         else:
