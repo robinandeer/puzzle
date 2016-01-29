@@ -66,9 +66,10 @@ def cli(ctx, verbose, mode, variant_type, root):
 
 
 @cli.command()
+@click.option('--reset', is_flag=True)
 @click.version_option(puzzle.__version__)
 @click.pass_context
-def init(ctx):
+def init(ctx, reset):
     """Initialize a database that store metadata
 
         Check if "root" dir exists, otherwise create the directory and
@@ -93,7 +94,7 @@ def init(ctx):
 
     logger.debug('Connect to database and create tables')
     store = SqlStore(ctx.obj['db_path'])
-    store.set_up()
+    store.set_up(reset=reset)
 
 
 @cli.command()
@@ -166,10 +167,10 @@ def load(ctx, variant_source, family_file, family_type):
         store.add_case(case_obj, vtype=variant_type, mode=mode)
 
 @cli.command()
-@click.option('-f', '--family_id', 
+@click.option('-f', '--family_id',
     type=str,
 )
-@click.option('-i', '--individual_id', 
+@click.option('-i', '--individual_id',
     type=str,
 )
 @click.version_option(puzzle.__version__)
@@ -184,21 +185,21 @@ def delete(ctx, family_id, individual_id):
     if not os.path.exists(db_path):
         logger.warn("database not initialized, run 'puzzle init'")
         ctx.abort()
-    
+
     store = SqlStore(db_path)
     if family_id:
         case_obj = store.case(case_id=family_id)
         if case_obj.case_id != family_id:
             logger.warning("Family {0} does not exist in database".format(family_id))
-            ctx.abort() 
+            ctx.abort()
         store.delete_case(case_obj)
     elif individual_id:
         ind_obj = store.individual(ind_id=individual_id)
         if ind_obj.ind_id != individual_id:
             logger.warning("Individual {0} does not exist in database".format(individual_id))
-            ctx.abort() 
+            ctx.abort()
         store.delete_individual(ind_obj)
-        
+
 
 @cli.command()
 @click.version_option(puzzle.__version__)
@@ -213,7 +214,7 @@ def cases(ctx):
     if not os.path.exists(db_path):
         logger.warn("database not initialized, run 'puzzle init'")
         ctx.abort()
-    
+
     store = SqlStore(db_path)
     for case in store.cases():
         print(case)
@@ -231,11 +232,11 @@ def individuals(ctx):
     if not os.path.exists(db_path):
         logger.warn("database not initialized, run 'puzzle init'")
         ctx.abort()
-    
+
     store = SqlStore(db_path)
     for ind in store.individuals():
         print(ind)
-    
+
 
 @cli.command()
 @click.option('--host',

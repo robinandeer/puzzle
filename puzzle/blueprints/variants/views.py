@@ -50,11 +50,8 @@ def variant(case_id, variant_id):
     sorted_compounds = sorted(variant['compounds'],
                               key=lambda compound: compound['combined_score'])
 
-    if app.db.variant_type == 'sv':
-        return render_template('sv_variant.html', variant=variant,
-                            compounds=sorted_compounds, case_id=case_id)
-    else:
-        return render_template('variant.html', variant=variant,
+    template = 'sv_variant.html' if app.db.variant_type == 'sv' else 'variant.html'
+    return render_template(template, variant=variant,
                            compounds=sorted_compounds, case_id=case_id)
 
 

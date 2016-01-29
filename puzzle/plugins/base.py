@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import logging
-from puzzle.models import (Case, Individual)
+from puzzle.models import Case
 
 logger = logging.getLogger(__name__)
+
 
 class Plugin(object):
     """docstring for Plugin"""
@@ -39,59 +40,7 @@ class Plugin(object):
         """Return a specific variant."""
         raise NotImplementedError
 
-    def load_case(self, case_lines=None, bam_paths=None):
-        """Load a case to the database"""
-        raise NotImplementedError
-
-    def connect(self, db_name, host='localhost', port=27017, username=None,
-                password=None):
-        """Connect to a database
-
-            For vcf and gemini this is the database with cases and comments.
-        """
-        raise NotImplementedError
-
-    def _get_individual_object(self, ind_id, case_id, mother=None, father=None,
-                        sex=None, phenotype=None, index=None, bam_path=None):
-        """Create and return an Individual object
-
-            Args:
-                ind_id(str)
-                case_id(str)
-                mother(str)
-                father(str)
-                sex(str)
-                phenotype(str)
-                variant_source(str): Path to variant source
-                index(int)
-                bam_path(str)
-
-            Returns:
-                individual(Individual)
-
-        """
-        individual = Individual(
-                ind_id=ind_id,
-                case_id=case_id,
-                mother=mother,
-                father=father,
-                sex=str(sex),
-                phenotype=str(phenotype),
-                bam_path=None
-        )
-        return individual
-
-    def _get_case_object(self, case_id, variant_source=None, name=None):
-        """Create and return a Case object
-
-            Args:
-                case_id(str)
-                variant_source(str)
-                name(str)
-        """
-        case = Case(
-            case_id=case_id,
-            variant_source=variant_source,
-            name=name or case_id
-        )
-        return case
+    def individual_dict(self, ind_ids):
+        """Return a dict with ind_id as key and Individual as values."""
+        ind_dict = {ind.ind_id: ind for ind in self.individuals(ind_ids=ind_ids)}
+        return ind_dict

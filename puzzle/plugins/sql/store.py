@@ -14,12 +14,12 @@ from sqlalchemy.sql.expression import ClauseElement
 from puzzle.models import Case as BaseCase
 from puzzle.models import Individual as BaseIndividual
 from puzzle.models.sql import (BASE, Case, Individual)
-from puzzle.plugins import VcfPlugin, GeminiPlugin
+from puzzle.plugins import VcfPlugin, GeminiPlugin, Plugin
 
 logger = logging.getLogger(__name__)
 
 
-class Store(object):
+class Store(Plugin):
 
     """SQLAlchemy-based database object.
     .. note::
@@ -85,11 +85,14 @@ class Store(object):
         """
         return self.engine.dialect.name
 
-    def set_up(self):
+    def set_up(self, reset=False):
         """Initialize a new database with the default tables and columns.
         Returns:
             Store: self
         """
+        if reset:
+            self.tear_down()
+
         # create the tables
         BASE.metadata.create_all(self.engine)
         return self
@@ -100,6 +103,7 @@ class Store(object):
             Store: self
         """
         # drop/delete the tables
+        logger.info('resetting database...')
         BASE.metadata.drop_all(self.engine)
         return self
 
@@ -143,10 +147,10 @@ class Store(object):
         self.session.add(new_case)
         self.save()
         return new_case
-    
+
     def delete_case(self, case_obj):
         """Delete a case from the database
-        
+
         Args:
             case_obj (puzzle.models.Case): initialized case model
         """
@@ -159,7 +163,7 @@ class Store(object):
 
     def delete_individual(self, ind_obj):
         """Delete a case from the database
-        
+
         Args:
             ind_obj (puzzle.models.Individual): initialized individual model
         """
@@ -167,7 +171,7 @@ class Store(object):
         self.session.delete(ind_obj)
         self.save()
         return ind_obj
-    
+
     def case(self, case_id):
         """Fetch a case from the database."""
         case_obj = self.query(Case).filter_by(case_id=case_id).first()

@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from .mixins import PedigreeHumanMixin
+from .dotdict import DotDict
 
 
-class Individual(dict, PedigreeHumanMixin):
+class Individual(DotDict, PedigreeHumanMixin):
     """Individual representation."""
     def __init__(self, ind_id, case_id=None, mother=None,
-    father=None, sex=None, phenotype = None, index=None,
-    variant_source=None, bam_path=None):
+                 father=None, sex=None, phenotype=None, index=None,
+                 variant_source=None, bam_path=None):
         """Construct a individual object
 
             Args:
@@ -25,5 +26,3 @@ class Individual(dict, PedigreeHumanMixin):
                 case_id=case_id, mother=mother, father=father, sex=sex,
                 phenotype=phenotype, index=index,
                 variant_source=variant_source, bam_path=bam_path)
-        self.sex = sex
-        self.phenotype = phenotype
