@@ -10,7 +10,8 @@ from puzzle.models import Case, Individual
 logger = logging.getLogger(__name__)
 
 
-def get_case(variant_source, case_lines=None, case_type='ped'):
+def get_case(variant_source, case_lines=None, case_type='ped', variant_type='snv',
+            variant_mode='vcf'):
         """Create a cases and populate it with individuals
 
             Args:
@@ -31,7 +32,9 @@ def get_case(variant_source, case_lines=None, case_type='ped'):
             case_id = individual['case_id']
 
         case = Case(case_id=case_id, variant_source=variant_source,
-                    name=case_id)
+                    name=case_id, variant_type=variant_type, 
+                    variant_mode=variant_mode,
+                    )
 
         logger.debug("Found case with case_id: {0} and name: {1}".format(
             case['case_id'], case['name']))

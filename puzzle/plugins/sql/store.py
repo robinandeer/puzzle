@@ -12,10 +12,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.sql.expression import ClauseElement
 
 from puzzle.models import Case as BaseCase
-<<<<<<< HEAD
 from puzzle.models import Individual as BaseIndividual
-=======
->>>>>>> 8b402384c7ec2c56e822bfa1f1222be5f52446d0
 from puzzle.models.sql import (BASE, Case, Individual)
 from puzzle.plugins import VcfPlugin, GeminiPlugin
 
@@ -189,9 +186,12 @@ class Store(object):
         """Fetch all cases from the database."""
         return self.query(Case)
 
-    def individuals(self):
+    def individuals(self, ind_ids=None):
         """Fetch all individuals from the database."""
-        return self.query(Individual)
+        query = self.query(Individual)
+        if ind_ids:
+            query = query.filter(Individual.ind_id.in_(ind_ids))
+        return query
 
     def variants(self, case_id, skip=0, count=30, filters=None):
         """Fetch variants for a case."""
@@ -211,7 +211,7 @@ class Store(object):
 def select_plugin(case_obj):
     """Select and initialize the correct plugin for the case."""
     if case_obj.variant_mode == 'vcf':
-        plugin = VcfPlugin(case_obj.variant_source,
+        plugin = VcfPlugin(root_path=case_obj.variant_source,
                            vtype=case_obj.variant_type)
         case_id = os.path.basename(case_obj.variant_source)
     elif case_obj.variant_mode == 'gemini':

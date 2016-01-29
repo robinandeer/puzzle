@@ -3,7 +3,6 @@ import logging
 
 from puzzle.models import Case
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -35,3 +34,20 @@ class CaseMixin(object):
                 return list(self.case_objs)[0]
 
         return Case(case_id='unknown')
+    
+    def individuals(self, ind_ids=None):
+        """Return information about individuals
+        
+            Args:
+                ind_ids (list(str)): List of individual ids
+            
+            Returns:
+                individuals (Iterable): Iterable with Individuals
+        """
+        if ind_ids:
+            for ind_id in ind_ids:
+                for ind in self.individuals:
+                    if ind['ind_id'] == ind_id:
+                        yield ind
+        else:
+            yield self.individuals

@@ -15,7 +15,8 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
     """docstring for Plugin"""
 
     def __init__(self, root_path=None, case_lines=None,
-                 case_type=None, pattern='*.vcf', vtype='snv'):
+                 case_type=None, pattern='*.vcf', vtype='snv',
+                 case_obj=None):
         """Initialize a vcf adapter.
 
             When instansiating all cases are found.
@@ -26,6 +27,7 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
                 case_type(str) : Format of pedigreeinformation
                 patter(str) : What pattern to search for in directory
                 vtype(str) : 'snv' or 'sv'
+                case_obj(puzzle.models.case) : If initialized with a case
         """
         super(VcfPlugin, self).__init__()
 
@@ -40,7 +42,7 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
         logger.info("Setting variant type to {0}".format(vtype))
         logger.debug("Updating pattern to {0}".format(pattern))
         self.pattern = pattern
-
+        
         if root_path:
             if os.path.isdir(root_path):
                 logger.info("Looking for vcf files in {0}".format(root_path))
