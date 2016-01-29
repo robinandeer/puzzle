@@ -27,7 +27,7 @@ class MockApp(object):
 
 def test_variants():
     vcf_plugin = VcfPlugin(root_path=vcf)
-    variants = vcf_plugin._variants(vcf)
+    variants = vcf_plugin.variants("hapmap.vcf")
     variant = next(variants)
     assert variant['CHROM'] == 'X'
     assert int(variant['POS']) == 84563218
@@ -65,21 +65,21 @@ def test_variants_case_with_ped():
     assert variant['index'] == 2
 
 
-# def test_variant():
-#     vcf_plugin = VcfPlugin()
-#     variant = vcf_plugin.variant(vcf, 'X_155239821_G_A')
-#     assert variant['CHROM'] == 'X'
-#     assert variant['POS'] == '155239821'
-#
-#     # get 10th variant
-#     variant = vcf_plugin.variant(vcf, '3_124998098_C_A')
-#     assert variant['index'] == 10
+def test_variant():
+    vcf_plugin = VcfPlugin(root_path=vcf)
+    variant = vcf_plugin.variant('hapmap.vcf', 'X_155239821_G_A')
+    assert variant['CHROM'] == 'X'
+    assert variant['POS'] == '155239821'
+
+    # get 10th variant
+    variant = vcf_plugin.variant('hapmap.vcf', '3_124998098_C_A')
+    assert variant['index'] == 10
 
 def test_ped_info():
     adapter=VcfPlugin(root_path=vcf, case_lines=individuals, case_type='ped')
     assert len(adapter.individuals) == 3
     case_obj = adapter.case_objs[0]
-    assert case_obj['name'] == "636808"
+    assert case_obj.name == "636808"
 
 def test_vcf_case():
     adapter=VcfPlugin(root_path=vcf)
