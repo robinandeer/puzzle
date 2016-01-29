@@ -25,9 +25,12 @@ class CaseMixin(object):
             Returns:
                 A Case object
         """
+        print("Case:", case_id)
         if case_id:
             for case in self.case_objs:
-                if case['case_id'] == case_id:
+                print("Case:")
+                print(case)
+                if case.case_id == case_id:
                     return case
         else:
             if self.cases:
@@ -47,7 +50,7 @@ class CaseMixin(object):
         if ind_ids:
             for ind_id in ind_ids:
                 for ind in self.individuals:
-                    if ind['ind_id'] == ind_id:
+                    if ind.ind_id == ind_id:
                         yield ind
         else:
             yield self.individuals

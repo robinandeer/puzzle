@@ -47,11 +47,11 @@ class VariantMixin(object):
                     sv_type: List (list of sv types),
                 }
         """
-        case = self.case(case_id=case_id)
-        vcf_path = case['variant_source']
+        print("First variants:", case_id)
+        case_obj = self.case(case_id=case_id)
         limit = count + skip
 
-        filtered_variants = self._variants(vcf_path)
+        filtered_variants = self._variants(case_obj)
 
         if filters.get('gene_list'):
             gene_list = set([gene_id.strip() for gene_id in filters['gene_list']])
@@ -167,7 +167,11 @@ class VariantMixin(object):
             ))
         return transcripts
 
-    def _variants(self, vcf_file_path):
+    def _variants(self, case_obj):
+        print("Variants:")
+        print(case_obj)
+        vcf_file_path = case_obj.variant_source
+        logger.info("Parsing file {0}".format(vcf_file_path))
         head = HeaderParser()
         handle = get_vcf_handle(infile=vcf_file_path)
         # Parse the header
@@ -186,7 +190,7 @@ class VariantMixin(object):
         header_line = head.header
 
         # Get the individual ids for individuals in vcf file
-        vcf_individuals = set([ind['ind_id'] for ind in self.individuals])
+        vcf_individuals = set([ind_id for ind_id in head.individuals])
 
         variant_columns = ['CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER']
 
@@ -303,8 +307,8 @@ class VariantMixin(object):
                     variant['genetic_models'] = genetic_models
 
                 #Add genotype calls:
-                for individual in self.individuals:
-                    sample_id = individual['ind_id']
+                for individual in case_obj.individuals:
+                    sample_id = individual.ind_id
 
                     if sample_id in vcf_individuals:
 
@@ -315,8 +319,8 @@ class VariantMixin(object):
                         variant.add_individual(Genotype(
                             sample_id = sample_id,
                             genotype = raw_call.get('GT', './.'),
-                            case_id = individual.get('case_id'),
-                            phenotype = individual.get('phenotype'),
+                            case_id = individual.case_id,
+                            phenotype = individual.phenotype,
                             ref_depth = raw_call.get('AD', ',').split(',')[0],
                             alt_depth = raw_call.get('AD', ',').split(',')[1],
                             genotype_quality = raw_call.get('GQ', '.'),

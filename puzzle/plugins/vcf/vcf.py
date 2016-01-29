@@ -33,15 +33,16 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
 
         self.individuals = []
         self.case_objs = []
-        logger.debug("Updating root path to {0}".format(root_path))
+        logger.info("Updating root path to {0}".format(root_path))
         self.root_path = root_path
 
         self.check_setup(case_lines)
 
         self.variant_type = vtype
         logger.info("Setting variant type to {0}".format(vtype))
-        logger.debug("Updating pattern to {0}".format(pattern))
+
         self.pattern = pattern
+        logger.debug("Updating pattern to {0}".format(pattern))
         
         if root_path:
             if os.path.isdir(root_path):
@@ -59,7 +60,7 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
                 )
 
             for case_obj in self.case_objs:
-                for ind in case_obj['individuals']:
+                for ind in case_obj.individuals:
                     self.individuals.append(ind)
 
         logger.debug("Setting can_filter_gene to 'True'")
@@ -78,7 +79,7 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
             self.can_filter_consequence = True
             logger.debug("Setting can_filter_inheritance to 'True'")
             self.can_filter_inheritance = True
-
+    
     def check_setup(self, case_lines):
         """Make some small tests to see if setup is correct"""
         valid_vcf_suffixes = ('.vcf', '.vcf.gz')

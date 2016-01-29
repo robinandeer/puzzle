@@ -145,12 +145,12 @@ class VariantMixin(object):
         """
         individuals = []
         for ind in individual_objs:
-            index = ind['index']
+            index = ind.index
             individuals.append(Genotype(
-                sample_id=ind['ind_id'],
+                sample_id=ind.ind_id,
                 genotype=gemini_variant['gts'][index],
-                case_id=ind.get('case_id'),
-                phenotype=ind.get('phenotype'),
+                case_id=ind.case_id,
+                phenotype=ind.phenotype,
                 ref_depth=gemini_variant['gt_ref_depths'][index],
                 alt_depth=gemini_variant['gt_alt_depths'][index],
                 depth=gemini_variant['gt_depths'][index],
@@ -227,11 +227,11 @@ class VariantMixin(object):
         individuals = []
         # Get the individuals for the case
         for case in self.cases():
-            if case['name'] == case_id:
-                for individual in case['individuals']:
+            if case.name == case_id:
+                for individual in case.individuals:
                     individuals.append(individual)
 
-        indexes = [individual['index'] for individual in individuals]
+        indexes = [individual.index for individual in individuals]
 
         index = 0
         for gemini_variant in gq:

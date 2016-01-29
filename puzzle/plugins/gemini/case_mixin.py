@@ -37,7 +37,7 @@ class CaseMixin(object):
         cases = self.cases()
         if case_id:
             for case in cases:
-                if case['case_id'] == case_id:
+                if case.case_id == case_id:
                     return case
         else:
             if cases:
@@ -57,7 +57,7 @@ class CaseMixin(object):
         if ind_ids:
             for ind_id in ind_ids:
                 for ind in self.individuals:
-                    if ind['ind_id'] == ind_id:
+                    if ind.ind_id == ind_id:
                         yield ind
         else:
             yield self.individuals
@@ -77,7 +77,7 @@ class CaseMixin(object):
             self.db
         ))
         for individual in individuals:
-            case_ids.add(individual['case_id'])
+            case_ids.add(individual.case_id)
 
         for case_id in case_ids:
             logger.info("Found case {0}".format(case_id))
@@ -90,9 +90,9 @@ class CaseMixin(object):
                 )
             # Add the individuals to the correct case
             for individual in individuals:
-                if individual['case_id'] == case_id:
+                if individual.case_id == case_id:
                     logger.info("Adding ind {0} to case {1}".format(
-                        individual['name'], individual['case_id']
+                        individual.name, individual.case_id
                     ))
                     case.add_individual(individual)
 
@@ -114,6 +114,7 @@ class CaseMixin(object):
 
         query = "SELECT * from samples"
         gq.run(query)
+
         for individual in gq:
             logger.info("Found individual {0} with family id {1}".format(
                 individual['name'], individual['family_id']))
