@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
-from puzzle.models import Case
+
+from puzzle.models.dotdict import DotDict
 
 logger = logging.getLogger(__name__)
 
@@ -14,12 +15,14 @@ class Plugin(object):
         self.individuals = None
         self.case_obj = None
         self.variant_type = 'snv'
-        self.can_filter_frequency = False
-        self.can_filter_cadd = False
-        self.can_filter_consequence = False
-        self.can_filter_gene = False
-        self.can_filter_inheritance = False
-        self.can_filter_sv = False
+        self.filters = DotDict(
+            can_filter_frequency=False,
+            can_filter_cadd=False,
+            can_filter_consequence=False,
+            can_filter_gene=False,
+            can_filter_inheritance=False,
+            can_filter_sv=False
+        )
 
     def init_app(self, app):
         """Initialize plugin via Flask."""

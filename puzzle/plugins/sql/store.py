@@ -202,6 +202,7 @@ class Store(Plugin):
         logger.debug("Fetching case with case_id:{0}".format(case_id))
         case_obj = self.case(case_id)
         plugin, case_id = select_plugin(case_obj)
+        self.filters = plugin.filters
         variants = plugin.variants(case_id, skip, count, filters)
         return variants
 
@@ -226,5 +227,4 @@ def select_plugin(case_obj):
                               vtype=case_obj.variant_type)
 
     case_id = case_obj.case_id
-
     return plugin, case_id

@@ -5,6 +5,7 @@ import logging
 from path import path
 
 from puzzle.plugins import Plugin
+from puzzle.models import DotDict
 from puzzle.utils import get_case
 from . import VariantMixin, CaseMixin
 
@@ -43,7 +44,7 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
 
         self.pattern = pattern
         logger.debug("Updating pattern to {0}".format(pattern))
-        
+
         if root_path:
             if os.path.isdir(root_path):
                 logger.info("Looking for vcf files in {0}".format(root_path))
@@ -63,23 +64,15 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
                 for ind in case_obj.individuals:
                     self.individuals.append(ind)
 
-        logger.debug("Setting can_filter_gene to 'True'")
-        self.can_filter_gene = True
-        if self.variant_type == 'sv':
-            logger.debug("Setting can_filter_sv to 'True'")
-            self.can_filter_sv = True
-            logger.debug("Setting can_filter_sv_len to 'True'")
-            self.can_filter_sv_len = True
-        else:
-            logger.debug("Setting can_filter_frequency to 'True'")
-            self.can_filter_frequency = True
-            logger.debug("Setting can_filter_cadd to 'True'")
-            self.can_filter_cadd = True
-            logger.debug("Setting can_filter_consequence to 'True'")
-            self.can_filter_consequence = True
-            logger.debug("Setting can_filter_inheritance to 'True'")
-            self.can_filter_inheritance = True
-    
+        self.filters = DotDict(
+            can_filter_frequency=True,
+            can_filter_cadd=True,
+            can_filter_consequence=True,
+            can_filter_gene=True,
+            can_filter_inheritance=True,
+            can_filter_sv=True
+        )
+
     def check_setup(self, case_lines):
         """Make some small tests to see if setup is correct"""
         valid_vcf_suffixes = ('.vcf', '.vcf.gz')
