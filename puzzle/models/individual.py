@@ -5,7 +5,7 @@ from .dotdict import DotDict
 
 class Individual(DotDict, PedigreeHumanMixin):
     """Individual representation."""
-    def __init__(self, ind_id, case_id=None, mother=None,
+    def __init__(self, ind_id, case_id=None, case_name=None, mother=None,
                  father=None, sex=None, phenotype=None, index=None,
                  variant_source=None, bam_path=None):
         """Construct a individual object
@@ -22,7 +22,16 @@ class Individual(DotDict, PedigreeHumanMixin):
                 variant_source (str): Path to source (vcf file)
                 bam_path (str): Path to bamfiles (vcf file)
         """
-        super(Individual, self).__init__(ind_id=ind_id, name=ind_id,
-                case_id=case_id, mother=mother, father=father, sex=sex,
-                phenotype=phenotype, index=index,
-                variant_source=variant_source, bam_path=bam_path)
+        super(Individual, self).__init__(
+            ind_id=ind_id,
+            name=ind_id,
+            case_id=case_id,
+            case_name=case_name or case_id,
+            mother=mother,
+            father=father,
+            sex=sex,
+            phenotype=phenotype,
+            index=index,
+            variant_source=variant_source,
+            bam_path=bam_path
+        )

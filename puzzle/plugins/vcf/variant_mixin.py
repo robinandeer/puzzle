@@ -5,7 +5,7 @@ from vcftoolbox import (get_variant_dict, HeaderParser, get_info_dict,
 
 from puzzle.models import (Compound, Variant, Gene, Genotype, Transcript,)
 
-from puzzle.utils import (get_most_severe_consequence, get_omim_number, 
+from puzzle.utils import (get_most_severe_consequence, get_omim_number,
                           get_cytoband_coord, get_gene_info)
 
 logger = logging.getLogger(__name__)
@@ -316,7 +316,7 @@ class VariantMixin(object):
                         variant.add_individual(Genotype(
                             sample_id = sample_id,
                             genotype = raw_call.get('GT', './.'),
-                            case_id = individual.case_id,
+                            case_id = individual.case_name,
                             phenotype = individual.phenotype,
                             ref_depth = raw_call.get('AD', ',').split(',')[0],
                             alt_depth = raw_call.get('AD', ',').split(',')[1],

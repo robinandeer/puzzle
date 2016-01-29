@@ -224,7 +224,7 @@ def select_plugin(case_obj):
         logger.debug("Using gemini plugin")
         plugin = GeminiPlugin(db=case_obj.variant_source,
                               vtype=case_obj.variant_type)
-    
+
     case_id = case_obj.case_id
-    
+
     return plugin, case_id

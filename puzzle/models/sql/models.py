@@ -53,6 +53,11 @@ class Individual(BASE, PedigreeHumanMixin):
     case_id = Column(Integer, ForeignKey("case.id"))
     case = relationship(Case, backref=("individuals"))
 
+    @property
+    def case_name(self):
+        """Fetch display name of case."""
+        return self.case.name
+
     def __repr__(self):
         return("<Individual(id:{self.id}, ind_id:{self.ind_id}, mother:{self.mother},"\
                 " father{self.father}, sex:{self.sex}, phenotype.{self.phenotype}"\
