@@ -20,10 +20,8 @@ class TestGeminiAdapter(object):
 
     def setup(self):
         """docstring for setup"""
-        app = MockApp(GEMINI_DB)
 
-        self.adapter = GeminiPlugin()
-        self.adapter.init_app(app)
+        self.adapter = GeminiPlugin(GEMINI_DB)
 
     def test_gemini_individuals(self):
         """docstring for test_gemini_individuals"""

@@ -37,13 +37,30 @@ class CaseMixin(object):
         cases = self.cases()
         if case_id:
             for case in cases:
-                if case['case_id'] == case_id:
+                if case.case_id == case_id:
                     return case
         else:
             if cases:
                 return cases[0]
 
         return Case(case_id='unknown')
+    
+    def individuals(self, ind_ids=None):
+        """Return information about individuals
+        
+            Args:
+                ind_ids (list(str)): List of individual ids
+            
+            Returns:
+                individuals (Iterable): Iterable with Individuals
+        """
+        if ind_ids:
+            for ind_id in ind_ids:
+                for ind in self.individuals:
+                    if ind.ind_id == ind_id:
+                        yield ind
+        else:
+            yield self.individuals
     
     def _get_cases(self, individuals):
         """Return the cases found in the database
@@ -60,26 +77,29 @@ class CaseMixin(object):
             self.db
         ))
         for individual in individuals:
-            case_ids.add(individual['case_id'])
+            case_ids.add(individual.case_id)
 
         for case_id in case_ids:
             logger.info("Found case {0}".format(case_id))
             case = Case(
                 case_id=case_id,
-                name=case_id
+                name=case_id,
+                variant_source=self.db,
+                variant_type=self.variant_type,
+                variant_mode='gemini',
                 )
             # Add the individuals to the correct case
             for individual in individuals:
-                if individual['case_id'] == case_id:
+                if individual.case_id == case_id:
                     logger.info("Adding ind {0} to case {1}".format(
-                        individual['name'], individual['case_id']
+                        individual.name, individual.case_id
                     ))
                     case.add_individual(individual)
 
             case_objs.append(case)
 
         return case_objs
-    
+
     def _get_individuals(self):
         """Return a list with the individual objects found in db
 
@@ -94,9 +114,11 @@ class CaseMixin(object):
 
         query = "SELECT * from samples"
         gq.run(query)
+
         for individual in gq:
             logger.info("Found individual {0} with family id {1}".format(
                 individual['name'], individual['family_id']))
+            
             individuals.append(
                 Individual(
                     ind_id=individual['name'],

@@ -14,7 +14,6 @@ blueprint = Blueprint(BP_NAME, __name__, url_prefix='/variants',
 def variants(case_id):
     """Show all variants for a case."""
     filters = parse_filters()
-    print(filters)
     variants = app.db.variants(
         case_id,
         skip=filters['skip'],
@@ -28,25 +27,15 @@ def variants(case_id):
             'sv_types': filters['selected_sv_types'],
         }
     )
-    if app.db.mode == 'sv':
-        print(app.db)
-        print(app.db.can_filter_gene)
-        print(app.db.can_filter_frequency)
-        print(app.db.can_filter_cadd)
-        print(app.db.can_filter_consequence)
+    if app.db.variant_type == 'sv':
         return render_template('sv_variants.html', variants=variants, case_id=case_id,
                                db=app.db, filters=filters, consequences=SO_TERMS,
-                               inheritance_models=INHERITANCE_MODELS_SHORT, 
+                               inheritance_models=INHERITANCE_MODELS_SHORT,
                                sv_types=SV_TYPES)
     else:
-        print(app.db)
-        print(app.db.can_filter_gene)
-        print(app.db.can_filter_frequency)
-        print(app.db.can_filter_cadd)
-        print(app.db.can_filter_consequence)
         return render_template('variants.html', variants=variants, case_id=case_id,
                                db=app.db, filters=filters, consequences=SO_TERMS,
-                               inheritance_models=INHERITANCE_MODELS_SHORT, 
+                               inheritance_models=INHERITANCE_MODELS_SHORT,
                                sv_types=SV_TYPES)
 
 
@@ -60,12 +49,9 @@ def variant(case_id, variant_id):
     # sort compounds by score
     sorted_compounds = sorted(variant['compounds'],
                               key=lambda compound: compound['combined_score'])
-    
-    if app.db.mode == 'sv':
-        return render_template('sv_variant.html', variant=variant, 
-                            compounds=sorted_compounds, case_id=case_id)
-    else:
-        return render_template('variant.html', variant=variant,
+
+    template = 'sv_variant.html' if app.db.variant_type == 'sv' else 'variant.html'
+    return render_template(template, variant=variant,
                            compounds=sorted_compounds, case_id=case_id)
 
 
@@ -84,9 +70,9 @@ def parse_filters():
     filters['selected_consequences'] = request.args.getlist('consequences')
     filters['selected_sv_types'] = request.args.getlist('sv_types')
     filters['skip'] = int(request.args.get('skip', 0))
-    
+
     filters['query_dict'] = {key: request.args.getlist(key) for key
                              in request.args.keys()}
     filters['query_dict'].update({'skip': (filters['skip'] + 30)})
-    
+
     return filters
