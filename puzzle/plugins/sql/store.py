@@ -14,7 +14,11 @@ from sqlalchemy.sql.expression import ClauseElement
 from puzzle.models import Case as BaseCase
 from puzzle.models import Individual as BaseIndividual
 from puzzle.models.sql import (BASE, Case, Individual)
-from puzzle.plugins import VcfPlugin, GeminiPlugin, Plugin
+from puzzle.plugins import VcfPlugin, Plugin
+try:
+    from puzzle.plugins import GeminiPlugin
+except ImportError as e:
+    pass
 
 logger = logging.getLogger(__name__)
 
