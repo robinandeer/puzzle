@@ -8,7 +8,7 @@ Try the online [demo](https://puzzle-demo-robinandeer.c9.io) or install and run 
 $ git clone https://github.com/robinandeer/puzzle.git
 $ cd puzzle
 $ pip install --editable .
-$ puzzle tests/ view
+$ puzzle view -i tests/fixtures/
 # open webbrowser on port 5000
 $ open http://localhost:5000
 ```
@@ -40,6 +40,22 @@ $ otto dev ssh
 # open webbrowser on port 5000
 ```
 
+
+## Use a gemini database ##
+
+Make sure you have gemini installed in your local environment
+
+```
+puzzle --mode gemini view -i path/to/gemini_database.db
+```
+
+## Use ped info ##
+
+Puzzle uses the ped file to show more information in family view and in variant calls:
+
+```
+puzzle view -i tests/fixtures/hapmap.vcf --family_file/-f tests/fixtures/hapmap.vcf
+```
 
 ## License
 MIT. See the [LICENSE](LICENSE) file for more details.

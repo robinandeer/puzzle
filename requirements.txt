@@ -7,8 +7,9 @@
 
 click
 Flask-Script
-vcftoolbox>=1.0
+vcftoolbox>1.1
 path.py
 ped-parser
 intervaltree
 phizz>=0.1.1
+sqlalchemy
