@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import (abort, Blueprint, current_app as app, render_template,
                    redirect, request)
+from werkzeug import secure_filename
 
 from puzzle.utils import hpo_genes
 
@@ -13,7 +14,9 @@ blueprint = Blueprint(BP_NAME, __name__, template_folder='templates',
 @blueprint.route('/')
 def index():
     """Show the landing page."""
-    return render_template('index.html', cases=app.db.cases())
+    gene_lists = app.db.gene_lists() if app.config['STORE_ENABLED'] else []
+    return render_template('index.html', cases=app.db.cases(),
+                           gene_lists=gene_lists)
 
 
 @blueprint.route('/cases/<case_id>')
@@ -38,6 +41,11 @@ def phenotypes():
         # update the HPO gene list for the case
         hpo_list = app.db.case_genelist(ind_obj.case)
         hpo_results = hpo_genes(ind_obj.case.phenotype_ids())
+
+        if hpo_results is None:
+            return abort(500, "couldn't link to genes, try again"
+                              .format(phenotype_id))
+
         gene_ids = [result['gene_id'] for result in hpo_results
                     if result['gene_id']]
         hpo_list.gene_ids = gene_ids
@@ -55,11 +63,36 @@ def delete_phenotype(phenotype_id):
     return redirect(request.referrer)
 
 
-@blueprint.route('/genelists/<list_id>')
-def gene_list(list_id):
-    """Display details on a gene list."""
-    genelist_obj = app.db.gene_list(list_id)
-    if genelist_obj is None:
-        return abort(404, "gene list not found: {}".format(list_id))
+@blueprint.route('/genelists', methods=['POST'])
+@blueprint.route('/genelists/<list_id>', methods=['GET', 'POST'])
+def gene_list(list_id=None):
+    """Display or add a gene list."""
+    if list_id:
+        genelist_obj = app.db.gene_list(list_id)
+        if genelist_obj is None:
+            return abort(404, "gene list not found: {}".format(list_id))
 
-    return render_template('gene_list.html', gene_list=genelist_obj)
+    if request.method == 'POST':
+        if list_id:
+            # link a case to the gene list
+            case_ids = request.form.getlist('case_id')
+            for case_id in case_ids:
+                case_obj = app.db.case(case_id)
+                if case_obj not in genelist_obj.cases:
+                    genelist_obj.cases.append(case_obj)
+                    app.db.save()
+        else:
+            # upload a new gene list
+            req_file = request.files['file']
+            list_id = (request.form['list_id'] or
+                       secure_filename(req_file.filename))
+
+            if not req_file:
+                return abort(500, 'Please provide a file for upload')
+
+            gene_ids = [line for line in req_file.stream
+                        if not line.startswith('#')]
+            genelist_obj = app.db.add_genelist(list_id, gene_ids)
+
+    return render_template('gene_list.html', gene_list=genelist_obj,
+                           cases=app.db.cases())

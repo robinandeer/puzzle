@@ -260,6 +260,21 @@ class Store(Plugin):
         """Get a gene list from the database."""
         return self.query(GeneList).filter_by(list_id=list_id).first()
 
+    def gene_lists(self):
+        """Return all gene lists from the database."""
+        return self.query(GeneList)
+
+    def add_genelist(self, list_id, gene_ids, case_obj=None):
+        """Create a new gene list and optionally link to cases."""
+        new_genelist = GeneList(list_id=list_id)
+        new_genelist.gene_ids = gene_ids
+        if case_obj:
+            new_genelist.cases.append(case_obj)
+
+        self.session.add(new_genelist)
+        self.save()
+        return new_genelist
+
     def case_genelist(self, case_obj):
         """Get or create a new case specific gene list record."""
         list_id = "{}-HPO".format(case_obj.case_id)

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from .models import BASE
@@ -10,9 +10,12 @@ class CaseGenelistLink(BASE):
     """Link between case and gene list."""
 
     __tablename__ = 'case_genelist_link'
+    __table_args__ = (UniqueConstraint('case_id', 'genelist_id',
+                                       name='_case_genelist_uc'),)
 
-    case_id = Column(Integer, ForeignKey('case.id'), primary_key=True)
-    genelist_id = Column(Integer, ForeignKey('gene_list.id', primary_key=True))
+    id = Column(Integer, primary_key=True)
+    case_id = Column(Integer, ForeignKey('case.id'))
+    genelist_id = Column(Integer, ForeignKey('gene_list.id'))
 
 
 class GeneList(BASE):

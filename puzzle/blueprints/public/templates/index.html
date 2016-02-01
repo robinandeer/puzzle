@@ -1,17 +1,58 @@
 {% extends "layouts/base.html" %}
 
 {% block body_content %}
-	<ul class="list-group">
-		{% for case in cases %}
-			<li class="list-group-item">
-				<a href="{{ url_for('public.case', case_id=case.case_id) }}">
-					{{ case.name }}
-				</a>
+	<div class="row">
+		<div class="col-md-8">
+			<ul class="list-group">
+				{% for case in cases %}
+					<li class="list-group-item">
+						<a href="{{ url_for('public.case', case_id=case.case_id) }}">
+							{{ case.name }}
+						</a>
 
-				<a class="pull-right" href="{{ url_for('variants.variants', case_id=case.case_id) }}">
-					Variants
-				</a>
-			</li>
-		{% endfor %}
-	</ul>
+						<a class="pull-right" href="{{ url_for('variants.variants', case_id=case.case_id) }}">
+							Variants
+						</a>
+					</li>
+				{% endfor %}
+			</ul>
+		</div>
+
+		{% if config['STORE_ENABLED'] %}
+			<div class="col-md-4">
+				<div class="panel panel-default">
+					<div class="panel-heading">Gene lists</div>
+					<ul class="list-group">
+						{% for gene_list in gene_lists %}
+							<li class="list-group-item">
+								<a href="{{ url_for('public.gene_list', list_id=gene_list.list_id) }}" title="{{ gene_list.list_id }}">{{ gene_list.list_id }}</a>
+							</li>
+						{% else %}
+							<li class="list-group-item">No gene lists added.</li>
+						{% endfor %}
+					</ul>
+				</div>
+
+				<div class="panel panel-default">
+					<div class="panel-heading">Upload a gene list</div>
+
+					<div class="panel-body">
+						<form action="{{ url_for('public.gene_list') }}" method="POST" enctype="multipart/form-data">
+							<div class="form-group">
+								<input class="form-control" name="list_id" placeholder="gene list id"></input>
+							</div>
+							<div class="form-group row">
+								<div class="col-md-8">
+									<input class="form-control" type="file" name="file"></input>
+								</div>
+								<div class="col-md-4">
+									<button class="btn btn-default form-control" type="submit">Upload</button>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		{% endif %}
+	</div>
 {% endblock %}
