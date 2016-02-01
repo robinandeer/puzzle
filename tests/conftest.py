@@ -83,6 +83,9 @@ def sql_store():
 
 
 @pytest.yield_fixture(scope='function')
-def test_db(sql_store):
+def test_db(sql_store, case_obj):
     """Populate database with some sample data."""
-    sql_store.add()
+    sql_store.add_case(case_obj)
+    yield sql_store
+    sql_store.tear_down()
+    sql_store.set_up()

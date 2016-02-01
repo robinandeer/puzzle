@@ -15,8 +15,8 @@ class PhenotypeTerm(BASE):
     phenotype_id = Column(String(32), nullable=False)
     description = Column(String(128))
 
-    case_id = Column(Integer, ForeignKey('case.id'))
-    case = relationship('Case', backref=('phenotype_terms'))
+    ind_id = Column(Integer, ForeignKey('individual.id'))
+    individual = relationship('Individual', backref=('phenotypes'))
 
     @property
     def hpo_link(self):
