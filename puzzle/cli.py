@@ -280,6 +280,7 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
             ctx.abort()
 
         plugin = SqlStore(ctx.obj['db_path'])
+        BaseConfig.STORE_ENABLED = True
 
     elif mode == 'vcf':
         logger.info("Initialzing VCF plugin")
