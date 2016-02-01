@@ -8,13 +8,13 @@ logger = logging.getLogger(__name__)
 
 class Transcript(dict):
     """Class that holds information about a transcript"""
-    def __init__(self, SYMBOL, Feature, Consequence, Gene=None, BIOTYPE=None, 
-                STRAND=None, SIFT=None, PolyPhen=None, EXON=None, HGVSc=None, 
+    def __init__(self, hgnc_symbol, transcript_id, consequence, ensembl_id=None, biotype=None, 
+                strand=None, sift=None, polyphen=None, exon=None, HGVSc=None, 
                 HGVSp=None):
         super(Transcript, self).__init__(
-            SYMBOL=SYMBOL, Feature=Feature, BIOTYPE=BIOTYPE,
-            Consequence=Consequence, Gene=Gene, STRAND=STRAND, SIFT=SIFT,
-            PolyPhen=PolyPhen, EXON=EXON, HGVSc=HGVSc, HGVSp=HGVSp)
+            hgnc_symbol=hgnc_symbol, transcript_id=transcript_id, biotype=biotype,
+            consequence=consequence, ensembl_id=ensembl_id, strand=strand, sift=sift,
+            polyphen=polyphen, exon=exon, HGVSc=HGVSc, HGVSp=HGVSp)
 
 
 class Gene(dict):

@@ -7,7 +7,7 @@
 
 click
 Flask-Script
-vcftoolbox>1.1
+vcftoolbox>1.2
 path.py
 ped-parser
 intervaltree

@@ -1,7 +1,7 @@
 import logging
 
 from vcftoolbox import (get_variant_dict, HeaderParser, get_info_dict,
-                        get_vep_info, get_vcf_handle)
+                        get_vep_info, get_snpeff_info, get_vcf_handle)
 
 from puzzle.models import (Compound, Variant, Gene, Genotype, Transcript,)
 
@@ -140,7 +140,7 @@ class VariantMixin(object):
         genes = get_gene_info(variant['transcripts'])
         return genes
 
-    def _get_transcripts(self, variant, vep_info):
+    def _get_vep_transcripts(self, variant, vep_info):
         """Get all transcripts for a variant
 
             Args:
@@ -152,17 +152,40 @@ class VariantMixin(object):
         transcripts = []
         for transcript_info in vep_info:
             transcripts.append(Transcript(
-                SYMBOL = transcript_info.get('SYMBOL'),
-                Feature = transcript_info.get('Feature'),
-                Gene = transcript_info.get('Gene'),
-                BIOTYPE = transcript_info.get('BIOTYPE'),
-                Consequence = transcript_info.get('Consequence'),
-                STRAND = transcript_info.get('STRAND'),
-                SIFT = transcript_info.get('SIFT'),
-                PolyPhen = transcript_info.get('PolyPhen'),
-                EXON = transcript_info.get('EXON'),
+                hgnc_symbol = transcript_info.get('SYMBOL'),
+                transcript_id = transcript_info.get('Feature'),
+                ensembl_id = transcript_info.get('Gene'),
+                biotype = transcript_info.get('BIOTYPE'),
+                consequence = transcript_info.get('Consequence'),
+                strand = transcript_info.get('STRAND'),
+                sift = transcript_info.get('SIFT'),
+                polyphen = transcript_info.get('PolyPhen'),
+                exon = transcript_info.get('EXON'),
                 HGVSc = transcript_info.get('HGVSc'),
                 HGVSp = transcript_info.get('HGVSp')
+            ))
+        return transcripts
+
+    def _get_snpeff_transcripts(self, variant, snpeff_info):
+        """Get all transcripts for a variant
+
+            Args:
+                snp_info (list): A list of snpeff dicts
+
+            Returns:
+                transcripts (list): A list of transcripts
+        """
+        transcripts = []
+        for transcript_info in snpeff_info:
+            transcripts.append(Transcript(
+                hgnc_symbol = transcript_info.get('Gene_Name'),
+                transcript_id = transcript_info.get('Feature'),
+                ensembl_id = transcript_info.get('Gene_ID'),
+                biotype = transcript_info.get('Transcript_BioType'),
+                consequence = transcript_info.get('Annotation'),
+                exon = transcript_info.get('Rank'),
+                HGVSc = transcript_info.get('HGVS.c'),
+                HGVSp = transcript_info.get('HGVS.p')
             ))
         return transcripts
 
@@ -192,6 +215,7 @@ class VariantMixin(object):
         variant_columns = ['CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER']
 
         vep_header = head.vep_columns
+        snpeff_header = head.snpeff_columns
 
         handle = get_vcf_handle(infile=vcf_file_path)
 
@@ -211,11 +235,21 @@ class VariantMixin(object):
                 #Check if vep annotation:
                 vep_string = info_dict.get('CSQ')
 
+                #Check if snpeff annotation:
+                snpeff_string = info_dict.get('ANN')
+                
                 if vep_string:
                     #Get the vep annotations
                     vep_info = get_vep_info(
                         vep_string = vep_string,
                         vep_header = vep_header
+                    )
+
+                elif snpeff_string:
+                    #Get the vep annotations
+                    snpeff_info = get_snpeff_info(
+                        snpeff_string = snpeff_string,
+                        snpeff_header = snpeff_header
                     )
 
                 variant = Variant(
@@ -329,12 +363,17 @@ class VariantMixin(object):
 
                 # Add transcript information:
                 if vep_string:
-                    for transcript in self._get_transcripts(variant, vep_info):
+                    for transcript in self._get_vep_transcripts(variant, vep_info):
+                        variant.add_transcript(transcript)
+                
+                elif snpeff_string:
+                    for transcript in self._get_snpeff_transcripts(variant, snpeff_info):
                         variant.add_transcript(transcript)
 
                 variant['most_severe_consequence'] = get_most_severe_consequence(
                     variant['transcripts']
                 )
+                
                 for gene in self._get_genes(variant):
                     variant.add_gene(gene)
 
