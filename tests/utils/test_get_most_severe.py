@@ -3,7 +3,7 @@ from puzzle.utils import get_most_severe_consequence
 def test_get_most_severe():
     """docstring for test_get_most_severe"""
     transcripts = [
-        {'Consequence': 'transcript_ablation'}
+        {'consequence': 'transcript_ablation'}
     ]
     
     assert get_most_severe_consequence(transcripts) == 'transcript_ablation'
@@ -17,7 +17,7 @@ def test_get_most_severe_no_transcripts():
 def test_get_most_severe_unknown_consequence():
     """docstring for test_get_most_severe"""
     transcripts = [
-        {'Consequence': 'unknown'}
+        {'consequence': 'unknown'}
     ]
     
     assert get_most_severe_consequence(transcripts) == None
@@ -25,9 +25,17 @@ def test_get_most_severe_unknown_consequence():
 def test_get_most_severe_multiple_transcripts():
     """docstring for test_get_most_severe"""
     transcripts = [
-        {'Consequence': 'inframe_deletion'},
-        {'Consequence': 'start_lost'},
-        {'Consequence': 'synonymous_variant'}
+        {'consequence': 'inframe_deletion'},
+        {'consequence': 'start_lost'},
+        {'consequence': 'synonymous_variant'}
+    ]
+    
+    assert get_most_severe_consequence(transcripts) == 'start_lost'
+
+def test_get_most_severe_multiple_annotations():
+    """docstring for test_get_most_severe"""
+    transcripts = [
+        {'consequence': 'start_lost&synonymous_variant'},
     ]
     
     assert get_most_severe_consequence(transcripts) == 'start_lost'
