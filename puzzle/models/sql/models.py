@@ -29,6 +29,13 @@ class Case(BASE):
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
+    @property
+    def phenotypes(self):
+        """Return all phenotypes for included individuals."""
+        for individual in self.individuals:
+            for term in individual.phenotypes:
+                yield term
+
     def __repr__(self):
         return("<Case(id:{self.id}, case_id:{self.case_id}, name:{self.name},"\
                 " variant_source:{self.variant_source}, variant_type:"\
