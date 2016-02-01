@@ -259,7 +259,7 @@ class VariantMixin(object):
                 variant (dict): A Variant object
         """
         variant_dict = {
-            'CHROM':gemini_variant['chrom'].lstrip('chr'),
+            'CHROM':gemini_variant['chrom'].lstrip('chrCHR'),
             'POS':str(gemini_variant['start']),
             'ID':gemini_variant['rs_ids'],
             'REF':gemini_variant['ref'],

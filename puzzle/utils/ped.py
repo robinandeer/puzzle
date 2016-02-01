@@ -27,7 +27,10 @@ def get_case(variant_source, case_lines=None, case_type='ped', variant_type='snv
             case_lines=case_lines,
             case_type=case_type,
         )
-
+        
+        #If no individuals we still need to have a case id
+        case_id = os.path.basename(variant_source)
+        
         for individual in individuals:
             case_id = individual['case_id']
 

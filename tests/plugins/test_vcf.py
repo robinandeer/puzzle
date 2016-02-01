@@ -89,5 +89,5 @@ def test_vcf_case():
 
 def test_vcf_case_dir():
     adapter=VcfPlugin(root_path="tests/fixtures/")
-    assert len(adapter.case_objs) == 2
+    assert len(adapter.case_objs) == 3
 

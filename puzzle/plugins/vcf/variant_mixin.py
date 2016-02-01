@@ -228,6 +228,7 @@ class VariantMixin(object):
                     variant_line = variant_line,
                     header_line = header_line
                 )
+                variant_dict['CHROM'] = variant_dict['CHROM'].lstrip('chrCHR')
                 #Crreate a info dict:
                 info_dict = get_info_dict(
                     info_line = variant_dict['INFO']
