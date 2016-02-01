@@ -14,7 +14,7 @@ from sqlalchemy.sql.expression import ClauseElement
 
 from puzzle.models import Case as BaseCase
 from puzzle.models import Individual as BaseIndividual
-from puzzle.models.sql import (BASE, Case, Individual, PhenotypeTerm)
+from puzzle.models.sql import (BASE, Case, Individual, PhenotypeTerm, GeneList)
 from puzzle.plugins import VcfPlugin, Plugin
 try:
     from puzzle.plugins import GeminiPlugin
@@ -228,10 +228,11 @@ class Store(Plugin):
             hpo_results = phizz.query_disease([phenotype_id])
 
         added_terms = []
+        existing_ids = set(term.phenotype_id for term in ind_obj.phenotypes)
         for result in hpo_results:
-            term = PhenotypeTerm(phenotype_id=result['hpo_term'],
-                                 description=result['description'])
-            if term not in ind_obj.phenotypes:
+            if result['hpo_term'] not in existing_ids:
+                term = PhenotypeTerm(phenotype_id=result['hpo_term'],
+                                     description=result['description'])
                 logger.info('adding new HPO term: %s', term.phenotype_id)
                 ind_obj.phenotypes.append(term)
                 added_terms.append(term)
@@ -254,6 +255,22 @@ class Store(Plugin):
                     self.session.delete(term)
         logger.debug('persist removals')
         self.save()
+
+    def gene_list(self, list_id):
+        """Get a gene list from the database."""
+        return self.query(GeneList).filter_by(list_id=list_id).first()
+
+    def case_genelist(self, case_obj):
+        """Get or create a new case specific gene list record."""
+        list_id = "{}-HPO".format(case_obj.case_id)
+        gene_list = self.gene_list(list_id)
+
+        if gene_list is None:
+            gene_list = GeneList(list_id=list_id)
+            case_obj.gene_lists.append(gene_list)
+            self.session.add(gene_list)
+
+        return gene_list
 
 
 def select_plugin(case_obj):

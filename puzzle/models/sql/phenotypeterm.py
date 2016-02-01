@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from .models import BASE
@@ -10,6 +10,8 @@ class PhenotypeTerm(BASE):
     """Represent a HPO phenotype term."""
 
     __tablename__ = "phenotype_term"
+    __table_args__ = (UniqueConstraint('ind_id', 'phenotype_id',
+                                       name='_ind_phenotype_uc'),)
 
     id = Column(Integer, primary_key=True)
     phenotype_id = Column(String(32), nullable=False)
