@@ -2,8 +2,6 @@
 
 Variant Caller GUI and genetic disease analysis tool.
 
-Try the online [demo](https://puzzle-demo-robinandeer.c9.io) or install and run locally:
-
 ```bash
 $ git clone https://github.com/robinandeer/puzzle.git
 $ cd puzzle
@@ -62,7 +60,7 @@ MIT. See the [LICENSE](LICENSE) file for more details.
 
 
 [travis-url]: https://travis-ci.org/robinandeer/puzzle
-[travis-image]: https://img.shields.io/travis/robinandeer/puzzle.svg?style=flat-square
+[travis-image]: https://img.shields.io/travis/robinandeer/puzzle/master.svg?style=flat-square
 [coveralls-url]: https://coveralls.io/github/robinandeer/puzzle
 [coveralls-img]: https://img.shields.io/coveralls/robinandeer/puzzle.svg?style=flat-square
 [otto]: https://ottoproject.io/
