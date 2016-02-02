@@ -35,7 +35,7 @@ class GeneList(BASE):
     @property
     def gene_ids(self):
         """Return a list of gene ids."""
-        return self._gene_ids.split(',')
+        return self._gene_ids.split(',') if self._gene_ids else []
 
     @gene_ids.setter
     def gene_ids(self, value):
