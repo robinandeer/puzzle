@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import (abort, Blueprint, current_app as app, render_template,
-                   redirect, request)
+                   redirect, request, url_for)
 from werkzeug import secure_filename
 
 from puzzle.utils import hpo_genes
@@ -69,6 +69,8 @@ def gene_list(list_id=None):
     """Display or add a gene list."""
     if list_id:
         genelist_obj = app.db.gene_list(list_id)
+        case_ids = [case.case_id for case in app.db.cases()
+                    if case not in genelist_obj.cases]
         if genelist_obj is None:
             return abort(404, "gene list not found: {}".format(list_id))
 
@@ -95,4 +97,19 @@ def gene_list(list_id=None):
             genelist_obj = app.db.add_genelist(list_id, gene_ids)
 
     return render_template('gene_list.html', gene_list=genelist_obj,
-                           cases=app.db.cases())
+                           case_ids=case_ids)
+
+
+@blueprint.route('/genelists/delete/<list_id>', methods=['POST'])
+@blueprint.route('/genelists/delete/<list_id>/<case_id>', methods=['POST'])
+def delete_genelist(list_id, case_id=None):
+    """Delete a whole gene list with links to cases or a link."""
+    if case_id:
+        # unlink a case from a gene list
+        case_obj = app.db.case(case_id)
+        app.db.remove_genelist(list_id, case_obj=case_obj)
+        return redirect(request.referrer)
+    else:
+        # remove the whole gene list
+        app.db.remove_genelist(list_id)
+        return redirect(url_for('.index'))

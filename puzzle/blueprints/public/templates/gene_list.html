@@ -2,8 +2,17 @@
 {% import "macros/form_utils.html" as utils %}
 
 {% block body_content %}
-	<div class="page-header">
-		<h3>{{ gene_list.list_id }}</h3>
+
+	<div class="navbar navbar-default">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<div class="navbar-brand">{{ gene_list.list_id }}</div>
+			</div>
+
+			<form class="navbar-form navbar-right" action="{{ url_for('public.delete_genelist', list_id=gene_list.list_id) }}" method="POST" accept-charset="utf-8" role="delete">
+				<button type="submit" class="btn btn-default btn-sm navbar-btn">Delete</button>
+			</form>
+		</div>
 	</div>
 
 	<div class="row">
@@ -27,6 +36,12 @@
 					{% for case in gene_list.cases %}
 						<li class="list-group-item">
 							<a href="{{ url_for('public.case', case_id=case.case_id) }}" title="{{ case.name }}">{{ case.name }}</a>
+
+							<form class="badge" action="{{ url_for('public.delete_genelist', list_id=gene_list.list_id, case_id=case.case_id) }}" method="POST" accept-charset="utf-8">
+								<button class="no-style" type="submit">
+									<span class="glyphicon glyphicon-remove"></span>
+								</button>
+							</form>
 						</li>
 					{% else %}
 						<li class="list-group-item">Not linked to any cases.</li>
@@ -34,21 +49,23 @@
 				</ul>
 			</div>
 
-			<div class="panel panel-default">
-				<div class="panel-heading">Add gene list to case</div>
-				<div class="panel-body">
-					<form action="{{ url_for('public.gene_list', list_id=gene_list.list_id) }}" method="POST" accept-charset="utf-8">
-						<div class="row">
-							<div class="col-md-8">
-								{{ utils.select_input('case_id', cases|map(attribute='case_id'), multiple=True) }}
+			{% if case_ids %}
+				<div class="panel panel-default">
+					<div class="panel-heading">Add gene list to case</div>
+					<div class="panel-body">
+						<form action="{{ url_for('public.gene_list', list_id=gene_list.list_id) }}" method="POST" accept-charset="utf-8">
+							<div class="row">
+								<div class="col-md-8">
+									{{ utils.select_input('case_id', case_ids, multiple=True) }}
+								</div>
+								<div class="col-md-4">
+									<button class="form-control btn btn-default" type="submit">Link</button>
+								</div>
 							</div>
-							<div class="col-md-4">
-								<button class="form-control btn btn-default" type="submit">Link</button>
-							</div>
-						</div>
-					</form>
+						</form>
+					</div>
 				</div>
-			</div>
+			{% endif %}
 		</div>
 	</div>
 {% endblock %}

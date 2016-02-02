@@ -14,7 +14,8 @@ from sqlalchemy.sql.expression import ClauseElement
 
 from puzzle.models import Case as BaseCase
 from puzzle.models import Individual as BaseIndividual
-from puzzle.models.sql import (BASE, Case, Individual, PhenotypeTerm, GeneList)
+from puzzle.models.sql import (BASE, Case, Individual, PhenotypeTerm, GeneList,
+                               CaseGenelistLink)
 from puzzle.plugins import VcfPlugin, Plugin
 try:
     from puzzle.plugins import GeminiPlugin
@@ -274,6 +275,27 @@ class Store(Plugin):
         self.session.add(new_genelist)
         self.save()
         return new_genelist
+
+    def remove_genelist(self, list_id, case_obj=None):
+        """Remove a gene list and links to cases."""
+        gene_list = self.gene_list(list_id)
+
+        if case_obj:
+            # remove a single link between case and gene list
+            case_ids = [case_obj.id]
+        else:
+            # remove all links and the list itself
+            case_ids = [case.id for case in gene_list.cases]
+            self.session.delete(gene_list)
+
+        case_links = self.query(CaseGenelistLink).filter(
+            CaseGenelistLink.case_id.in_(case_ids),
+            CaseGenelistLink.genelist_id == gene_list.id
+        )
+        for case_link in case_links:
+            self.session.delete(case_link)
+
+        self.save()
 
     def case_genelist(self, case_obj):
         """Get or create a new case specific gene list record."""
