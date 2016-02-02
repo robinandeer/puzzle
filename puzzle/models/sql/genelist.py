@@ -41,5 +41,10 @@ class GeneList(BASE):
     def gene_ids(self, value):
         self._gene_ids = ','.join(value)
 
+    def delete_gene(self, *gene_ids):
+        """Delete one or more gene ids form the list."""
+        self.gene_ids = [gene_id for gene_id in self.gene_ids
+                         if gene_id not in gene_ids]
+
     def __repr__(self):
         return "PhenotypeTerm(list_id={this.list_id})".format(this=self)
