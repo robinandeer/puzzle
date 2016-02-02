@@ -13,6 +13,8 @@
 				<ul class="list-group">
 					{% for gene_id in gene_list.gene_ids %}
 						<li class="list-group-item">{{ gene_id }}</li>
+					{% else %}
+						<li class="list-group-item">No genes?</li>
 					{% endfor %}
 				</ul>
 			</div>
