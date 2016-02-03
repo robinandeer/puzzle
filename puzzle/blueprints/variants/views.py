@@ -25,18 +25,19 @@ def variants(case_id):
             'consequence': filters['selected_consequences'],
             'genetic_models': filters['selected_models'],
             'sv_types': filters['selected_sv_types'],
+            'gene_lists': filters['gene_lists']
         }
     )
+    gene_lists = ([gene_list.list_id for gene_list in app.db.gene_lists()]
+                  if app.config['STORE_ENABLED'] else [])
+    kwargs = dict(variants=variants, case_id=case_id, db=app.db,
+                  filters=filters, consequences=SO_TERMS,
+                  inheritance_models=INHERITANCE_MODELS_SHORT,
+                  gene_lists=gene_lists)
     if app.db.variant_type == 'sv':
-        return render_template('sv_variants.html', variants=variants, case_id=case_id,
-                               db=app.db, filters=filters, consequences=SO_TERMS,
-                               inheritance_models=INHERITANCE_MODELS_SHORT,
-                               sv_types=SV_TYPES)
+        return render_template('sv_variants.html', sv_types=SV_TYPES, **kwargs)
     else:
-        return render_template('variants.html', variants=variants, case_id=case_id,
-                               db=app.db, filters=filters, consequences=SO_TERMS,
-                               inheritance_models=INHERITANCE_MODELS_SHORT,
-                               sv_types=SV_TYPES)
+        return render_template('variants.html', **kwargs)
 
 
 @blueprint.route('/<case_id>/<variant_id>')
@@ -70,6 +71,7 @@ def parse_filters():
     filters['selected_consequences'] = request.args.getlist('consequences')
     filters['selected_sv_types'] = request.args.getlist('sv_types')
     filters['skip'] = int(request.args.get('skip', 0))
+    filters['gene_lists'] = request.args.getlist('gene_lists')
 
     filters['query_dict'] = {key: request.args.getlist(key) for key
                              in request.args.keys()}
