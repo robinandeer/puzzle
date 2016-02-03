@@ -4,7 +4,7 @@ from gemini import GeminiQuery
 
 from puzzle.models import (Compound, Variant, Gene, Genotype, Transcript,)
 
-from puzzle.utils import (get_most_severe_consequence, get_omim_number, 
+from puzzle.utils import (get_most_severe_consequence, get_omim_number,
                           get_cytoband_coord, get_gene_info)
 
 
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class VariantMixin(object):
     """Class to store variant specific functions for gemini plugin"""
 
-    def variants(self, case_id, skip=0, count=30, filters={}):
+    def variants(self, case_id, skip=0, count=30, filters=None):
         """Return count variants for a case.
 
             Args:
@@ -31,6 +31,7 @@ class VariantMixin(object):
                 }
 
         """
+        filters = filters or {}
         logger.debug("Looking for variants in {0}".format(case_id))
 
         limit = count + skip
@@ -53,8 +54,8 @@ class VariantMixin(object):
                 gemini_query += " WHERE (cadd_scaled > {0})".format(cadd_score)
             any_filter = True
 
-        if filters.get('gene_list'):
-            gene_list = [gene_id.strip() for gene_id in filters['gene_list']]
+        if filters.get('gene_ids'):
+            gene_list = [gene_id.strip() for gene_id in filters['gene_ids']]
             gene_string = "("
             for index, gene_id in enumerate(gene_list):
                 if index == 0:
@@ -378,4 +379,3 @@ class VariantMixin(object):
                 return True
 
         return False
-
