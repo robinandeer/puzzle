@@ -18,7 +18,7 @@ def variants(case_id):
         case_id,
         skip=filters['skip'],
         filters={
-            'gene_list': filters['gene_symbols'],
+            'gene_ids': filters['gene_symbols'],
             'frequency': filters.get('frequency'),
             'cadd': filters.get('cadd'),
             'sv_len': filters.get('sv_len'),
