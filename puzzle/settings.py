@@ -15,6 +15,7 @@ class BaseConfig:
     # http://flask.pocoo.org/docs/quickstart/#sessions
     SECRET_KEY = 'secret key'
     PUZZLE_BACKEND = VcfPlugin()
+    STORE_ENABLED = False
 
     PUZZLE_MODE = 'snv'
 
