@@ -60,7 +60,7 @@
 			{% if config['STORE_ENABLED'] %}
 				<div class="col-md-3">
 					<label class="control-label">Gene lists</label>
-					{{ utils.select_input('gene_lists', gene_lists, filters.selected_gene_lists, multiple=True) }}
+					{{ utils.select_input('gene_lists', gene_lists, filters.gene_lists, multiple=True) }}
 				</div>
 			{% endif %}
 		</div>
