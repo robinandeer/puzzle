@@ -28,7 +28,7 @@ class VariantMixin(object):
                 return variant_obj
         return None
 
-    def variants(self, case_id, skip=0, count=30, filters={}):
+    def variants(self, case_id, skip=0, count=30, filters=None):
         """Return all variants in the VCF.
 
             Args:
@@ -47,11 +47,12 @@ class VariantMixin(object):
                     sv_type: List (list of sv types),
                 }
         """
+        filters = filters or {}
         case_obj = self.case(case_id=case_id)
         limit = count + skip
-        
+
         raw_variants = self._get_filtered_variants(case_obj, filters)
-        
+
         formated_variants = self._formated_variants(raw_variants, case_obj)
 
         if filters.get('frequency'):
@@ -80,54 +81,50 @@ class VariantMixin(object):
                     yield variant_obj
                 else:
                     break
-    
+
     def _get_filtered_variants(self, case_obj, filters={}):
         """Check if variants follows the filters
-        
+
             This function will try to make filters faster for the vcf adapter
-            
+
             Args:
                 case_obj (puzzle.models.Case): A case object
                 filters (dict): A dictionary with filters
         """
-        
+
         genes = set()
         consequences = set()
         sv_types = set()
-        
+
         vcf_file_path = case_obj.variant_source
         logger.info("Parsing file {0}".format(vcf_file_path))
-        
-        if filters.get('gene_list'):
-            genes = set([gene_id.strip() for gene_id in filters['gene_list']])
-            gene_filter = True
+
+        if filters.get('gene_ids'):
+            genes = set([gene_id.strip() for gene_id in filters['gene_ids']])
 
         if filters.get('consequence'):
             consequences = set(filters['consequence'])
-            consequence_filter = True
 
         if filters.get('sv_types'):
             sv_types = set(filters['sv_types'])
-            sv_types_filter = True
-        
+
         handle = get_vcf_handle(infile=vcf_file_path)
-        
-        index = 0
+
         for variant_line in handle:
             if not variant_line.startswith('#'):
                 keep_variant = True
-                
+
                 if genes and keep_variant:
                     keep_variant = False
                     for gene in genes:
                         if "|{0}|".format(gene) in variant_line:
                             keep_variant = True
                             break
-                
+
                 if consequences and keep_variant:
                     keep_variant = False
                     for consequence in consequences:
-                        if consequence in variant_variant:
+                        if consequence in variant_line:
                             keep_variant = True
                             break
 
@@ -137,11 +134,11 @@ class VariantMixin(object):
                         if sv_type in variant_line:
                             keep_variant = True
                             break
-                
+
                 if keep_variant:
                     yield variant_line
-    
-    
+
+
     def _add_compounds(self, variant, info_dict):
         """Check if there are any compounds and add them to the variant
 
@@ -229,14 +226,14 @@ class VariantMixin(object):
 
     def _formated_variants(self, raw_variants, case_obj):
         """Return variant objects
-        
+
             Args:
                 raw_variants (Iterable): An iterable with variant lines
                 case_obj (puzzle.nodels.Case): A case object
-        
+
         """
         vcf_file_path = case_obj.variant_source
-        
+
         logger.info("Parsing file {0}".format(vcf_file_path))
         head = HeaderParser()
         handle = get_vcf_handle(infile=vcf_file_path)
@@ -282,7 +279,7 @@ class VariantMixin(object):
 
                 #Check if snpeff annotation:
                 snpeff_string = info_dict.get('ANN')
-                
+
                 if vep_string:
                     #Get the vep annotations
                     vep_info = get_vep_info(
@@ -410,7 +407,7 @@ class VariantMixin(object):
                 if vep_string:
                     for transcript in self._get_vep_transcripts(variant, vep_info):
                         variant.add_transcript(transcript)
-                
+
                 elif snpeff_string:
                     for transcript in self._get_snpeff_transcripts(variant, snpeff_info):
                         variant.add_transcript(transcript)
@@ -418,7 +415,7 @@ class VariantMixin(object):
                 variant['most_severe_consequence'] = get_most_severe_consequence(
                     variant['transcripts']
                 )
-                
+
                 for gene in self._get_genes(variant):
                     variant.add_gene(gene)
 

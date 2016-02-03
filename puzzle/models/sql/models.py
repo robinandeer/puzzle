@@ -36,6 +36,10 @@ class Case(BASE):
             for term in individual.phenotypes:
                 yield term
 
+    def phenotype_ids(self):
+        """Return only phenotype ids for included individuals."""
+        return [term.phenotype_id for term in self.phenotypes]
+
     def __repr__(self):
         return("<Case(id:{self.id}, case_id:{self.case_id}, name:{self.name},"\
                 " variant_source:{self.variant_source}, variant_type:"\

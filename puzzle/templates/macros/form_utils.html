@@ -1,7 +1,7 @@
-{% macro select_input(name, items, selected, multiple=False) %}
+{% macro select_input(name, items, selected=None, multiple=False) %}
 	<select class="selectpicker form-control" name="{{ name }}" {% if multiple %}multiple{% endif %} class="form-control">
 		{% for item in items %}
-			{% if item in selected %}
+			{% if selected and item in selected %}
 				<option value="{{ item }}" selected>{{ item }}</option>
 			{% else %}
 				<option value="{{ item }}">{{ item }}</option>

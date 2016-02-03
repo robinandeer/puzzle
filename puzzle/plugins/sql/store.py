@@ -3,6 +3,7 @@
 puzzle.plugins.sql.store
 ~~~~~~~~~~~~~~~~~~
 """
+import itertools
 import logging
 import os
 
@@ -14,7 +15,8 @@ from sqlalchemy.sql.expression import ClauseElement
 
 from puzzle.models import Case as BaseCase
 from puzzle.models import Individual as BaseIndividual
-from puzzle.models.sql import (BASE, Case, Individual, PhenotypeTerm)
+from puzzle.models.sql import (BASE, Case, Individual, PhenotypeTerm, GeneList,
+                               CaseGenelistLink)
 from puzzle.plugins import VcfPlugin, Plugin
 try:
     from puzzle.plugins import GeminiPlugin
@@ -204,10 +206,21 @@ class Store(Plugin):
 
     def variants(self, case_id, skip=0, count=30, filters=None):
         """Fetch variants for a case."""
+        filters = filters or {}
         logger.debug("Fetching case with case_id:{0}".format(case_id))
         case_obj = self.case(case_id)
         plugin, case_id = select_plugin(case_obj)
         self.filters = plugin.filters
+
+        gene_lists = (self.gene_list(list_id) for list_id
+                      in filters.get('gene_lists', []))
+        nested_geneids = (gene_list.gene_ids for gene_list in gene_lists)
+        gene_ids = set(itertools.chain.from_iterable(nested_geneids))
+
+        if filters.get('gene_ids'):
+            filters['gene_ids'].extend(gene_ids)
+        else:
+            filters['gene_ids'] = gene_ids
         variants = plugin.variants(case_id, skip, count, filters)
         return variants
 
@@ -228,10 +241,11 @@ class Store(Plugin):
             hpo_results = phizz.query_disease([phenotype_id])
 
         added_terms = []
+        existing_ids = set(term.phenotype_id for term in ind_obj.phenotypes)
         for result in hpo_results:
-            term = PhenotypeTerm(phenotype_id=result['hpo_term'],
-                                 description=result['description'])
-            if term not in ind_obj.phenotypes:
+            if result['hpo_term'] not in existing_ids:
+                term = PhenotypeTerm(phenotype_id=result['hpo_term'],
+                                     description=result['description'])
                 logger.info('adding new HPO term: %s', term.phenotype_id)
                 ind_obj.phenotypes.append(term)
                 added_terms.append(term)
@@ -254,6 +268,58 @@ class Store(Plugin):
                     self.session.delete(term)
         logger.debug('persist removals')
         self.save()
+
+    def gene_list(self, list_id):
+        """Get a gene list from the database."""
+        return self.query(GeneList).filter_by(list_id=list_id).first()
+
+    def gene_lists(self):
+        """Return all gene lists from the database."""
+        return self.query(GeneList)
+
+    def add_genelist(self, list_id, gene_ids, case_obj=None):
+        """Create a new gene list and optionally link to cases."""
+        new_genelist = GeneList(list_id=list_id)
+        new_genelist.gene_ids = gene_ids
+        if case_obj:
+            new_genelist.cases.append(case_obj)
+
+        self.session.add(new_genelist)
+        self.save()
+        return new_genelist
+
+    def remove_genelist(self, list_id, case_obj=None):
+        """Remove a gene list and links to cases."""
+        gene_list = self.gene_list(list_id)
+
+        if case_obj:
+            # remove a single link between case and gene list
+            case_ids = [case_obj.id]
+        else:
+            # remove all links and the list itself
+            case_ids = [case.id for case in gene_list.cases]
+            self.session.delete(gene_list)
+
+        case_links = self.query(CaseGenelistLink).filter(
+            CaseGenelistLink.case_id.in_(case_ids),
+            CaseGenelistLink.genelist_id == gene_list.id
+        )
+        for case_link in case_links:
+            self.session.delete(case_link)
+
+        self.save()
+
+    def case_genelist(self, case_obj):
+        """Get or create a new case specific gene list record."""
+        list_id = "{}-HPO".format(case_obj.case_id)
+        gene_list = self.gene_list(list_id)
+
+        if gene_list is None:
+            gene_list = GeneList(list_id=list_id)
+            case_obj.gene_lists.append(gene_list)
+            self.session.add(gene_list)
+
+        return gene_list
 
 
 def select_plugin(case_obj):
