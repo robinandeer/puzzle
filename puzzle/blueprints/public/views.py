@@ -67,6 +67,7 @@ def delete_phenotype(phenotype_id):
 @blueprint.route('/genelists/<list_id>', methods=['GET', 'POST'])
 def gene_list(list_id=None):
     """Display or add a gene list."""
+    all_case_ids = [case.case_id for case in app.db.cases()]
     if list_id:
         genelist_obj = app.db.gene_list(list_id)
         case_ids = [case.case_id for case in app.db.cases()
@@ -102,6 +103,7 @@ def gene_list(list_id=None):
             gene_ids = [line for line in req_file.stream
                         if not line.startswith('#')]
             genelist_obj = app.db.add_genelist(list_id, gene_ids)
+            case_ids = all_case_ids
 
     return render_template('gene_list.html', gene_list=genelist_obj,
                            case_ids=case_ids)
