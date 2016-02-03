@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import (abort, Blueprint, current_app as app, render_template,
-                   redirect, request, url_for)
+                   redirect, request, url_for, make_response)
 from werkzeug import secure_filename
 
 from puzzle.utils import hpo_genes
@@ -73,6 +73,13 @@ def gene_list(list_id=None):
                     if case not in genelist_obj.cases]
         if genelist_obj is None:
             return abort(404, "gene list not found: {}".format(list_id))
+
+    if 'download' in request.args:
+        response = make_response('\n'.join(genelist_obj.gene_ids))
+        filename = secure_filename("{}.txt".format(genelist_obj.list_id))
+        header = "attachment; filename={}".format(filename)
+        response.headers['Content-Disposition'] = header
+        return response
 
     if request.method == 'POST':
         if list_id:
