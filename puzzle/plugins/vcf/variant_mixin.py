@@ -49,61 +49,99 @@ class VariantMixin(object):
         """
         case_obj = self.case(case_id=case_id)
         limit = count + skip
-
-        filtered_variants = self._variants(case_obj)
-
-        if filters.get('gene_list'):
-            gene_list = set([gene_id.strip() for gene_id in filters['gene_list']])
-
-            filtered_variants = (variant for variant in filtered_variants
-                                 if (set(gene['symbol'] for gene in variant['genes'])
-                                     .intersection(gene_list)))
+        
+        raw_variants = self._get_filtered_variants(case_obj, filters)
+        
+        formated_variants = self._formated_variants(raw_variants, case_obj)
 
         if filters.get('frequency'):
             frequency = float(filters['frequency'])
-            filtered_variants = (variant for variant in filtered_variants
+            formated_variants = (variant for variant in formated_variants
                                  if variant['max_freq'] <= frequency)
 
         if filters.get('cadd'):
             cadd_score = float(filters['cadd'])
-            filtered_variants = (variant for variant in filtered_variants
+            formated_variants = (variant for variant in formated_variants
                                  if variant['max_freq'] <= cadd_score)
-
-        if filters.get('consequence'):
-            consequences = set(filters['consequence'])
-            cons_variants = []
-            for variant in filtered_variants:
-                for transcript in variant.get('transcripts', []):
-                    if transcript['Consequence'] in consequences:
-                        cons_variants.append(variant)
-                        break
-
-            filtered_variants = cons_variants
 
         if filters.get('genetic_models'):
             genetic_models = set(filters['genetic_models'])
-            filtered_variants = (variant for variant in filtered_variants
+            formated_variants = (variant for variant in formated_variants
             if set(variant.get('genetic_models',[])).intersection(genetic_models))
-
-        if filters.get('sv_types'):
-            sv_types = set(filters['sv_types'])
-            filtered_variants = (variant for variant in filtered_variants
-                                    if variant.get('sv_type') in sv_types)
 
         if filters.get('sv_len'):
             sv_len = float(filters['sv_len'])
-            filtered_variants = (variant for variant in filtered_variants
+            formated_variants = (variant for variant in formated_variants
                                     if variant.get('sv_len') >= sv_len)
 
-        for index, variant_obj in enumerate(filtered_variants):
+        for index, variant_obj in enumerate(formated_variants):
             if index >= skip:
                 if index <= limit:
                     yield variant_obj
                 else:
                     break
+    
+    def _get_filtered_variants(self, case_obj, filters={}):
+        """Check if variants follows the filters
+        
+            This function will try to make filters faster for the vcf adapter
+            
+            Args:
+                case_obj (puzzle.models.Case): A case object
+                filters (dict): A dictionary with filters
+        """
+        
+        genes = set()
+        consequences = set()
+        sv_types = set()
+        
+        vcf_file_path = case_obj.variant_source
+        logger.info("Parsing file {0}".format(vcf_file_path))
+        
+        if filters.get('gene_list'):
+            genes = set([gene_id.strip() for gene_id in filters['gene_list']])
+            gene_filter = True
 
+        if filters.get('consequence'):
+            consequences = set(filters['consequence'])
+            consequence_filter = True
 
+        if filters.get('sv_types'):
+            sv_types = set(filters['sv_types'])
+            sv_types_filter = True
+        
+        handle = get_vcf_handle(infile=vcf_file_path)
+        
+        index = 0
+        for variant_line in handle:
+            if not variant_line.startswith('#'):
+                keep_variant = True
+                
+                if genes and keep_variant:
+                    keep_variant = False
+                    for gene in genes:
+                        if "|{0}|".format(gene) in variant_line:
+                            keep_variant = True
+                            break
+                
+                if consequences and keep_variant:
+                    keep_variant = False
+                    for consequence in consequences:
+                        if consequence in variant_variant:
+                            keep_variant = True
+                            break
 
+                if sv_types and keep_variant:
+                    keep_variant = False
+                    for sv_type in sv_types:
+                        if sv_type in variant_line:
+                            keep_variant = True
+                            break
+                
+                if keep_variant:
+                    yield variant_line
+    
+    
     def _add_compounds(self, variant, info_dict):
         """Check if there are any compounds and add them to the variant
 
@@ -189,8 +227,16 @@ class VariantMixin(object):
             ))
         return transcripts
 
-    def _variants(self, case_obj):
+    def _formated_variants(self, raw_variants, case_obj):
+        """Return variant objects
+        
+            Args:
+                raw_variants (Iterable): An iterable with variant lines
+                case_obj (puzzle.nodels.Case): A case object
+        
+        """
         vcf_file_path = case_obj.variant_source
+        
         logger.info("Parsing file {0}".format(vcf_file_path))
         head = HeaderParser()
         handle = get_vcf_handle(infile=vcf_file_path)
@@ -217,10 +263,8 @@ class VariantMixin(object):
         vep_header = head.vep_columns
         snpeff_header = head.snpeff_columns
 
-        handle = get_vcf_handle(infile=vcf_file_path)
-
         index = 0
-        for variant_line in handle:
+        for variant_line in raw_variants:
             if not variant_line.startswith('#'):
                 index += 1
                 #Create a variant dict:
