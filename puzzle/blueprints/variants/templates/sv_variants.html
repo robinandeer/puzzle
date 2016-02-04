@@ -63,13 +63,14 @@
 
 {% block js_bottom %}
 	{{ super() }}
-	<script type="text/javascript" charset="utf-8">
-		$('.selectpicker').selectpicker();
-		$(document).ready(function(){
+  <script type="text/javascript" charset="utf-8">
+  $('.selectpicker').selectpicker();
+  $(document).ready(function(){
     $('#variants_list').DataTable({
-					"paging":   false,
-					"searching": false
-				});
-		});
-	</script>
+      "paging":   false,
+      "searching": false,
+			"info": false
+    });
+   });
+  </script>
 {% endblock %}
