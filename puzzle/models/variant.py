@@ -1,55 +1,12 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from .mixins import PedigreeHumanMixin
+from . import (DotDict, Transcript, Gene, Compound, Genotype)
 
 logger = logging.getLogger(__name__)
 
 
-class Transcript(dict):
-    """Class that holds information about a transcript"""
-    def __init__(self, hgnc_symbol, transcript_id, consequence, ensembl_id=None, biotype=None, 
-                strand=None, sift=None, polyphen=None, exon=None, HGVSc=None, 
-                HGVSp=None):
-        super(Transcript, self).__init__(
-            hgnc_symbol=hgnc_symbol, transcript_id=transcript_id, biotype=biotype,
-            consequence=consequence, ensembl_id=ensembl_id, strand=strand, sift=sift,
-            polyphen=polyphen, exon=exon, HGVSc=HGVSc, HGVSp=HGVSp)
-
-
-class Gene(dict):
-    """Class that holds information about a Gene"""
-    def __init__(self, symbol, omim_number=None, ensembl_id=None, 
-                description=None, chrom=None, start=None, stop=None,
-                location=None, hi_score=None, constraint_score=None,
-                hgnc_id=None):
-        super(Gene, self).__init__(symbol=symbol, omim_number=omim_number,
-        ensembl_id=ensembl_id, description=description, chrom=chrom, 
-        start=start, stop=stop, location=location, hi_score=hi_score, 
-        constraint_score=constraint_score, hgnc_id=hgnc_id)
-        
-        self['morbid'] = None
-
-class Compound(dict):
-    """Class that holds information about a compound variant"""
-    def __init__(self, variant_id, combined_score=None):
-        super(Compound, self).__init__(variant_id=variant_id,
-                                       combined_score=combined_score)
-
-
-class Genotype(dict, PedigreeHumanMixin):
-    """Class that holds information about a genotype call"""
-    def __init__(self, sample_id, genotype, case_id=None, phenotype=None,
-                ref_depth='.', alt_depth='.', genotype_quality='.', depth='.',
-                supporting_evidence='0', pe_support='0', sr_support='0'):
-        super(Genotype, self).__init__(sample_id=sample_id, genotype=genotype,
-            case_id=case_id, phenotype=phenotype, ref_depth=ref_depth, 
-            alt_depth=alt_depth, depth=depth, genotype_quality=genotype_quality,
-            supporting_evidence=supporting_evidence, pe_support=pe_support, 
-            sr_support=sr_support)
-
-
-class Variant(dict):
+class Variant(DotDict):
     """docstring for Variant"""
     def __init__(self, CHROM, POS, ID, REF, ALT, QUAL, FILTER):
         super(Variant, self).__init__(CHROM=CHROM, POS=POS, ID=ID, REF=REF,

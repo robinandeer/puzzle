@@ -175,18 +175,16 @@ class VariantMixin(object):
         genes = get_gene_info(variant['transcripts'])
         return genes
 
-    def _get_vep_transcripts(self, variant, vep_info):
+    def _get_vep_transcripts(self, transcript_info):
         """Get all transcripts for a variant
 
             Args:
-                vep_info (list): A list of vep dicts
+                transcript_info (dict): A dict with vep info
 
             Returns:
-                transcripts (list): A list of transcripts
+                transcript (puzzle.models.Transcript): A Transcripts
         """
-        transcripts = []
-        for transcript_info in vep_info:
-            transcripts.append(Transcript(
+        transcript = Transcript(
                 hgnc_symbol = transcript_info.get('SYMBOL'),
                 transcript_id = transcript_info.get('Feature'),
                 ensembl_id = transcript_info.get('Gene'),
@@ -198,21 +196,19 @@ class VariantMixin(object):
                 exon = transcript_info.get('EXON'),
                 HGVSc = transcript_info.get('HGVSc'),
                 HGVSp = transcript_info.get('HGVSp')
-            ))
-        return transcripts
+            )
+        return transcript
 
-    def _get_snpeff_transcripts(self, variant, snpeff_info):
+    def _get_snpeff_transcripts(self, transcript_info):
         """Get all transcripts for a variant
 
             Args:
-                snp_info (list): A list of snpeff dicts
+                transcript_info (dict): A dict with snpeff info
 
             Returns:
-                transcripts (list): A list of transcripts
+                transcript (puzzle.models.Transcript): A Transcripts
         """
-        transcripts = []
-        for transcript_info in snpeff_info:
-            transcripts.append(Transcript(
+        transcript = Transcript(
                 hgnc_symbol = transcript_info.get('Gene_Name'),
                 transcript_id = transcript_info.get('Feature'),
                 ensembl_id = transcript_info.get('Gene_ID'),
@@ -221,8 +217,8 @@ class VariantMixin(object):
                 exon = transcript_info.get('Rank'),
                 HGVSc = transcript_info.get('HGVS.c'),
                 HGVSp = transcript_info.get('HGVS.p')
-            ))
-        return transcripts
+            )
+        return transcript
 
     def _formated_variants(self, raw_variants, case_obj):
         """Return variant objects
@@ -404,12 +400,23 @@ class VariantMixin(object):
                         ))
 
                 # Add transcript information:
+                gmaf = None
                 if vep_string:
-                    for transcript in self._get_vep_transcripts(variant, vep_info):
+                    for transcript_info in vep_info:
+                        transcript = self._get_vep_transcripts(transcript_info)
+                        gmaf_raw = transcript_info.get('GMAF')
+                        if gmaf_raw:
+                            gmaf = float(gmaf_raw.split(':')[-1])
                         variant.add_transcript(transcript)
 
+                if gmaf:
+                    variant.add_frequency('GMAF', gmaf)
+                    if not variant.thousand_g:
+                        variant.thousand_g = gmaf
+
                 elif snpeff_string:
-                    for transcript in self._get_snpeff_transcripts(variant, snpeff_info):
+                    for transcript_info in snpeff_info:
+                        transcript = self._get_snpeff_transcripts(transcript_info)
                         variant.add_transcript(transcript)
 
                 variant['most_severe_consequence'] = get_most_severe_consequence(
