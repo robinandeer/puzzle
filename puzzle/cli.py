@@ -162,8 +162,13 @@ def load(ctx, variant_source, family_file, family_type):
     store = SqlStore(db_path)
 
     for case_obj in plugin.cases():
+        if store.case(case_obj.case_id):
+            logger.warn("{} already exists in the database"
+                        .format(case_obj.case_id))
+            continue
+
         # extract case information
-        logger.debug("adding case: {}".format(case_obj['case_id']))
+        logger.debug("adding case: {}".format(case_obj.case_id))
         store.add_case(case_obj, vtype=variant_type, mode=mode)
 
 @cli.command()
