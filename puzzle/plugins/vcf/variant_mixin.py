@@ -6,7 +6,7 @@ from vcftoolbox import (get_variant_dict, HeaderParser, get_info_dict,
 from puzzle.models import (Compound, Variant, Gene, Genotype, Transcript,)
 
 from puzzle.utils import (get_most_severe_consequence, get_omim_number,
-                          get_cytoband_coord, get_gene_info)
+                          get_cytoband_coord, get_gene_info, IMPACT_SEVERITIES)
 
 logger = logging.getLogger(__name__)
 
@@ -418,11 +418,15 @@ class VariantMixin(object):
                     for transcript_info in snpeff_info:
                         transcript = self._get_snpeff_transcripts(transcript_info)
                         variant.add_transcript(transcript)
-
-                variant['most_severe_consequence'] = get_most_severe_consequence(
+                
+                most_severe_consequence = get_most_severe_consequence(
                     variant['transcripts']
                 )
-
+                if most_severe_consequence:
+                    variant['most_severe_consequence'] = most_severe_consequence
+                
+                    variant['impact_severity'] = IMPACT_SEVERITIES.get(most_severe_consequence)
+                
                 for gene in self._get_genes(variant):
                     variant.add_gene(gene)
 
