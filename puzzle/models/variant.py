@@ -45,10 +45,10 @@ class Variant(DotDict):
     def is_intrachromosomal(self):
         """Check if variant is intrachromosomal
             
-            If stop_chrom != CHROM return True
+            If stop_chrom == CHROM return True
             else return False
         """
-        return self.get('stop_chrom', self['CHROM']) != self['CHROM']
+        return self.get('stop_chrom', self['CHROM']) == self['CHROM']
 
     def add_frequency(self, name, value):
         """Add a frequency that will be displayed on the variant level
