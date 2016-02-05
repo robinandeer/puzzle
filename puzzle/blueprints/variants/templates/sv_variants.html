@@ -20,7 +20,7 @@
 	</div>
 
 	<div class="table-responsive">
-		<table class="table table-bordered table-hover">
+		<table class="table table-bordered table-hover" id="variants_list">
 			<thead>
 				<tr>
 					<th>Rank#</th>
@@ -63,7 +63,14 @@
 
 {% block js_bottom %}
 	{{ super() }}
-	<script type="text/javascript" charset="utf-8">
-		$('.selectpicker').selectpicker();
-	</script>
+  <script type="text/javascript" charset="utf-8">
+  $('.selectpicker').selectpicker();
+  $(document).ready(function(){
+    $('#variants_list').DataTable({
+      "paging":   false,
+      "searching": false,
+			"info": false
+    });
+   });
+  </script>
 {% endblock %}

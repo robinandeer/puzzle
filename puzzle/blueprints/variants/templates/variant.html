@@ -162,3 +162,26 @@
 	</div>
 	{% endif %}
 {% endblock %}
+
+{% block js_bottom %}
+  {{ super() }}
+  <script type="text/javascript" charset="utf-8">
+  $(document).ready(function(){
+    $('#genes_list').DataTable({
+      "paging":   false,
+      "searching": false,
+      "info": false
+    });
+    $('#transcripts_list').DataTable({
+      "paging":   false,
+      "searching": false,
+      "info": false
+    });
+    $('#compounds_list').DataTable({
+      "paging":   false,
+      "searching": false,
+      "info": false
+    });
+  });
+  </script>
+{% endblock %}
