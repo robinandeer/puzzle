@@ -308,7 +308,7 @@ class VariantMixin(object):
                 if self.variant_type == 'sv':
                     other_chrom = variant['CHROM']
                     # If we have a translocation:
-                    if ':' in variant_dict['ALT']:
+                    if ':' in variant_dict['ALT'] and not '<' in variant_dict['ALT']:
                         other_coordinates = variant_dict['ALT'].strip('ACGTN[]').split(':')
                         other_chrom = other_coordinates[0].lstrip('chrCHR')
                         other_position = other_coordinates[1]
