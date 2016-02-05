@@ -50,8 +50,11 @@ def cli(ctx, verbose, mode, variant_type, root):
     logger.debug('Booting up command line interface')
 
     if root is None:
-        root = os.path.join(os.environ['HOME'], '.puzzle')
-
+        if 'HOME' in os.environ:
+            root = os.path.join(os.environ['HOME'], '.puzzle')
+        elif 'USERPROFILE' in os.environ:
+            root = os.path.join(os.environ['USERPROFILE'], '.puzzle')
+            
     if os.path.isfile(root):
         logger.error("'root' can't be a file")
         ctx.abort()
