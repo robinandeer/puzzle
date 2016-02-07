@@ -25,7 +25,7 @@ class GeminiPlugin(CaseMixin, VariantMixin, Plugin):
         logger.debug("Setting variant type to {0}".format(vtype))
         self.variant_type = vtype
 
-        logger.info("Check if database if in correct format")
+        logger.info("Check if database is in correct format")
         self.test_gemini_db()
 
         self.individuals = self._get_individuals()
