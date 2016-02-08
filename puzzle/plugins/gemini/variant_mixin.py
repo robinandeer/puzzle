@@ -81,7 +81,7 @@ class VariantMixin(object):
             cons_variants = []
             for variant in filtered_variants:
                 for transcript in variant.get('transcripts', []):
-                    if transcript['Consequence'] in consequences:
+                    if transcript['consequence'] in consequences:
                         cons_variants.append(variant)
                         break
 

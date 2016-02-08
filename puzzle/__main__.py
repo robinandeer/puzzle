@@ -11,7 +11,7 @@ or ``python -m puzzle`` (no install required).
 """
 import sys
 
-from .cli import cli
+from puzzle.cli import base as cli
 
 
 if __name__ == '__main__':

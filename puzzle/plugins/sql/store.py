@@ -197,7 +197,7 @@ class Store(Plugin):
         """Fetch all cases from the database."""
         return self.query(Case)
 
-    def individuals(self, ind_ids=None):
+    def get_individuals(self, ind_ids=None):
         """Fetch all individuals from the database."""
         query = self.query(Individual)
         if ind_ids:
@@ -209,7 +209,7 @@ class Store(Plugin):
         filters = filters or {}
         logger.debug("Fetching case with case_id:{0}".format(case_id))
         case_obj = self.case(case_id)
-        plugin, case_id = select_plugin(case_obj)
+        plugin, case_id = self.select_plugin(case_obj)
         self.filters = plugin.filters
 
         gene_lists = (self.gene_list(list_id) for list_id
@@ -227,7 +227,7 @@ class Store(Plugin):
     def variant(self, case_id, variant_id):
         """Fetch a single variant from variant source."""
         case_obj = self.case(case_id)
-        plugin, case_id = select_plugin(case_obj)
+        plugin, case_id = self.select_plugin(case_obj)
         variant = plugin.variant(case_id, variant_id)
         return variant
 
@@ -322,19 +322,19 @@ class Store(Plugin):
         return gene_list
 
 
-def select_plugin(case_obj):
-    """Select and initialize the correct plugin for the case."""
-    if case_obj.variant_mode == 'vcf':
-        logger.debug("Using vcf plugin")
-        plugin = VcfPlugin(root_path=case_obj.variant_source,
-                           vtype=case_obj.variant_type)
-        plugin.case_objs = [case_obj]
-    elif case_obj.variant_mode == 'gemini':
-        logger.debug("Using gemini plugin")
-        plugin = GeminiPlugin(db=case_obj.variant_source,
-                              vtype=case_obj.variant_type)
+    def select_plugin(self, case_obj):
+        """Select and initialize the correct plugin for the case."""
+        if case_obj.variant_mode == 'vcf':
+            logger.debug("Using vcf plugin")
+            plugin = VcfPlugin(root_path=case_obj.variant_source,
+                               vtype=case_obj.variant_type)
+            plugin.case_objs = [case_obj]
+        elif case_obj.variant_mode == 'gemini':
+            logger.debug("Using gemini plugin")
+            plugin = GeminiPlugin(db=case_obj.variant_source,
+                                  vtype=case_obj.variant_type)
+        
+        self.variant_type = case_obj.variant_type
     
-    self.variant_type = case_obj.variant_type
-
-    case_id = case_obj.case_id
-    return plugin, case_id
+        case_id = case_obj.case_id
+        return plugin, case_id
