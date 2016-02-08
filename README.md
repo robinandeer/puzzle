@@ -39,8 +39,10 @@ $ otto dev ssh
 ```
 
 ## Testing Puzzle
-To run the tests, you need [pytest](pytest) installed in your system. You will also need to download
-the database used for testing, which you can do by executing this command:
+To run the tests, you need [pytest](pytest) installed in your system. You can install `pytest` together
+with the other development libraries by running `pip install -r requirements-dev.txt`.
+
+You will also need to download the database used for testing, which you can do by executing this command:
 
 ```
 wget https://s3-us-west-2.amazonaws.com/robinandeer/HapMapFew.db -O tests/fixtures/HapMapFew.db
@@ -74,3 +76,4 @@ MIT. See the [LICENSE](LICENSE) file for more details.
 [coveralls-img]: https://img.shields.io/coveralls/robinandeer/puzzle.svg?style=flat-square
 [otto]: https://ottoproject.io/
 [gemini]: https://github.com/arq5x/gemini
+[pytest]: http://pytest.org/latest/
