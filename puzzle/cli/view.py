@@ -55,7 +55,7 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
     """
 
     if root is None:
-        root = expanduser("~")
+        root = os.path.expanduser("~")
 
     if os.path.isfile(root):
         logger.error("'root' can't be a file")
