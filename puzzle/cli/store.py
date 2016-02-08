@@ -1,9 +1,10 @@
 import os
+from os.path import expanduser
+
 import logging
 import click
 
-from . import (cli, root, family_file, family_type, variant_type, mode,
- get_home_dir)
+from . import (base, root, family_file, family_type, variant_type, mode)
 
 from puzzle.plugins import SqlStore, VcfPlugin
 try:
@@ -16,7 +17,7 @@ from sqlite3 import DatabaseError
 
 logger = logging.getLogger(__name__)
 
-@cli.command()
+@base.command()
 @click.option('--reset', is_flag=True)
 @root
 @click.pass_context
@@ -34,11 +35,9 @@ def init(ctx, reset, root):
             A sqlite database will be built in the home directory of the user
         GEMINI:
             A sqlite database will be built in the home directory of the user
-    """
-    root = root or ctx.obj['root']
-    
+    """    
     if root is None:
-        root = get_home_dir()
+        root = expanduser("~")
     
     if os.path.isfile(root):
         logger.error("'root' can't be a file")
@@ -61,9 +60,9 @@ def init(ctx, reset, root):
     store.set_up(reset=reset)
 
 
-@cli.command()
+@base.command()
 @click.argument('variant-source', 
-                type=click.Path(exists=True),
+    type=click.Path(exists=True),
 )
 @family_file
 @family_type
@@ -79,10 +78,8 @@ def load(ctx, variant_source, family_file, family_type, root, mode,
     This can be done with a config file or from command line.
     If no database was found run puzzle init first.
     """
-    root = root or ctx.obj['root']
-    
     if root is None:
-        root = get_home_dir()
+        root = expanduser("~")
     
     if os.path.isfile(root):
         logger.error("'root' can't be a file")
@@ -141,7 +138,7 @@ def load(ctx, variant_source, family_file, family_type, root, mode,
         logger.debug("adding case: {}".format(case_obj.case_id))
         store.add_case(case_obj, vtype=variant_type, mode=mode)
 
-@cli.command()
+@base.command()
 @click.option('-f', '--family_id',
     type=str,
 )
@@ -156,10 +153,8 @@ def delete(ctx, family_id, individual_id, root):
 
     If no database was found run puzzle init first.
     """
-    root = root or ctx.obj['root']
-    
     if root is None:
-        root = get_home_dir()
+        root = expanduser("~")
     
     if os.path.isfile(root):
         logger.error("'root' can't be a file")
@@ -190,7 +185,7 @@ def delete(ctx, family_id, individual_id, root):
         store.delete_individual(ind_obj)
 
 
-@cli.command()
+@base.command()
 @root
 @click.pass_context
 def cases(ctx, root):
@@ -199,10 +194,8 @@ def cases(ctx, root):
 
     If no database was found run puzzle init first.
     """
-    root = root or ctx.obj['root']
-    
     if root is None:
-        root = get_home_dir()
+        root = expanduser("~")
     
     if os.path.isfile(root):
         logger.error("'root' can't be a file")
@@ -221,7 +214,7 @@ def cases(ctx, root):
     for case in store.cases():
         print(case)
 
-@cli.command()
+@base.command()
 @root
 @click.pass_context
 def individuals(ctx, root):
@@ -230,10 +223,8 @@ def individuals(ctx, root):
 
     If no database was found run puzzle init first.
     """
-    root = root or ctx.obj['root']
-    
     if root is None:
-        root = get_home_dir()
+        root = expanduser("~")
     
     if os.path.isfile(root):
         logger.error("'root' can't be a file")

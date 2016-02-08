@@ -3,8 +3,8 @@ import os
 import click
 import logging
 
-from . import (cli, family_file, family_type, version, verbose, root, mode,
-               get_home_dir, variant_type)
+from . import (base, family_file, family_type, version, verbose, root, mode,
+               variant_type)
 
 from puzzle.plugins import SqlStore, VcfPlugin
 try:
@@ -19,7 +19,7 @@ from puzzle.factory import create_app
 
 logger = logging.getLogger(__name__)
 
-@cli.command()
+@base.command()
 @click.argument('variant-source', 
     type=click.Path(exists=True),
     required=False
@@ -54,10 +54,8 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
     2.
     """
 
-    root = root or ctx.obj['root']
-
     if root is None:
-        root = get_home_dir()
+        root = expanduser("~")
 
     if os.path.isfile(root):
         logger.error("'root' can't be a file")

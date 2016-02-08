@@ -1,6 +1,4 @@
-import os
 import click
-
 import puzzle
 
 root = click.option('--root', '-r',
@@ -37,18 +35,3 @@ family_type = click.option('--family_type',
 )
 version = click.version_option(puzzle.__version__)
 
-
-def get_home_dir():
-    """Get path to home directory
-    
-        Returns:
-            root (str): Path to home dir
-    """
-    root = None
-    if 'HOME' in os.environ:
-        root = os.path.join(os.environ['HOME'], '.puzzle')
-    #For windows:
-    elif 'USERPROFILE' in os.environ:
-        root = os.path.join(os.environ['USERPROFILE'], '.puzzle')
-    return root
-    
