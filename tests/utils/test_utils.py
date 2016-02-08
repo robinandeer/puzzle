@@ -1,6 +1,7 @@
 """Test al functionalities of the Utils module"""
 
 from puzzle.utils import get_most_severe_consequence, get_cytoband_coord, get_omim_number
+from puzzle.utils.constants import HGNC_TO_OMIM, SEVERITY_DICT
 
 class TestGetInfo():
     """Test get_info submodule"""
@@ -54,7 +55,7 @@ class TestGetInfo():
         assert get_cytoband_coord('chrX', '155270600') == None
 
 
-    def test_get_omim_number():
+    def test_get_omim_number(self):
         """Test get_omim_number(hgnc_symbol) method"""
 
         print "Test get_omim_number with valid hgnc_symbol"
@@ -67,3 +68,16 @@ class TestGetInfo():
         assert get_omim_number('MCCRP2') != get_omim_number('PLK4')
         assert get_omim_number('MCCRP2') == None
         assert get_omim_number('PLK4') == 605031
+
+
+class TestConstants():
+    """Test constants submodule"""
+
+    def test_HGNC_TO_OMIM(self):
+        assert HGNC_TO_OMIM['CACNA1F'].get('mim_nr') == 300110
+        assert HGNC_TO_OMIM['ADK'].get('mim_nr') == 102750
+
+
+    def test_SEVERITY_DICT(self):
+        assert SEVERITY_DICT['transcript_ablation'] == 0
+        assert SEVERITY_DICT['start_lost'] == 6
