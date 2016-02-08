@@ -1,6 +1,6 @@
 """Test al functionalities of the Utils module"""
 
-from puzzle.utils import get_most_severe_consequence, get_cytoband_coord
+from puzzle.utils import get_most_severe_consequence, get_cytoband_coord, get_omim_number
 
 class TestGetInfo():
     """Test get_info submodule"""
@@ -52,3 +52,18 @@ class TestGetInfo():
 
         print "Test get_cytoband_coord with non existing position"
         assert get_cytoband_coord('chrX', '155270600') == None
+
+
+    def test_get_omim_number():
+        """Test get_omim_number(hgnc_symbol) method"""
+
+        print "Test get_omim_number with valid hgnc_symbol"
+        assert get_omim_number('IFT172') == 607386
+
+        print "Test get_omim_number with invalid hgnc_symbol"
+        assert get_omim_number('HEJ') == None
+
+        print "Test getting phenotype"
+        assert get_omim_number('MCCRP2') != get_omim_number('PLK4')
+        assert get_omim_number('MCCRP2') == None
+        assert get_omim_number('PLK4') == 605031
