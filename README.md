@@ -38,6 +38,15 @@ $ otto dev ssh
 # open webbrowser on port 5000
 ```
 
+## Testing Puzzle
+To run the tests, you need [pytest](pytest) installed in your system. You will also need to download
+the database used for testing, which you can do by executing this command:
+
+```
+wget https://s3-us-west-2.amazonaws.com/robinandeer/HapMapFew.db -O tests/fixtures/HapMapFew.db
+```
+
+Then, just run `py.test tests/`
 
 ## Use a gemini database ##
 
