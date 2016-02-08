@@ -1,45 +1,57 @@
 """Test al functionalities of the Utils module"""
-from puzzle.utils import get_most_severe_consequence
+import logging
+
+from puzzle.utils import get_most_severe_consequence, get_cytoband_coord
 
 class TestGetInfo():
     """Test get_info submodule"""
 
-    def test_get_most_severe():
-        """Get most sever consequence"""
+    logger = logging.getLogger('TestGetInfo')
+
+    def test_get_most_severe_consequence():
+        """Test get_most_sever_consequence(transcripts) method"""
+
+        logger.debug("Test get_most_sever_consequence with a 'regular' transcripts list")
         transcripts = [
             {'consequence': 'transcript_ablation'}
         ]
-
         assert get_most_severe_consequence(transcripts) == 'transcript_ablation'
 
-    def test_get_most_severe_no_transcripts():
-        """Get most sever consequence (empty transcrpts list)"""
+        logger.debug("Test get_most_sever_consequence with empty transcripts list")
         transcripts = []
-
         assert get_most_severe_consequence(transcripts) == None
 
-    def test_get_most_severe_unknown_consequence():
-        """Get most severe consequence ('unknown' consequence)"""
+        logger.debug("Test get_most_sever_consequence with 'unknown' consequence")
         transcripts = [
             {'consequence': 'unknown'}
         ]
-
         assert get_most_severe_consequence(transcripts) == None
 
-    def test_get_most_severe_multiple_transcripts():
-        """Get most severe consequence of multiple transcripts"""
+        logger.debug("Test most_severe_consequence with multiple transcripts")
         transcripts = [
             {'consequence': 'inframe_deletion'},
             {'consequence': 'start_lost'},
             {'consequence': 'synonymous_variant'}
         ]
-
         assert get_most_severe_consequence(transcripts) == 'start_lost'
 
-    def test_get_most_severe_multiple_annotations():
-        """Get most sever consequence of multiple transcripts (annotations)"""
+        logger.debug("Test most_severe_consequence with multiple transcripts (annotations)")
         transcripts = [
             {'consequence': 'start_lost&synonymous_variant'},
         ]
-
         assert get_most_severe_consequence(transcripts) == 'start_lost'
+
+
+    def test_get_cytoband_coord():
+        """test get_cytoband_coord(chrom, pos) method"""
+
+        logger.debug("Test get_cytoband_coord with different input formats")
+        assert get_cytoband_coord('1', 3) == '1p36.33'
+        assert get_cytoband_coord('chr1', 3)  == '1p36.33'
+        assert get_cytoband_coord('chr1', '3') == '1p36.33'
+
+        logger.debug("Test get_cytoband_coord with non existing chromosome")
+        assert get_cytoband_coord('chrMT', '3') == None
+
+        logger.debug("Test get_cytoband_coord with non existing position")
+        assert get_cytoband_coord('chrX', '155270600')
