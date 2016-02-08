@@ -25,7 +25,8 @@ def index():
 @blueprint.route('/cases/<case_id>')
 def case(case_id):
     """Show the overview for a case."""
-    return render_template('case.html', case=app.db.case(case_id), case_id=case_id)
+    return render_template('case.html', case=app.db.case(case_id),
+                           case_id=case_id)
 
 
 @blueprint.route('/phenotypes', methods=['POST'])
@@ -155,6 +156,7 @@ def resource(resource_id):
 
     return render_template('resource.html', resource=resource_obj)
 
+
 @blueprint.route('/resource/delete/<resource_id>', methods=['POST'])
 def delete_resource(resource_id):
     """Delete a resource."""
@@ -166,4 +168,3 @@ def delete_resource(resource_id):
 
     app.db.delete_resource(resource_id)
     return redirect(request.referrer)
-

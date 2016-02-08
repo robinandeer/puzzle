@@ -10,7 +10,9 @@
 
 		<div class="row">
 			<div class="col-md-12">
-				<img src="{{ url_for('public.resource', resource_id=resource.id, raw=True) }}" alt="">
+				<a href="{{ url_for('public.resource', resource_id=resource.id, raw=True) }}">
+					<img class="img-responsive" src="{{ url_for('public.resource', resource_id=resource.id, raw=True) }}">
+				</a>
 			</div>
 		</div>
 	</div>

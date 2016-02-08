@@ -355,4 +355,3 @@ class Store(Plugin):
         logger.debug("Deleting resource {0}".format(resource_obj.name))
         self.session.delete(resource_obj)
         self.save()
-
