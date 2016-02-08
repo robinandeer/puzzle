@@ -348,3 +348,11 @@ class Store(Plugin):
     def resource(self, resource_id):
         """Fetch a resource."""
         return self.query(Resource).get(resource_id)
+
+    def delete_resource(self, resource_id):
+        """Link a resource to an individual."""
+        resource_obj = self.resource(resource_id)
+        logger.debug("Deleting resource {0}".format(resource_obj.name))
+        self.session.delete(resource_obj)
+        self.save()
+

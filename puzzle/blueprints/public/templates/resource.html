@@ -2,6 +2,9 @@
 
 {% block body_content %}
 	<div class="container">
+		<p>
+			<a href="{{url_for('public.case', 
+								case_id=resource.individual.case.case_id)}}">{{ resource.individual.case.case_id }}</a></p>
 		<div class="page-header"><h3>{{ resource.name }}</h3></div>
 		<p>{{ resource.individual.ind_id }}</p>
 

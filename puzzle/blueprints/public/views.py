@@ -131,12 +131,12 @@ def delete_genelist(list_id, case_id=None):
 def resources():
     """Upload a new resource for an individual."""
     ind_id = request.form['ind_id']
-    name = request.form['name']
 
     upload_dir = os.path.abspath(app.config['UPLOAD_DIR'])
     req_file = request.files['file']
     filename = secure_filename(req_file.filename)
     file_path = os.path.join(upload_dir, filename)
+    name = request.form['name'] or filename
     req_file.save(file_path)
 
     ind_obj = app.db.individual(ind_id)
@@ -154,3 +154,16 @@ def resource(resource_id):
                                    os.path.basename(resource_obj.path))
 
     return render_template('resource.html', resource=resource_obj)
+
+@blueprint.route('/resource/delete/<resource_id>', methods=['POST'])
+def delete_resource(resource_id):
+    """Delete a resource."""
+    resource_obj = app.db.resource(resource_id)
+    try:
+        os.remove(resource_obj.path)
+    except OSError as err:
+        app.logger.debug(err.message)
+
+    app.db.delete_resource(resource_id)
+    return redirect(request.referrer)
+
