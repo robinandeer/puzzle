@@ -1,0 +1,14 @@
+{% extends "layouts/base.html" %}
+
+{% block body_content %}
+	<div class="container">
+		<div class="page-header"><h3>{{ resource.name }}</h3></div>
+		<p>{{ resource.individual.ind_id }}</p>
+
+		<div class="row">
+			<div class="col-md-12">
+				<img src="{{ url_for('public.resource', resource_id=resource.id, raw=True) }}" alt="">
+			</div>
+		</div>
+	</div>
+{% endblock %}

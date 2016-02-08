@@ -35,24 +35,27 @@ def init(ctx, reset, root):
             A sqlite database will be built in the home directory of the user
         GEMINI:
             A sqlite database will be built in the home directory of the user
-    """    
+    """
     if root is None:
-        root = expanduser("~")
-    
+        root = expanduser("~/.puzzle")
+
     if os.path.isfile(root):
         logger.error("'root' can't be a file")
         ctx.abort()
-    
+
     logger.info("Root directory is: {}".format(root))
-    
+
     db_path = os.path.join(root, 'puzzle_db.sqlite3')
     logger.info("db path is: {}".format(db_path))
-    
-    if os.path.exists(root):
+
+    resource_dir = os.path.join(root, 'resources')
+    logger.info("resource dir is: {}".format(resource_dir))
+
+    if os.path.exists(resource_dir):
         logger.debug("Found puzzle directory: {0}".format(root))
     else:
-        logger.info("Create directory: {0}".format(root))
-        os.makedirs(root)
+        logger.info("Create directory: {0}".format(resource_dir))
+        os.makedirs(resource_dir)
         logger.debug('Directory created')
 
     logger.debug('Connect to database and create tables')
@@ -61,7 +64,7 @@ def init(ctx, reset, root):
 
 
 @base.command()
-@click.argument('variant-source', 
+@click.argument('variant-source',
     type=click.Path(exists=True),
 )
 @family_file
@@ -70,7 +73,7 @@ def init(ctx, reset, root):
 @mode
 @variant_type
 @click.pass_context
-def load(ctx, variant_source, family_file, family_type, root, mode, 
+def load(ctx, variant_source, family_file, family_type, root, mode,
         variant_type):
     """
     Load a case into the database.
@@ -80,27 +83,27 @@ def load(ctx, variant_source, family_file, family_type, root, mode,
     """
     if root is None:
         root = expanduser("~")
-    
+
     if os.path.isfile(root):
         logger.error("'root' can't be a file")
         ctx.abort()
-    
+
     logger.info("Root directory is: {}".format(root))
-    
+
     db_path = os.path.join(root, 'puzzle_db.sqlite3')
     logger.info("db path is: {}".format(db_path))
-    
+
     if not os.path.exists(db_path):
         logger.warn("database not initialized, run 'puzzle init'")
         ctx.abort()
-    
+
     logger.debug('Set puzzle backend to {0}'.format(mode))
-    
+
     logger.debug('Set variant type to {0}'.format(variant_type))
 
     if mode == 'vcf':
         logger.info("Initialzing VCF plugin")
-        
+
         try:
             plugin = VcfPlugin(
                 root_path=variant_source,
@@ -155,22 +158,22 @@ def delete(ctx, family_id, individual_id, root):
     """
     if root is None:
         root = expanduser("~")
-    
+
     if os.path.isfile(root):
         logger.error("'root' can't be a file")
         ctx.abort()
-    
+
     logger.info("Root directory is: {}".format(root))
-    
+
     db_path = os.path.join(root, 'puzzle_db.sqlite3')
     logger.info("db path is: {}".format(db_path))
-    
+
     if not os.path.exists(db_path):
         logger.warn("database not initialized, run 'puzzle init'")
         ctx.abort()
 
     store = SqlStore(db_path)
-    
+
     if family_id:
         case_obj = store.case(case_id=family_id)
         if case_obj.case_id != family_id:
@@ -196,16 +199,16 @@ def cases(ctx, root):
     """
     if root is None:
         root = expanduser("~")
-    
+
     if os.path.isfile(root):
         logger.error("'root' can't be a file")
         ctx.abort()
-    
+
     logger.info("Root directory is: {}".format(root))
-    
+
     db_path = os.path.join(root, 'puzzle_db.sqlite3')
     logger.info("db path is: {}".format(db_path))
-    
+
     if not os.path.exists(db_path):
         logger.warn("database not initialized, run 'puzzle init'")
         ctx.abort()
@@ -225,16 +228,16 @@ def individuals(ctx, root):
     """
     if root is None:
         root = expanduser("~")
-    
+
     if os.path.isfile(root):
         logger.error("'root' can't be a file")
         ctx.abort()
-    
+
     logger.info("Root directory is: {}".format(root))
-    
+
     db_path = os.path.join(root, 'puzzle_db.sqlite3')
     logger.info("db path is: {}".format(db_path))
-    
+
     if not os.path.exists(db_path):
         logger.warn("database not initialized, run 'puzzle init'")
         ctx.abort()
