@@ -98,15 +98,18 @@ def gene_list(list_id=None):
         else:
             # upload a new gene list
             req_file = request.files['file']
-            list_id = (request.form['list_id'] or
-                       secure_filename(req_file.filename))
+            new_listid = (request.form['list_id'] or
+                          secure_filename(req_file.filename))
+
+            if app.db.gene_list(new_listid):
+                return abort(500, 'Please provide a unique list name')
 
             if not req_file:
                 return abort(500, 'Please provide a file for upload')
 
             gene_ids = [line for line in req_file.stream
                         if not line.startswith('#')]
-            genelist_obj = app.db.add_genelist(list_id, gene_ids)
+            genelist_obj = app.db.add_genelist(new_listid, gene_ids)
             case_ids = all_case_ids
 
     return render_template('gene_list.html', gene_list=genelist_obj,
