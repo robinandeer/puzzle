@@ -61,7 +61,7 @@
             <form action="{{ url_for('public.gene_list', list_id=gene_list.list_id) }}" method="POST" accept-charset="utf-8">
               <div class="row">
                 <div class="col-md-8">
-                  {{ utils.select_input('case_id', case_ids, multiple=True) }}
+                  {{ utils.select_input('case_id', case_ids, multiple=True, required=True) }}
                 </div>
                 <div class="col-md-4">
                   <button class="form-control btn btn-default" type="submit">Link</button>

@@ -82,7 +82,7 @@
         <div class="col-md-4">
           <form action="{{ url_for('public.phenotypes') }}" method="POST" accept-charset="utf-8">
             <div class=form-group>
-              <input name="phenotype_id" class="form-control" placeholder="HPO or OMIM id"></input>
+              <input name="phenotype_id" class="form-control" placeholder="HPO or OMIM id" required></input>
             </div>
             <div class="form-group row">
               <div class="col-md-8">
@@ -141,7 +141,7 @@
             </div>
             <div class="form-group row">
               <div class="col-xs-4">
-                <input class="form-control" type="file" name="file"></input>
+                <input class="form-control" type="file" name="file" required></input>
               </div>
               <div class="col-xs-4">
                 {{ utils.select_input('ind_id', case.individuals|map(attribute='ind_id')) }}
