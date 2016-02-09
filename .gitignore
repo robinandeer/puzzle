@@ -68,3 +68,8 @@ node_modules/
 
 # mkdocs
 site/
+
+# Database/testing files
+*.db
+*.zip
+TODO
