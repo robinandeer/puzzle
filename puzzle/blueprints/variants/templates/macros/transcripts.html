@@ -1,37 +1,37 @@
 {% macro vep_transcripts(transcripts) %}
-	<div class="table-responsive">
-		<table class="table table-bordered table-hover" id="transcripts_list">
-			<caption>Transcripts</caption>
-			<thead>
-				<tr>
-					<th>Gene</th>
-					<th>Transcript</th>
-					<th>Biotype</th>
-					<th>Consequence</th>
-					<th>Strand</th>
-					<th>Sift</th>
-					<th>PolyPhen</th>
-					<th>Exon</th>
-					<th>cDNA</th>
-					<th>Amino acid</th>
-				</tr>
-			</thead>
-			<tbody>
-				{% for transcript in transcripts %}
-					<tr>
-						<td>{{ transcript.hgnc_symbol }}</td>
-						<td>{{ transcript.transcript_id }}</td>
-						<td>{{ transcript.biotype }}</td>
-						<td>{{ transcript.consequence }}</td>
-						<td>{{ transcript.strand }}</td>
-						<td>{{ transcript.sift }}</td>
-						<td>{{ transcript.polyphen }}</td>
-						<td>{{ transcript.exon }}</td>
-						<td>{{ transcript.HGVSc }}</td>
-						<td>{{ transcript.HGVSp }}</td>
-					</tr>
-				{% endfor %}
-			</tbody>
-		</table>
-	</div>
+<div class="table-responsive">
+  <table class="table table-bordered table-hover" id="transcripts_list">
+    <caption>Transcripts</caption>
+    <thead>
+      <tr>
+        <th>Gene</th>
+        <th>Transcript</th>
+        <th>Biotype</th>
+        <th>Consequence</th>
+        <th>Strand</th>
+        <th>Sift</th>
+        <th>PolyPhen</th>
+        <th>Exon</th>
+        <th>cDNA</th>
+        <th>Amino acid</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for transcript in transcripts %}
+        <tr>
+          <td>{{ transcript.hgnc_symbol }}</td>
+          <td>{{ transcript.transcript_id }}</td>
+          <td>{{ transcript.biotype }}</td>
+          <td>{{ transcript.consequence }}</td>
+          <td>{{ transcript.strand }}</td>
+          <td>{{ transcript.sift }}</td>
+          <td>{{ transcript.polyphen }}</td>
+          <td>{{ transcript.exon }}</td>
+          <td>{{ transcript.HGVSc }}</td>
+          <td>{{ transcript.HGVSp }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endmacro %}
