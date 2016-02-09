@@ -20,7 +20,7 @@ from puzzle.factory import create_app
 logger = logging.getLogger(__name__)
 
 @base.command()
-@click.argument('variant-source', 
+@click.argument('variant-source',
     type=click.Path(exists=True),
     required=False
 )
@@ -55,7 +55,7 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
     """
 
     if root is None:
-        root = os.path.expanduser("~")
+        root = os.path.expanduser("~/.puzzle")
 
     if os.path.isfile(root):
         logger.error("'root' can't be a file")
@@ -103,6 +103,8 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
     logger.debug("Plugin setup was succesfull")
 
     BaseConfig.PUZZLE_BACKEND = plugin
+    BaseConfig.ROOT_DIR = root
+    BaseConfig.UPLOAD_DIR = os.path.join(root, 'resources')
 
     app = create_app(config_obj=BaseConfig)
 

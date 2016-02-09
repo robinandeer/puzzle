@@ -4,117 +4,157 @@
 {% block body_content %}
 
 <div class="row">
-	<div class="col-md-12">
-		<div class="panel panel-default">
-			<div class="panel-body">
-				<span class="lead">Case: <span class="text-primary">{{ case.name }}</span></span>
+  <div class="col-md-12">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <span class="lead">Case: <span class="text-primary">{{ case.name }}</span></span>
 
-				<a class="btn btn-primary pull-right btn-sm" href="{{ url_for('variants.variants', case_id=case_id) }}">Variants</a>
-			</div>
-		</div>
-	</div>
+        <a class="btn btn-primary pull-right btn-sm" href="{{ url_for('variants.variants', case_id=case_id) }}">Variants</a>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="row">
-	<div class="col-md-6">
-		<div class="panel panel-default">
-			<div class="panel-heading">Individuals</div>
-			<ul class="list-group">
-				{% for individual in case.individuals %}
-					<li class="list-group-item">
-						{% if individual.is_affected %}
-							<span class="badge">AFFECTED</span>
-						{% endif %}
-						{{ individual.ind_id }}
-						<small><strong class="text-info">
-							{% if individual.sex_human != 'unknown' %}
-								{{ individual.sex_human }}
-							{% endif %}
-						</strong></small>
-					</li>
-				{% else %}
-					<li class="list-group-item">No individuals found.</li>
-				{% endfor %}
-			</ul>
-		</div>
-	</div>
+  <div class="col-md-6">
+    <div class="panel panel-default">
+      <div class="panel-heading">Individuals</div>
+      <ul class="list-group">
+        {% for individual in case.individuals %}
+          <li class="list-group-item">
+            {% if individual.is_affected %}
+              <span class="badge">AFFECTED</span>
+            {% endif %}
+            {{ individual.ind_id }}
+            <small><strong class="text-info">
+              {% if individual.sex_human != 'unknown' %}
+                {{ individual.sex_human }}
+              {% endif %}
+            </strong></small>
+          </li>
+        {% else %}
+          <li class="list-group-item">No individuals found.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
 </div>
 
 {% if config['STORE_ENABLED'] %}
-	<div class="panel panel-default">
-		<div class="panel-heading">Phenotypes</div>
-		<div class="panel-body">
-			<div class="row">
-				<div class="col-md-8">
-					<table class="table table-bordered">
-						<thead>
-							<tr>
-								<th>HPO</th>
-								<th>Description</th>
-								<th>Individual</th>
-								<th>Delete</th>
-							</tr>
-						</thead>
-						<tbody>
-							{% for term in case.phenotypes %}
-								<tr>
-									<td>{{ term.phenotype_id }}</td>
-									<td>{{ term.description }}</td>
-									<td>{{ term.individual.ind_id }}</td>
-									<td>
-										<form class="badge" action="{{ url_for('public.delete_phenotype', phenotype_id=term.phenotype_id) }}" method="POST" accept-charset="utf-8">
-											<input name="ind_id" value="{{ term.individual.ind_id }}" hidden></input>
-											<button class="no-style" type="submit">
-												<span class="glyphicon glyphicon-remove"></span>
-											</button>
-										</form>
-									</td>
-								</tr>
-							{% else %}
-								<tr>
-									<td colspan="4">No phenotypes added.</td>
-								</tr>
-							{% endfor %}
-						</tbody>
-					</table>
-				</div>
+  <div class="panel panel-default">
+    <div class="panel-heading">Phenotypes</div>
+    <div class="panel-body">
+      <div class="row">
+        <div class="col-md-8">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>HPO</th>
+                <th>Description</th>
+                <th>Individual</th>
+                <th>Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for term in case.phenotypes %}
+                <tr>
+                  <td>{{ term.phenotype_id }}</td>
+                  <td>{{ term.description }}</td>
+                  <td>{{ term.individual.ind_id }}</td>
+                  <td>
+                    <form class="badge" action="{{ url_for('public.delete_phenotype', phenotype_id=term.phenotype_id) }}" method="POST" accept-charset="utf-8">
+                      <input name="ind_id" value="{{ term.individual.ind_id }}" hidden></input>
+                      <button class="no-style" type="submit">
+                        <span class="glyphicon glyphicon-remove"></span>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              {% else %}
+                <tr>
+                  <td colspan="4">No phenotypes added.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
 
-				<div class="col-md-4">
-					<form action="{{ url_for('public.phenotypes') }}" method="POST" accept-charset="utf-8">
-						<div class=form-group>
-							<input name="phenotype_id" class="form-control" placeholder="HPO or OMIM id"></input>
-						</div>
-						<div class="form-group row">
-							<div class="col-md-8">
-								{{ utils.select_input('ind_id', case.individuals|map(attribute='ind_id')) }}
-							</div>
-							<div class="col-md-4">
-								<button class="btn btn-default form-control" type="submit">Add</button>
-							</div>
-						</div>
-					</form>
-				</div>
-			</div>
-		</div>
-	</div>
+        <div class="col-md-4">
+          <form action="{{ url_for('public.phenotypes') }}" method="POST" accept-charset="utf-8">
+            <div class=form-group>
+              <input name="phenotype_id" class="form-control" placeholder="HPO or OMIM id" required></input>
+            </div>
+            <div class="form-group row">
+              <div class="col-md-8">
+                {{ utils.select_input('ind_id', case.individuals|map(attribute='ind_id')) }}
+              </div>
+              <div class="col-md-4">
+                <button class="btn btn-default form-control" type="submit">Add</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 
-	<div class="row">
-		<div class="col-md-6">
-			<div class="panel panel-default">
-				<div class="panel-heading">Gene lists</div>
-				<ul class="list-group">
-					{% for gene_list in case.gene_lists %}
-						<li class="list-group-item">
-							<span class="badge">{{ gene_list.gene_ids|length }} genes</span>
-							<a href="{{ url_for('public.gene_list', list_id=gene_list.list_id) }}" title="{{ gene_list.list_id }}">{{ gene_list.list_id }}</a>
-						</li>
-					{% else %}
-						<li class="list-group-item">No gene lists added.</li>
-					{% endfor %}
-				</ul>
-			</div>
-		</div>
-	</div>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">Gene lists</div>
+        <ul class="list-group">
+          {% for gene_list in case.gene_lists %}
+            <li class="list-group-item">
+              <span class="badge">{{ gene_list.gene_ids|length }} genes</span>
+              <a href="{{ url_for('public.gene_list', list_id=gene_list.list_id) }}" title="{{ gene_list.list_id }}">{{ gene_list.list_id }}</a>
+            </li>
+          {% else %}
+            <li class="list-group-item">No gene lists added.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">Resources</div>
+
+        <ul class="list-group">
+          {% for resource in case.resources %}
+            <li class="list-group-item">
+              <a href="{{ url_for('public.resource', resource_id=resource.id) }}" title="{{ resource.name }}">{{ resource.name }}</a>
+
+              <form class="badge" action="{{ url_for('public.delete_resource', resource_id=resource.id) }}" method="POST" accept-charset="utf-8">
+                  <button class="no-style" type="submit">
+                    <span class="glyphicon glyphicon-remove"></span>
+                  </button>
+                </form>
+            </li>
+
+          {% endfor %}
+        </ul>
+
+        <div class="panel-body">
+          <form action="{{ url_for('public.resources') }}" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+              <input class="form-control" name="name" placeholder="resource name"></input>
+            </div>
+            <div class="form-group row">
+              <div class="col-xs-4">
+                <input class="form-control" type="file" name="file" required></input>
+              </div>
+              <div class="col-xs-4">
+                {{ utils.select_input('ind_id', case.individuals|map(attribute='ind_id')) }}
+              </div>
+              <div class="col-xs-4">
+                <button class="btn btn-default form-control" type="submit">Upload</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endif %}
 
 {% endblock %}

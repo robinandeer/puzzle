@@ -30,6 +30,13 @@ class Case(BASE):
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     @property
+    def resources(self):
+        """Return resources for all individuals."""
+        for individual in self.individuals:
+            for resource in individual.resources:
+                yield resource
+
+    @property
     def phenotypes(self):
         """Return all phenotypes for included individuals."""
         for individual in self.individuals:

@@ -25,7 +25,7 @@ class GeneList(BASE):
     __tablename__ = "gene_list"
 
     id = Column(Integer, primary_key=True)
-    list_id = Column(String(32), nullable=False)
+    list_id = Column(String(32), nullable=False, unique=True)
     # comma separated list of gene ids
     _gene_ids = Column(String(1024))
 

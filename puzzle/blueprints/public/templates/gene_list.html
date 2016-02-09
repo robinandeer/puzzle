@@ -3,74 +3,74 @@
 
 {% block body_content %}
 
-	<div class="navbar navbar-default">
-		<div class="container-fluid">
-			<div class="navbar-header">
-				<div class="navbar-brand">{{ gene_list.list_id }}</div>
-			</div>
+  <div class="navbar navbar-default">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <div class="navbar-brand">{{ gene_list.list_id }}</div>
+      </div>
 
-			<form class="navbar-form navbar-right" action="{{ url_for('public.delete_genelist', list_id=gene_list.list_id) }}" method="POST" accept-charset="utf-8" role="delete">
-				<div class="btn-group">
-					<button type="submit" class="btn btn-danger btn-sm navbar-btn">Delete</button>
-					<a class="btn btn-sm btn-default navbar-btn" href="{{ url_for('public.gene_list', list_id=gene_list.list_id, download=True) }}" target="_blank">
-						<span class="glyphicon glyphicon-download"></span>
-					</a>
-				</div>
-			</form>
-		</div>
-	</div>
+      <form class="navbar-form navbar-right" action="{{ url_for('public.delete_genelist', list_id=gene_list.list_id) }}" method="POST" accept-charset="utf-8" role="delete">
+        <div class="btn-group">
+          <button type="submit" class="btn btn-danger btn-sm navbar-btn">Delete</button>
+          <a class="btn btn-sm btn-default navbar-btn" href="{{ url_for('public.gene_list', list_id=gene_list.list_id, download=True) }}" target="_blank">
+            <span class="glyphicon glyphicon-download"></span>
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
 
-	<div class="row">
-		<div class="col-md-6">
-			<div class="panel panel-default">
-				<div class="panel-heading">Genes</div>
-				<ul class="list-group">
-					{% for gene_id in gene_list.gene_ids %}
-						<li class="list-group-item">{{ gene_id }}</li>
-					{% else %}
-						<li class="list-group-item">No genes?</li>
-					{% endfor %}
-				</ul>
-			</div>
-		</div>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">Genes</div>
+        <ul class="list-group">
+          {% for gene_id in gene_list.gene_ids %}
+            <li class="list-group-item">{{ gene_id }}</li>
+          {% else %}
+            <li class="list-group-item">No genes?</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
 
-		<div class="col-md-6">
-			<div class="panel panel-default">
-				<div class="panel-heading">Cases</div>
-				<ul class="list-group">
-					{% for case in gene_list.cases %}
-						<li class="list-group-item">
-							<a href="{{ url_for('public.case', case_id=case.case_id) }}" title="{{ case.name }}">{{ case.name }}</a>
+    <div class="col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">Cases</div>
+        <ul class="list-group">
+          {% for case in gene_list.cases %}
+            <li class="list-group-item">
+              <a href="{{ url_for('public.case', case_id=case.case_id) }}" title="{{ case.name }}">{{ case.name }}</a>
 
-							<form class="badge" action="{{ url_for('public.delete_genelist', list_id=gene_list.list_id, case_id=case.case_id) }}" method="POST" accept-charset="utf-8">
-								<button class="no-style" type="submit">
-									<span class="glyphicon glyphicon-remove"></span>
-								</button>
-							</form>
-						</li>
-					{% else %}
-						<li class="list-group-item">Not linked to any cases.</li>
-					{% endfor %}
-				</ul>
-			</div>
+              <form class="badge" action="{{ url_for('public.delete_genelist', list_id=gene_list.list_id, case_id=case.case_id) }}" method="POST" accept-charset="utf-8">
+                <button class="no-style" type="submit">
+                  <span class="glyphicon glyphicon-remove"></span>
+                </button>
+              </form>
+            </li>
+          {% else %}
+            <li class="list-group-item">Not linked to any cases.</li>
+          {% endfor %}
+        </ul>
+      </div>
 
-			{% if case_ids %}
-				<div class="panel panel-default">
-					<div class="panel-heading">Add gene list to case</div>
-					<div class="panel-body">
-						<form action="{{ url_for('public.gene_list', list_id=gene_list.list_id) }}" method="POST" accept-charset="utf-8">
-							<div class="row">
-								<div class="col-md-8">
-									{{ utils.select_input('case_id', case_ids, multiple=True) }}
-								</div>
-								<div class="col-md-4">
-									<button class="form-control btn btn-default" type="submit">Link</button>
-								</div>
-							</div>
-						</form>
-					</div>
-				</div>
-			{% endif %}
-		</div>
-	</div>
+      {% if case_ids %}
+        <div class="panel panel-default">
+          <div class="panel-heading">Add gene list to case</div>
+          <div class="panel-body">
+            <form action="{{ url_for('public.gene_list', list_id=gene_list.list_id) }}" method="POST" accept-charset="utf-8">
+              <div class="row">
+                <div class="col-md-8">
+                  {{ utils.select_input('case_id', case_ids, multiple=True, required=True) }}
+                </div>
+                <div class="col-md-4">
+                  <button class="form-control btn btn-default" type="submit">Link</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
 {% endblock %}

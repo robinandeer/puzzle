@@ -16,7 +16,7 @@ from sqlalchemy.sql.expression import ClauseElement
 from puzzle.models import Case as BaseCase
 from puzzle.models import Individual as BaseIndividual
 from puzzle.models.sql import (BASE, Case, Individual, PhenotypeTerm, GeneList,
-                               CaseGenelistLink)
+                               CaseGenelistLink, Resource)
 from puzzle.plugins import VcfPlugin, Plugin
 try:
     from puzzle.plugins import GeminiPlugin
@@ -321,7 +321,6 @@ class Store(Plugin):
 
         return gene_list
 
-
     def select_plugin(self, case_obj):
         """Select and initialize the correct plugin for the case."""
         if case_obj.variant_mode == 'vcf':
@@ -333,8 +332,26 @@ class Store(Plugin):
             logger.debug("Using gemini plugin")
             plugin = GeminiPlugin(db=case_obj.variant_source,
                                   vtype=case_obj.variant_type)
-        
+
         self.variant_type = case_obj.variant_type
-    
+
         case_id = case_obj.case_id
         return plugin, case_id
+
+    def add_resource(self, name, file_path, ind_obj):
+        """Link a resource to an individual."""
+        new_resource = Resource(name=name, individual=ind_obj, path=file_path)
+        self.session.add(new_resource)
+        self.save()
+        return new_resource
+
+    def resource(self, resource_id):
+        """Fetch a resource."""
+        return self.query(Resource).get(resource_id)
+
+    def delete_resource(self, resource_id):
+        """Link a resource to an individual."""
+        resource_obj = self.resource(resource_id)
+        logger.debug("Deleting resource {0}".format(resource_obj.name))
+        self.session.delete(resource_obj)
+        self.save()

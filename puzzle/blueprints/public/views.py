@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
+import os
+
 from flask import (abort, Blueprint, current_app as app, render_template,
-                   redirect, request, url_for, make_response)
+                   redirect, request, url_for, make_response,
+                   send_from_directory)
 from werkzeug import secure_filename
 
 from puzzle.utils import hpo_genes
@@ -22,7 +25,8 @@ def index():
 @blueprint.route('/cases/<case_id>')
 def case(case_id):
     """Show the overview for a case."""
-    return render_template('case.html', case=app.db.case(case_id), case_id=case_id)
+    return render_template('case.html', case=app.db.case(case_id),
+                           case_id=case_id)
 
 
 @blueprint.route('/phenotypes', methods=['POST'])
@@ -94,15 +98,18 @@ def gene_list(list_id=None):
         else:
             # upload a new gene list
             req_file = request.files['file']
-            list_id = (request.form['list_id'] or
-                       secure_filename(req_file.filename))
+            new_listid = (request.form['list_id'] or
+                          secure_filename(req_file.filename))
+
+            if app.db.gene_list(new_listid):
+                return abort(500, 'Please provide a unique list name')
 
             if not req_file:
                 return abort(500, 'Please provide a file for upload')
 
             gene_ids = [line for line in req_file.stream
                         if not line.startswith('#')]
-            genelist_obj = app.db.add_genelist(list_id, gene_ids)
+            genelist_obj = app.db.add_genelist(new_listid, gene_ids)
             case_ids = all_case_ids
 
     return render_template('gene_list.html', gene_list=genelist_obj,
@@ -122,3 +129,45 @@ def delete_genelist(list_id, case_id=None):
         # remove the whole gene list
         app.db.remove_genelist(list_id)
         return redirect(url_for('.index'))
+
+
+@blueprint.route('/resources', methods=['POST'])
+def resources():
+    """Upload a new resource for an individual."""
+    ind_id = request.form['ind_id']
+
+    upload_dir = os.path.abspath(app.config['UPLOAD_DIR'])
+    req_file = request.files['file']
+    filename = secure_filename(req_file.filename)
+    file_path = os.path.join(upload_dir, filename)
+    name = request.form['name'] or filename
+    req_file.save(file_path)
+
+    ind_obj = app.db.individual(ind_id)
+    app.db.add_resource(name, file_path, ind_obj)
+    return redirect(request.referrer)
+
+
+@blueprint.route('/resources/<resource_id>')
+def resource(resource_id):
+    """Show a resource."""
+    resource_obj = app.db.resource(resource_id)
+
+    if 'raw' in request.args:
+        return send_from_directory(os.path.dirname(resource_obj.path),
+                                   os.path.basename(resource_obj.path))
+
+    return render_template('resource.html', resource=resource_obj)
+
+
+@blueprint.route('/resource/delete/<resource_id>', methods=['POST'])
+def delete_resource(resource_id):
+    """Delete a resource."""
+    resource_obj = app.db.resource(resource_id)
+    try:
+        os.remove(resource_obj.path)
+    except OSError as err:
+        app.logger.debug(err.message)
+
+    app.db.delete_resource(resource_id)
+    return redirect(request.referrer)

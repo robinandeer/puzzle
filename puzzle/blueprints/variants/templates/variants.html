@@ -3,72 +3,72 @@
 {% from "macros/filters.html" import filters_form %}
 
 {% block body_content %}
-	<div class="panel-group" id="filter-accordion">
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<h4 class="panel-title">
-					<a role="button" data-toggle="collapse" data-parent="#accordion" href="#view-filters">Filters</a>
-				</h4>
-			</div>
+  <div class="panel-group" id="filter-accordion">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <a role="button" data-toggle="collapse" data-parent="#accordion" href="#view-filters">Filters</a>
+        </h4>
+      </div>
 
-			<div id="view-filters" class="panel-collapse collapse">
-				<div class="panel-body">
-					{{ filters_form(case_id, db, inheritance_models, consequences, filters, gene_lists=gene_lists) }}
-				</div>
-			</div>
-		</div>
-	</div>
+      <div id="view-filters" class="panel-collapse collapse">
+        <div class="panel-body">
+          {{ filters_form(case_id, db, inheritance_models, consequences, filters, gene_lists=gene_lists) }}
+        </div>
+      </div>
+    </div>
+  </div>
 
-	<div class="table-responsive">
-		<table class="table table-bordered table-hover" id="variants_list">
-			<thead>
-				<tr>
-					<th>Rank #</th>
-					<th>Score</th>
-					<th>Chromosome</th>
-					<th>Gene</th>
-					<th>Consequence</th>
-					<th>1000G</th>
-					<th>CADD</th>
-				</tr>
-			</thead>
-			<tbody>
-				{% for variant in variants %}
-					<tr>
-						<td><a href="{{ url_for('variants.variant', case_id=case_id, variant_id=variant.variant_id) }}">{{ variant.index }}</a></td>
-						<td>{{ variant.rank_score or '-' }}</td>
-						<td>{{ variant.CHROM }}</td>
-						<td>{{ omim_links(variant.genes) }}</td>
-						<td>{{ variant.most_severe_consequence or '-' }}</td>
-						<td>
-							{% if variant.thousand_g %}
-								{{ variant.thousand_g|round(4) }}
-							{% else %}
-								<small class="text-muted">-</small>
-							{% endif %}
-						</td>
-						<td>{{ variant.cadd_score or '-' }}</td>
-					</tr>
-				{% else %}
-					<p>No more variants to show.</p>
-				{% endfor %}
-			</tbody>
-		</table>
-	</div>
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover" id="variants_list">
+      <thead>
+        <tr>
+          <th>Rank #</th>
+          <th>Score</th>
+          <th>Chromosome</th>
+          <th>Gene</th>
+          <th>Consequence</th>
+          <th>1000G</th>
+          <th>CADD</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for variant in variants %}
+          <tr>
+            <td><a href="{{ url_for('variants.variant', case_id=case_id, variant_id=variant.variant_id) }}">{{ variant.index }}</a></td>
+            <td>{{ variant.rank_score or '-' }}</td>
+            <td>{{ variant.CHROM }}</td>
+            <td>{{ omim_links(variant.genes) }}</td>
+            <td>{{ variant.most_severe_consequence or '-' }}</td>
+            <td>
+              {% if variant.thousand_g %}
+                {{ variant.thousand_g|round(4) }}
+              {% else %}
+                <small class="text-muted">-</small>
+              {% endif %}
+            </td>
+            <td>{{ variant.cadd_score or '-' }}</td>
+          </tr>
+        {% else %}
+          <p>No more variants to show.</p>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
-	<a href="{{ url_for('variants.variants', case_id=case_id, **filters.query_dict) }}" class="btn btn-default">Load more</a>
+  <a href="{{ url_for('variants.variants', case_id=case_id, **filters.query_dict) }}" class="btn btn-default">Load more</a>
 {% endblock %}
 
 {% block js_bottom %}
-	{{ super() }}
-	<script type="text/javascript" charset="utf-8">
-  $('.selectpicker').selectpicker();
-  $(document).ready(function(){
-    $('#variants_list').DataTable({
-      "paging":   false,
-      "searching": false,
-      "info": false
+  {{ super() }}
+  <script type="text/javascript" charset="utf-8">
+    $('.selectpicker').selectpicker();
+    $(document).ready(function() {
+      $('#variants_list').DataTable({
+        "paging":   false,
+        "searching": false,
+        "info": false
+      });
     });
-  });
   </script>
 {% endblock %}
