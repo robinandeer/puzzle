@@ -99,6 +99,7 @@ class VariantMixin(object):
         
         skip_index = 0
         for index,variant_line in enumerate(raw_variants):
+            index += 1
             if skip_index >= skip:
                 variant_obj = self._format_variant(
                      variant_line=variant_line, 
@@ -314,7 +315,6 @@ class VariantMixin(object):
                 case_obj (puzzle.nodels.Case): A case object
 
         """
-
         header_line = head.header
 
         # Get the individual ids for individuals in vcf file
