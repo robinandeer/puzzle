@@ -132,24 +132,24 @@ class Store(Plugin):
         Args:
             case_obj (puzzle.models.Case): initialized case model
         """
-        new_case = Case(case_id=case_obj['case_id'],
-                        name=case_obj['name'],
-                        variant_source=case_obj['variant_source'],
+        new_case = Case(case_id=case_obj.case_id,
+                        name=case_obj.name,
+                        variant_source=case_obj.variant_source,
                         variant_type=vtype,
                         variant_mode=mode,
                         pedigree=ped_svg)
 
         # build individuals
         inds = [Individual(
-            ind_id=ind['ind_id'],
-            mother=ind['mother'],
-            father=ind['father'],
-            sex=ind['sex'],
-            phenotype=ind['phenotype'],
-            ind_index=ind['index'],
-            variant_source=ind['variant_source'],
-            bam_path=ind['bam_path'],
-        ) for ind in case_obj['individuals']]
+            ind_id=ind.ind_id,
+            mother=ind.mother,
+            father=ind.father,
+            sex=ind.sex,
+            phenotype=ind.phenotype,
+            ind_index=ind.ind_index,
+            variant_source=ind.variant_source,
+            bam_path=ind.bam_path,
+        ) for ind in case_obj.individuals]
 
         new_case.individuals = inds
         self.session.add(new_case)

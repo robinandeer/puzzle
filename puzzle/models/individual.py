@@ -31,7 +31,7 @@ class Individual(DotDict, PedigreeHumanMixin):
             father=father,
             sex=sex,
             phenotype=phenotype,
-            ind_index=index,
+            ind_index=ind_index,
             variant_source=variant_source,
             bam_path=bam_path
         )
