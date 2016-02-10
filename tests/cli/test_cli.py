@@ -186,25 +186,45 @@ class TestDeleteCommand:
         
         assert result.exit_code == 0
 
-    # def test_individuals_command_file(self, vcf_file):
-    #     """Check if cases command work"""
-    #
-    #     logger = logging.getLogger("test_individuals_command_file")
-    #     runner = CliRunner()
-    #     logger.debug("Test if individuals command work with a file")
-    #     result = runner.invoke(cli, ['individuals','--root', vcf_file])
-    #
-    #     assert result.exit_code == 1
-    #
-    # def test_individuals_command_no_db(self, dir_path):
-    #     """Check if cases command work"""
-    #
-    #     logger = logging.getLogger("test_individuals_no_db")
-    #     runner = CliRunner()
-    #     logger.debug("Test if individuals command work without a puzzle db")
-    #     result = runner.invoke(cli, ['individuals','--root', dir_path])
-    #
-    #     assert result.exit_code == 1
+    def test_delete_case(self, populated_puzzle_db):
+        """Check if delete individuals command work"""
+        
+        logger = logging.getLogger("test_delete_case")
+        runner = CliRunner()
+        logger.debug("Test if delete case command work")
+        result = runner.invoke(cli, ['delete','--root', populated_puzzle_db,
+                                     '-f', '636808'])
+        
+        assert result.exit_code == 0
 
+    def test_delete_command_file(self, vcf_file):
+        
+        runner = CliRunner()
+        result = runner.invoke(cli, ['delete','--root', vcf_file,
+                                     '-f', '636808'])
+        
+        assert result.exit_code == 1
 
-    
+    def test_delete_command_no_input(self, populated_puzzle_db):
+        
+        runner = CliRunner()
+        result = runner.invoke(cli, ['delete','--root', populated_puzzle_db])
+        
+        assert result.exit_code == 1
+
+    def test_delete_command_non_existing_case(self, populated_puzzle_db):
+        
+        runner = CliRunner()
+        result = runner.invoke(cli, ['delete','--root', populated_puzzle_db,
+                                     '-f', 'hello'])
+        
+        assert result.exit_code == 1
+
+    def test_delete_command_non_existing_individual(self, populated_puzzle_db):
+        
+        runner = CliRunner()
+        result = runner.invoke(cli, ['delete','--root', populated_puzzle_db,
+                                     '-i', 'hello'])
+        
+        assert result.exit_code == 1
+

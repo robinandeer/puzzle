@@ -54,3 +54,7 @@ def delete(ctx, family_id, individual_id, root):
             logger.warning("Individual {0} does not exist in database".format(individual_id))
             ctx.abort()
         store.delete_individual(ind_obj)
+    else:
+        logger.warning("Please provide a family or individual id")
+        ctx.abort()
+        
