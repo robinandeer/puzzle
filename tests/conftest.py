@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import os
+import shutil
 import pytest
 import logging
 
@@ -23,6 +25,83 @@ def vcf():
     db = VcfPlugin()
     return db
 
+@pytest.fixture(scope='function')
+def puzzle_dir(request, dir_path):
+    """Return a puzzle dir with a database initialized"""
+    db_path = os.path.join(dir_path, 'puzzle_db.sqlite3')
+    logger.debug("db path is: {}".format(db_path))
+
+    resource_dir = os.path.join(dir_path, 'resources')
+    logger.debug("resource dir is: {}".format(resource_dir))
+
+    logger.debug("Create directory: {0}".format(resource_dir))
+    os.makedirs(resource_dir)
+    logger.debug('Directory created')
+
+    logger.debug('Connect to database and create tables')
+    store = SqlStore(db_path)
+    store.set_up(reset=False)
+    
+    #It's getting tear downed by dir_path()...
+    
+    return dir_path
+
+
+@pytest.fixture(scope='function')
+def vcf_file(request):
+    "Return the path to the hapmap vcf"
+    hapmap = "tests/fixtures/hapmap.vcf"
+    return hapmap
+
+@pytest.fixture(scope='function')
+def ped_file(request):
+    "Return the path to the hapmap vcf"
+    hapmap = "tests/fixtures/hapmap.ped"
+    return hapmap
+
+@pytest.fixture(scope='function')
+def gemini_db_path(request):
+    "Return the path to the hapmap gemini db"
+    hapmap = "tests/fixtures/HapMapFew.db"
+    return hapmap
+
+
+# @pytest.fixture(scope='function')
+# def puzzle_database(request, dir_path):
+#     """Return a puzzle dir with a database initialized"""
+#     db_path = os.path.join(dir_path, 'puzzle_db.sqlite3')
+#     logger.debug("db path is: {}".format(db_path))
+#
+#     resource_dir = os.path.join(dir_path, 'resources')
+#     logger.debug("resource dir is: {}".format(resource_dir))
+#
+#     logger.debug("Create directory: {0}".format(resource_dir))
+#     os.makedirs(resource_dir)
+#     logger.debug('Directory created')
+#
+#     logger.debug('Connect to database and create tables')
+#     store = SqlStore(db_path)
+#     store.set_up(reset=False)
+#
+#     #It's getting tear downed by dir_path()...
+#
+#     return dir_path
+
+
+
+@pytest.fixture(scope='function')
+def dir_path(request):
+    """Return the path to a dir. Delete afterwards"""
+    path_to_dir = "tests/fixtures/test_dir"
+
+    def teardown():
+        print('\n')
+        logger.info("Teardown directory")
+        if os.path.exists(path_to_dir):
+            shutil.rmtree(path_to_dir)
+    request.addfinalizer(teardown)
+    
+    return path_to_dir
 
 @pytest.fixture
 def variant():
