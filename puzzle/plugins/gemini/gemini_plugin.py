@@ -8,7 +8,6 @@ from . import (CaseMixin, VariantMixin)
 
 logger = logging.getLogger(__name__)
 
-
 class GeminiPlugin(CaseMixin, VariantMixin, Plugin):
     """This is the base class for puzzle plugins
 
@@ -35,6 +34,7 @@ class GeminiPlugin(CaseMixin, VariantMixin, Plugin):
         self.filters.can_filter_frequency = True
         self.filters.can_filter_cadd = True
         self.filters.can_filter_consequence = True
+        self.filters.can_filter_impact_severity = True
 
     def test_gemini_db(self):
         """Check if self.db is a valid gemini database"""

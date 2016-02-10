@@ -21,7 +21,8 @@ class Plugin(object):
             can_filter_consequence=False,
             can_filter_gene=False,
             can_filter_inheritance=False,
-            can_filter_sv=False
+            can_filter_sv=False,
+            can_filter_impact_severity=False,
         )
 
     def init_app(self, app):

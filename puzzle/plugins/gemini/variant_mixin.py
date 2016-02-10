@@ -289,6 +289,9 @@ class VariantMixin(object):
 
         #Add the most severe consequence
         variant['most_severe_consequence'] = gemini_variant['impact_so']
+        
+        #Add the impact severity
+        variant['impact_severity'] = gemini_variant['impact_severity']
 
         for gene in self._get_genes(variant):
             variant.add_gene(gene)
