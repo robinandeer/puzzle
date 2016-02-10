@@ -85,7 +85,7 @@ class VariantMixin(object):
             if any_filter:
                 gemini_query += " AND impact_severity in " + severity_string
             else:
-                gemini_query += " WHERE gene in " + severity_string
+                gemini_query += " WHERE impact_severity in " + severity_string
 
             any_filter = True
 
