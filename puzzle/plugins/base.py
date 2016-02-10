@@ -13,7 +13,7 @@ class Plugin(object):
         self.db = None
         self.puzzle_db = None
         self.individuals = None
-        self.case_obj = None
+        self.case_objs = None
         self.variant_type = 'snv'
         self.filters = DotDict(
             can_filter_frequency=False,
@@ -33,7 +33,7 @@ class Plugin(object):
     def cases(self, pattern=None):
         """Return all cases."""
         raise NotImplementedError
-
+    
     def variants(self, case_id, skip=0, count=30, filters=None):
         """Return count variants for a case.
 

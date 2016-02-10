@@ -99,7 +99,8 @@ class Store(Plugin):
         """
         if reset:
             self.tear_down()
-
+        
+        logger.info("Creating database")
         # create the tables
         BASE.metadata.create_all(self.engine)
         return self
@@ -325,13 +326,13 @@ class Store(Plugin):
         """Select and initialize the correct plugin for the case."""
         if case_obj.variant_mode == 'vcf':
             logger.debug("Using vcf plugin")
-            plugin = VcfPlugin(root_path=case_obj.variant_source,
-                               vtype=case_obj.variant_type)
-            plugin.case_objs = [case_obj]
+            plugin = VcfPlugin(vtype=case_obj.variant_type)
         elif case_obj.variant_mode == 'gemini':
             logger.debug("Using gemini plugin")
-            plugin = GeminiPlugin(db=case_obj.variant_source,
-                                  vtype=case_obj.variant_type)
+            plugin = GeminiPlugin(vtype=case_obj.variant_type)
+            plugin.db = case_obj.variant_source
+
+        plugin.case_objs = [case_obj]
 
         self.variant_type = case_obj.variant_type
 

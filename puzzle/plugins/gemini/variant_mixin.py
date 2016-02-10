@@ -133,8 +133,8 @@ class VariantMixin(object):
         individuals = []
         # Get the individuals for the case
         for case in self.cases():
-            if case['name'] == case_id:
-                for individual in case['individuals']:
+            if case.name == case_id:
+                for individual in case.individuals:
                     individuals.append(individual)
 
         gq = GeminiQuery(self.db)
@@ -164,7 +164,7 @@ class VariantMixin(object):
         """
         individuals = []
         for ind in individual_objs:
-            index = ind.index
+            index = ind.ind_index
             individuals.append(Genotype(
                 sample_id=ind.ind_id,
                 genotype=gemini_variant['gts'][index],
@@ -250,12 +250,12 @@ class VariantMixin(object):
                 for individual in case.individuals:
                     individuals.append(individual)
 
-        indexes = [individual.index for individual in individuals]
+        ind_indexes = [individual.ind_index for individual in individuals]
 
         index = 0
         for gemini_variant in gq:
             # Check if variant is non ref in the individuals
-            if self._is_variant(gemini_variant, indexes):
+            if self._is_variant(gemini_variant, ind_indexes):
                 index += 1
                 logger.debug("Updating index to: {0}".format(index))
 

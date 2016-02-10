@@ -6,7 +6,7 @@ from .dotdict import DotDict
 class Individual(DotDict, PedigreeHumanMixin):
     """Individual representation."""
     def __init__(self, ind_id, case_id=None, case_name=None, mother=None,
-                 father=None, sex=None, phenotype=None, index=None,
+                 father=None, sex=None, phenotype=None, ind_index=None,
                  variant_source=None, bam_path=None):
         """Construct a individual object
 
@@ -17,7 +17,7 @@ class Individual(DotDict, PedigreeHumanMixin):
                 father (str): The father id
                 sex (str): Sex in ped format
                 phenotype (str): Phenotype in ped format
-                index (int): Either the column in the vcf or what position in
+                ind_index (int): Either the column in the vcf or what position in
                              the gemini database the individual represents.
                 variant_source (str): Path to source (vcf file)
                 bam_path (str): Path to bamfiles (vcf file)
@@ -31,7 +31,7 @@ class Individual(DotDict, PedigreeHumanMixin):
             father=father,
             sex=sex,
             phenotype=phenotype,
-            index=index,
+            ind_index=index,
             variant_source=variant_source,
             bam_path=bam_path
         )

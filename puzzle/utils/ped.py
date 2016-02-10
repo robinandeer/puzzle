@@ -32,7 +32,7 @@ def get_case(variant_source, case_lines=None, case_type='ped', variant_type='snv
         case_id = os.path.basename(variant_source)
         
         for individual in individuals:
-            case_id = individual['case_id']
+            case_id = individual.case_id
 
         case = Case(case_id=case_id, variant_source=variant_source,
                     name=case_id, variant_type=variant_type, 
@@ -40,7 +40,7 @@ def get_case(variant_source, case_lines=None, case_type='ped', variant_type='snv
                     )
 
         logger.debug("Found case with case_id: {0} and name: {1}".format(
-            case['case_id'], case['name']))
+            case.case_id, case.name))
 
         for individual in individuals:
             case.add_individual(individual)
