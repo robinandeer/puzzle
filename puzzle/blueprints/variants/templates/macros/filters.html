@@ -1,6 +1,6 @@
 {% import "macros/form_utils.html" as utils %}
 
-{% macro filters_form(case_id, db, inheritance_models, consequences, filters, sv_types=None, gene_lists=None) %}
+{% macro filters_form(case_id, db, inheritance_models, consequences, impact_severities, filters, sv_types=None, gene_lists=None) %}
 <form method="get" action="{{ url_for('variants.variants', case_id=case_id) }}">
   <div class="form-group">
     <div class="row">
@@ -51,11 +51,17 @@
           {{ utils.select_input('consequences', consequences, filters.selected_consequences, multiple=True) }}
         </div>
       {% endif %}
-      {% if db.filters.can_filter_sv %}
+      {% if db.filters.can_filter_impact_severity %}
         <div class="col-md-3">
-          <label class="control-label">SV Types</label>
-          {{ utils.select_input('sv_types', (sv_types or []), filters.selected_sv_types, multiple=True) }}
+          <label class="control-label">Impact Severity</label>
+          {{ utils.select_input('impact_severities', impact_severities, filters.impact_severities, multiple=True) }}
         </div>
+      {% endif %}
+      {% if db.filters.can_filter_sv and db.variant_type == 'sv'%}
+      <div class="col-md-3">
+        <label class="control-label">SV Types</label>
+        {{ utils.select_input('sv_types', (sv_types or []), filters.selected_sv_types, multiple=True) }}
+      </div>
       {% endif %}
       {% if config['STORE_ENABLED'] %}
         <div class="col-md-3">

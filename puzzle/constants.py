@@ -67,3 +67,9 @@ SO_TERMS = (
     'feature_truncation',
     'intergenic_variant'
 )
+
+IMPACT_LEVELS = (
+    'HIGH',
+    'MEDIUM',
+    'LOW',
+)

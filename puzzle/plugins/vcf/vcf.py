@@ -70,7 +70,9 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
             can_filter_consequence=True,
             can_filter_gene=True,
             can_filter_inheritance=True,
-            can_filter_sv=True
+            can_filter_sv=True,
+            can_filter_impact_severity=True
+            
         )
 
     def check_setup(self, case_lines):

@@ -71,6 +71,24 @@ class VariantMixin(object):
 
             any_filter = True
 
+        if filters.get('impact_severities'):
+            severities_list = [severity.strip() 
+                    for severity in filters['impact_severities']]
+            severity_string = "("
+            for index, severity in enumerate(severities_list):
+                if index == 0:
+                    severity_string += "'{0}'".format(severity)
+                else:
+                    severity_string += ", '{0}'".format(severity)
+            severity_string += ")"
+
+            if any_filter:
+                gemini_query += " AND impact_severity in " + severity_string
+            else:
+                gemini_query += " WHERE impact_severity in " + severity_string
+
+            any_filter = True
+
         filtered_variants = self._variants(
             case_id=case_id,
             gemini_query=gemini_query
@@ -289,6 +307,9 @@ class VariantMixin(object):
 
         #Add the most severe consequence
         variant['most_severe_consequence'] = gemini_variant['impact_so']
+        
+        #Add the impact severity
+        variant['impact_severity'] = gemini_variant['impact_severity']
 
         for gene in self._get_genes(variant):
             variant.add_gene(gene)

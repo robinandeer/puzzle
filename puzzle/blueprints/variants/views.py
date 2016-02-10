@@ -2,7 +2,8 @@
 from flask import (abort, current_app as app, Blueprint, render_template,
                    request)
 
-from puzzle.constants import INHERITANCE_MODELS_SHORT, SO_TERMS, SV_TYPES
+from puzzle.constants import (INHERITANCE_MODELS_SHORT, SO_TERMS, SV_TYPES,
+                            IMPACT_LEVELS)
 
 BP_NAME = __name__.split('.')[-2]
 blueprint = Blueprint(BP_NAME, __name__, url_prefix='/variants',
@@ -25,7 +26,8 @@ def variants(case_id):
             'consequence': filters['selected_consequences'],
             'genetic_models': filters['selected_models'],
             'sv_types': filters['selected_sv_types'],
-            'gene_lists': filters['gene_lists']
+            'gene_lists': filters['gene_lists'],
+            'impact_severities': filters['impact_severities'],
         }
     )
     gene_lists = ([gene_list.list_id for gene_list in app.db.gene_lists()]
@@ -33,7 +35,8 @@ def variants(case_id):
     kwargs = dict(variants=variants, case_id=case_id, db=app.db,
                   filters=filters, consequences=SO_TERMS,
                   inheritance_models=INHERITANCE_MODELS_SHORT,
-                  gene_lists=gene_lists)
+                  gene_lists=gene_lists, impact_severities=IMPACT_LEVELS)
+    
     if app.db.variant_type == 'sv':
         return render_template('sv_variants.html', sv_types=SV_TYPES, **kwargs)
     else:
@@ -72,6 +75,7 @@ def parse_filters():
     filters['selected_sv_types'] = request.args.getlist('sv_types')
     filters['skip'] = int(request.args.get('skip', 0))
     filters['gene_lists'] = request.args.getlist('gene_lists')
+    filters['impact_severities'] = request.args.getlist('impact_severities')
 
     filters['query_dict'] = {key: request.args.getlist(key) for key
                              in request.args.keys()}
