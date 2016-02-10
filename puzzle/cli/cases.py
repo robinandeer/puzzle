@@ -36,4 +36,4 @@ def cases(ctx, root):
 
     store = SqlStore(db_path)
     for case in store.cases():
-        print(case)
+        click.echo(case)

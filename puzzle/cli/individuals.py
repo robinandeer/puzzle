@@ -36,4 +36,4 @@ def individuals(ctx, root):
 
     store = SqlStore(db_path)
     for ind in store.get_individuals():
-        print(ind)
+        click.echo(ind)
