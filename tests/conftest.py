@@ -66,28 +66,28 @@ def gemini_db_path(request):
     return hapmap
 
 
-# @pytest.fixture(scope='function')
-# def puzzle_database(request, dir_path):
-#     """Return a puzzle dir with a database initialized"""
-#     db_path = os.path.join(dir_path, 'puzzle_db.sqlite3')
-#     logger.debug("db path is: {}".format(db_path))
-#
-#     resource_dir = os.path.join(dir_path, 'resources')
-#     logger.debug("resource dir is: {}".format(resource_dir))
-#
-#     logger.debug("Create directory: {0}".format(resource_dir))
-#     os.makedirs(resource_dir)
-#     logger.debug('Directory created')
-#
-#     logger.debug('Connect to database and create tables')
-#     store = SqlStore(db_path)
-#     store.set_up(reset=False)
-#
-#     #It's getting tear downed by dir_path()...
-#
-#     return dir_path
+@pytest.fixture(scope='function')
+def populated_puzzle_db(request, dir_path, case_obj):
+    """Return a puzzle dir with a populated database"""
+    db_path = os.path.join(dir_path, 'puzzle_db.sqlite3')
+    logger.debug("db path is: {}".format(db_path))
 
+    resource_dir = os.path.join(dir_path, 'resources')
+    logger.debug("resource dir is: {}".format(resource_dir))
 
+    logger.debug("Create directory: {0}".format(resource_dir))
+    os.makedirs(resource_dir)
+    logger.debug('Directory created')
+
+    logger.debug('Connect to database and create tables')
+    store = SqlStore(db_path)
+    store.set_up(reset=False)
+    
+    store.add_case(case_obj, vtype='sv', mode='vcf')
+
+    #It's getting tear downed by dir_path()...
+
+    return dir_path
 
 @pytest.fixture(scope='function')
 def dir_path(request):

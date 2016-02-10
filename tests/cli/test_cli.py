@@ -106,4 +106,105 @@ class TestLoadCommand:
 
 class TestCasesCommand:
     """Test the cli cases command"""
-    pass
+    
+    def test_cases_command(self, populated_puzzle_db):
+        """Check if cases command work"""
+        
+        logger = logging.getLogger("test_cases_command")
+        runner = CliRunner()
+        logger.debug("Test if cases command work")
+        result = runner.invoke(cli, ['cases','--root', populated_puzzle_db])
+        
+        assert result.exit_code == 0
+        assert 'test.vcf' in result.output
+
+    def test_cases_command_file(self, vcf_file):
+        """Check if cases command work"""
+        
+        logger = logging.getLogger("test_cases_command_file")
+        runner = CliRunner()
+        logger.debug("Test if cases command work with a file")
+        result = runner.invoke(cli, ['cases','--root', vcf_file])
+        
+        assert result.exit_code == 1
+
+    def test_cases_command_no_db(self, dir_path):
+        """Check if cases command work"""
+        
+        logger = logging.getLogger("test_cases_no_db")
+        runner = CliRunner()
+        logger.debug("Test if cases command work without a puzzle db")
+        result = runner.invoke(cli, ['cases','--root', dir_path])
+        
+        assert result.exit_code == 1
+
+class TestIndividualsCommand:
+    """Test the cli individuals command"""
+    
+    def test_individuals_command(self, populated_puzzle_db):
+        """Check if cases command work"""
+        
+        logger = logging.getLogger("test_individuals_command")
+        runner = CliRunner()
+        logger.debug("Test if individuals command work")
+        result = runner.invoke(cli, ['individuals','--root', populated_puzzle_db])
+        
+        assert result.exit_code == 0
+        assert "ADM1059A1" in result.output
+
+    def test_individuals_command_file(self, vcf_file):
+        """Check if cases command work"""
+        
+        logger = logging.getLogger("test_individuals_command_file")
+        runner = CliRunner()
+        logger.debug("Test if individuals command work with a file")
+        result = runner.invoke(cli, ['individuals','--root', vcf_file])
+        
+        assert result.exit_code == 1
+    
+    def test_individuals_command_no_db(self, dir_path):
+        """Check if cases command work"""
+        
+        logger = logging.getLogger("test_individuals_no_db")
+        runner = CliRunner()
+        logger.debug("Test if individuals command work without a puzzle db")
+        result = runner.invoke(cli, ['individuals','--root', dir_path])
+        
+        assert result.exit_code == 1
+
+class TestDeleteCommand:
+    """Test the cli delete command"""
+    
+    def test_delete_individual(self, populated_puzzle_db):
+        """Check if delete individuals command work"""
+        
+        logger = logging.getLogger("test_delete_individual")
+        runner = CliRunner()
+        logger.debug("Test if delete individuals command work")
+        result = runner.invoke(cli, ['delete','--root', populated_puzzle_db,
+                                     '-i', 'ADM1059A1'])
+        
+        assert result.exit_code == 0
+
+    # def test_individuals_command_file(self, vcf_file):
+    #     """Check if cases command work"""
+    #
+    #     logger = logging.getLogger("test_individuals_command_file")
+    #     runner = CliRunner()
+    #     logger.debug("Test if individuals command work with a file")
+    #     result = runner.invoke(cli, ['individuals','--root', vcf_file])
+    #
+    #     assert result.exit_code == 1
+    #
+    # def test_individuals_command_no_db(self, dir_path):
+    #     """Check if cases command work"""
+    #
+    #     logger = logging.getLogger("test_individuals_no_db")
+    #     runner = CliRunner()
+    #     logger.debug("Test if individuals command work without a puzzle db")
+    #     result = runner.invoke(cli, ['individuals','--root', dir_path])
+    #
+    #     assert result.exit_code == 1
+
+
+    
