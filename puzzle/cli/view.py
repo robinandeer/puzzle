@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 import os
+import webbrowser
 
 import click
 import logging
@@ -25,6 +27,7 @@ logger = logging.getLogger(__name__)
 @click.option('--port', default=5000, show_default=True)
 @click.option('--debug', is_flag=True)
 @click.option('-p', '--pattern', default='*.vcf', show_default=True)
+@click.option('--no-browser', is_flag=True, help='Prevent auto-opening browser')
 @family_file
 @family_type
 @version
@@ -33,7 +36,7 @@ logger = logging.getLogger(__name__)
 @variant_type
 @click.pass_context
 def view(ctx, host, port, debug, pattern, family_file, family_type,
-         variant_source, variant_type, root, mode):
+         variant_source, variant_type, root, mode, no_browser):
     """Visualize DNA variant resources.
 
     1. Look for variant source(s) to visualize and inst. the right plugin
@@ -91,5 +94,8 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
     BaseConfig.UPLOAD_DIR = os.path.join(root, 'resources')
 
     app = create_app(config_obj=BaseConfig)
+
+    if not (no_browser or debug):
+        webbrowser.open_new_tab("http://{}:{}".format(host, port))
 
     app.run(host=host, port=port, debug=debug)
