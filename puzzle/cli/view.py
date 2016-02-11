@@ -90,7 +90,6 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
     logger.debug("Plugin setup was succesfull")
 
     BaseConfig.PUZZLE_BACKEND = plugin
-    BaseConfig.ROOT_DIR = root
     BaseConfig.UPLOAD_DIR = os.path.join(root, 'resources')
 
     app = create_app(config_obj=BaseConfig)
