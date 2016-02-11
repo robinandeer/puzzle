@@ -127,7 +127,7 @@ class CaseMixin(object):
                     father=individual['paternal_id'],
                     sex=individual['sex'],
                     phenotype=individual['phenotype'],
-                    index=sample_to_idx.get(individual['name']),
+                    ind_index=sample_to_idx.get(individual['name']),
                     variant_source=self.db,
                     bam_path=None)
             )

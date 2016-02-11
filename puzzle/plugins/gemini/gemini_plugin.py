@@ -17,18 +17,19 @@ class GeminiPlugin(CaseMixin, VariantMixin, Plugin):
 
     """
 
-    def __init__(self, db, vtype='snv'):
+    def __init__(self, db=None, vtype='snv'):
         super(GeminiPlugin, self).__init__()
         logger.debug("Setting self.db to {0}".format(db))
         self.db = db
         logger.debug("Setting variant type to {0}".format(vtype))
         self.variant_type = vtype
 
-        logger.info("Check if database is in correct format")
-        self.test_gemini_db()
-
-        self.individuals = self._get_individuals()
-        self.case_objs = self._get_cases(self.individuals)
+        if self.db:
+            logger.info("Check if database is in correct format")
+            self.test_gemini_db()
+            
+            self.individuals = self._get_individuals()
+            self.case_objs = self._get_cases(self.individuals)
 
         self.filters.can_filter_gene = True
         self.filters.can_filter_frequency = True

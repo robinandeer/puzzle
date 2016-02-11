@@ -99,7 +99,8 @@ class Store(Plugin):
         """
         if reset:
             self.tear_down()
-
+        
+        logger.info("Creating database")
         # create the tables
         BASE.metadata.create_all(self.engine)
         return self
@@ -131,24 +132,24 @@ class Store(Plugin):
         Args:
             case_obj (puzzle.models.Case): initialized case model
         """
-        new_case = Case(case_id=case_obj['case_id'],
-                        name=case_obj['name'],
-                        variant_source=case_obj['variant_source'],
+        new_case = Case(case_id=case_obj.case_id,
+                        name=case_obj.name,
+                        variant_source=case_obj.variant_source,
                         variant_type=vtype,
                         variant_mode=mode,
                         pedigree=ped_svg)
 
         # build individuals
         inds = [Individual(
-            ind_id=ind['ind_id'],
-            mother=ind['mother'],
-            father=ind['father'],
-            sex=ind['sex'],
-            phenotype=ind['phenotype'],
-            ind_index=ind['index'],
-            variant_source=ind['variant_source'],
-            bam_path=ind['bam_path'],
-        ) for ind in case_obj['individuals']]
+            ind_id=ind.ind_id,
+            mother=ind.mother,
+            father=ind.father,
+            sex=ind.sex,
+            phenotype=ind.phenotype,
+            ind_index=ind.ind_index,
+            variant_source=ind.variant_source,
+            bam_path=ind.bam_path,
+        ) for ind in case_obj.individuals]
 
         new_case.individuals = inds
         self.session.add(new_case)
@@ -325,13 +326,13 @@ class Store(Plugin):
         """Select and initialize the correct plugin for the case."""
         if case_obj.variant_mode == 'vcf':
             logger.debug("Using vcf plugin")
-            plugin = VcfPlugin(root_path=case_obj.variant_source,
-                               vtype=case_obj.variant_type)
-            plugin.case_objs = [case_obj]
+            plugin = VcfPlugin(vtype=case_obj.variant_type)
         elif case_obj.variant_mode == 'gemini':
             logger.debug("Using gemini plugin")
-            plugin = GeminiPlugin(db=case_obj.variant_source,
-                                  vtype=case_obj.variant_type)
+            plugin = GeminiPlugin(vtype=case_obj.variant_type)
+            plugin.db = case_obj.variant_source
+
+        plugin.case_objs = [case_obj]
 
         self.variant_type = case_obj.variant_type
 
