@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from puzzle.settings import BaseConfig
+from puzzle.server.settings import BaseConfig
 
 
 def test_BaseConfig():
