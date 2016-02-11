@@ -6,7 +6,7 @@ Variant Caller GUI and genetic disease analysis tool.
 $ git clone https://github.com/robinandeer/puzzle.git
 $ cd puzzle
 $ pip install --editable .
-$ puzzle view -i tests/fixtures/
+$ puzzle view tests/fixtures/
 # open webbrowser on port 5000
 $ open http://localhost:5000
 ```
