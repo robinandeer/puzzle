@@ -9,10 +9,6 @@ class MockApp(object):
     """Mock a flask app"""
     def __init__(self, db):
         super(MockApp, self).__init__()
-        self.config = {
-            'PUZZLE_ROOT': db
-            }
-
 
 
 class TestGeminiAdapter(object):

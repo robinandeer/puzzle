@@ -27,8 +27,7 @@ class Plugin(object):
 
     def init_app(self, app):
         """Initialize plugin via Flask."""
-        self.root_path = app.config['PUZZLE_ROOT']
-        self.pattern = app.config['PUZZLE_PATTERN']
+        raise NotImplementedError
 
     def cases(self, pattern=None):
         """Return all cases."""

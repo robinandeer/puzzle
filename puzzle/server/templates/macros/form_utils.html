@@ -1,5 +1,8 @@
 {% macro select_input(name, items, selected=None, multiple=False, required=False) %}
-  <select class="selectpicker form-control" name="{{ name }}" {% if multiple %}multiple{% endif %} class="form-control" {% if required %}required{% endif %}>
+  <select class="selectpicker form-control"
+          name="{{ name }}"
+          {% if multiple %}multiple{% endif %}
+          {% if required %}required{% endif %}>
     {% for item in items %}
       {% if selected and item in selected %}
         <option value="{{ item }}" selected>{{ item }}</option>
