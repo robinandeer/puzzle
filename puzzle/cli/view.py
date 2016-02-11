@@ -3,8 +3,7 @@ import os
 import click
 import logging
 
-from . import (base, family_file, family_type, version, verbose, root, mode,
-               variant_type)
+from . import base, family_file, family_type, version, root, mode, variant_type
 
 from puzzle.plugins import SqlStore, VcfPlugin
 try:
@@ -14,31 +13,18 @@ except ImportError:
 
 from sqlite3 import DatabaseError
 
-from puzzle.settings import BaseConfig
-from puzzle.factory import create_app
+from puzzle.server import create_app
+from puzzle.server.settings import BaseConfig
 
 logger = logging.getLogger(__name__)
 
+
 @base.command()
-@click.argument('variant-source',
-    type=click.Path(exists=True),
-    required=False
-)
-@click.option('--host',
-    default='0.0.0.0',
-    show_default=True,
-)
-@click.option('--port',
-    default=5000,
-    show_default=True,
-)
-@click.option('--debug',
-    is_flag=True
-)
-@click.option('-p', '--pattern',
-    default='*.vcf',
-    show_default=True,
-)
+@click.argument('variant-source', type=click.Path(exists=True), required=False)
+@click.option('--host', default='0.0.0.0', show_default=True)
+@click.option('--port', default=5000, show_default=True)
+@click.option('--debug', is_flag=True)
+@click.option('-p', '--pattern', default='*.vcf', show_default=True)
 @family_file
 @family_type
 @version
@@ -51,9 +37,7 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
     """Visualize DNA variant resources.
 
     1. Look for variant source(s) to visualize and inst. the right plugin
-    2.
     """
-
     if root is None:
         root = os.path.expanduser("~/.puzzle")
 
