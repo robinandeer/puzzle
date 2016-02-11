@@ -2,9 +2,10 @@ import logging
 
 from vcftoolbox import (get_variant_dict, HeaderParser, get_info_dict,
                         get_vep_info, get_snpeff_info, get_vcf_handle,
-                        get_variant_id)
+                        get_variant_id, Genotype)
 
-from puzzle.models import (Compound, Variant, Gene, Genotype, Transcript,)
+from puzzle.models import (Compound, Variant, Gene, Transcript,)
+from puzzle.models import Genotype as puzzle_genotype
 
 from puzzle.utils import (get_most_severe_consequence, get_omim_number,
                           get_cytoband_coord, get_gene_info, IMPACT_SEVERITIES)
@@ -34,7 +35,8 @@ class VariantMixin(object):
         for variant_line in handle:
             if not variant_line.startswith('#'):
                 index += 1
-                if get_variant_id(variant_line=variant_line) == variant_id:
+                line_id = get_variant_id(variant_line=variant_line).lstrip('chrCHR')
+                if line_id == variant_id:
                     return self._format_variant(
                         variant_line=variant_line, 
                         index=index, 
@@ -450,18 +452,21 @@ class VariantMixin(object):
                     variant_dict['FORMAT'].split(':'),
                     variant_dict[sample_id].split(':'))
                 )
-                variant.add_individual(Genotype(
+                
+                genotype = Genotype(**raw_call)
+                
+                variant.add_individual(puzzle_genotype(
                     sample_id = sample_id,
-                    genotype = raw_call.get('GT', './.'),
+                    genotype = genotype.genotype,
                     case_id = individual.case_name,
                     phenotype = individual.phenotype,
-                    ref_depth = raw_call.get('AD', ',').split(',')[0],
-                    alt_depth = raw_call.get('AD', ',').split(',')[1],
-                    genotype_quality = raw_call.get('GQ', '.'),
-                    depth = raw_call.get('DP', '.'),
-                    supporting_evidence = raw_call.get('SU', '0'),
-                    pe_support = raw_call.get('PE', '0'),
-                    sr_support = raw_call.get('SR', '0'),
+                    ref_depth = genotype.ref_depth,
+                    alt_depth = genotype.alt_depth,
+                    genotype_quality = genotype.genotype_quality,
+                    depth = genotype.depth_of_coverage,
+                    supporting_evidence = genotype.supporting_evidence,
+                    pe_support = genotype.pe_support,
+                    sr_support = genotype.sr_support,
                 ))
 
         # Add transcript information:
