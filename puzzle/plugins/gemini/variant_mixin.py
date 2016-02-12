@@ -177,7 +177,10 @@ class VariantMixin(object):
             ))
 
         return individuals
-
+    
+    def _get_hgnc_symbols(self, gemini_variant):
+        """Get the hgnc symbols for all transcripts in a variant"""
+    
     def _get_genes(self, variant):
         """Add the genes for a variant
 
@@ -250,12 +253,10 @@ class VariantMixin(object):
                 for individual in case.individuals:
                     individuals.append(individual)
 
-        ind_indexes = [individual.ind_index for individual in individuals]
-
         index = 0
         for gemini_variant in gq:
             # Check if variant is non ref in the individuals
-            if self._is_variant(gemini_variant, ind_indexes):
+            if self._is_variant(gemini_variant, individuals):
                 index += 1
                 logger.debug("Updating index to: {0}".format(index))
 
@@ -280,9 +281,36 @@ class VariantMixin(object):
             'QUAL':gemini_variant['qual'],
             'FILTER':gemini_variant['filter']
         }
-
-        return Variant(**variant_dict)
         
+        variant = Variant(**variant_dict)
+        variant['index'] = index
+        # Use the gemini id for fast search
+        variant.update_variant_id(gemini_variant['variant_id'])
+        
+        #Add the most severe consequence
+        variant['most_severe_consequence'] = gemini_variant['impact_so']
+        
+        #Add the impact severity
+        variant['impact_severity'] = gemini_variant['impact_severity']
+        
+        
+        return variant
+    
+    def format_variants(self, gemini_variant, ind_objs, index=0):
+        """Format the variant for the variants view
+        
+            We want to have it's own function for doing this since it includes 
+            much less information than in the variant view
+            
+            Args:
+                gemini_variant (GeminiQueryRow): The gemini variant
+                ind_objs (list(puzzle.models.individual))
+                index(int): The index of the variant
+
+            Returns:
+                variant (dict): A Variant object
+        """
+        variant = self._get_puzzle_variant(gemini_variant, index)
     
     def _format_variant(self, gemini_variant, individual_objs, index=0):
         """Make a puzzle variant from a gemini variant
@@ -295,12 +323,7 @@ class VariantMixin(object):
             Returns:
                 variant (dict): A Variant object
         """
-        variant = self._get_puzzle_variant(gemini_variant)
-        
-        variant['index'] = index
-
-        # Use the gemini id for fast search
-        variant.update_variant_id(gemini_variant['variant_id'])
+        variant = self._get_puzzle_variant(gemini_variant, index)
         
         # Update the individuals
         individual_genotypes = self._get_genotypes(
@@ -315,22 +338,16 @@ class VariantMixin(object):
         for transcript in self._get_transcripts(gemini_variant):
             variant.add_transcript(transcript)
 
-        #Add the most severe consequence
-        variant['most_severe_consequence'] = gemini_variant['impact_so']
-        
-        #Add the impact severity
-        variant['impact_severity'] = gemini_variant['impact_severity']
-
         for gene in self._get_genes(variant):
             variant.add_gene(gene)
 
-        variant['start'] = int(variant_dict['POS'])
+        variant['start'] = int(variant.POS)
 
         if self.variant_type == 'sv':
             other_chrom = variant['CHROM']
             # If we have a translocation:
-            if ':' in variant_dict['ALT']:
-                other_coordinates = variant_dict['ALT'].strip('ACGTN[]').split(':')
+            if ':' in variant.ALT:
+                other_coordinates = variant.ALT.strip('ACGTN[]').split(':')
                 other_chrom = other_coordinates[0].lstrip('chrCHR')
                 other_position = other_coordinates[1]
                 variant['stop'] = other_position
@@ -340,18 +357,18 @@ class VariantMixin(object):
                 variant['sv_type'] = 'BND'
             else:
                 variant['stop'] = int(gemini_variant['end'])
-                variant['sv_len'] = variant['stop'] - variant['start']
+                variant['sv_len'] = variant.stop - variant.start
                 variant['sv_type'] = gemini_variant['sub_type']
 
             variant['stop_chrom'] = other_chrom
 
         else:
-            variant['stop'] = int(variant_dict['POS']) + \
-                (len(variant_dict['REF']) - len(variant_dict['ALT']))
+            variant['stop'] = int(variant.POS) + \
+                (len(variant.REF) - len(variant.ALT))
 
         variant['cytoband_start'] = get_cytoband_coord(
-                                        chrom=variant['CHROM'],
-                                        pos=variant['start'])
+                                        chrom=variant.CHROM,
+                                        pos=variant.start)
 
         if variant.get('stop_chrom'):
             variant['cytoband_stop'] = get_cytoband_coord(
@@ -411,7 +428,7 @@ class VariantMixin(object):
         alt = gemini_variant['alt']
         indexes = (ind.ind_index for ind in ind_objs)
         #Merge all genotypes into one string
-        genotypes = [gemini_variant['gts'][idnex] for index in indexes].join()
+        genotypes = "".join([gemini_variant['gts'][index] for index in indexes])
         #Check if the alternative allele is found within the genotypes    
         if alt in genotypes:
             return True
