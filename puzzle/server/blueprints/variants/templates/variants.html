@@ -2,7 +2,7 @@
 {% from "macros/links.html" import omim_links %}
 {% from "macros/filters.html" import filters_form %}
 
-{% block body_content %}
+{% block container %}
   <div class="panel-group" id="filter-accordion">
     <div class="panel panel-default">
       <div class="panel-heading">
@@ -59,7 +59,7 @@
   <a href="{{ url_for('variants.variants', case_id=case_id, **filters.query_dict) }}" class="btn btn-default">Load more</a>
 {% endblock %}
 
-{% block js_bottom %}
+{% block scripts %}
   {{ super() }}
   <script type="text/javascript" charset="utf-8">
     $('.selectpicker').selectpicker();

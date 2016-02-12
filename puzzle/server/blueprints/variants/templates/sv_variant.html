@@ -10,7 +10,7 @@
   </li>
 {% endblock %}
 
-{% block body_content %}
+{% block container %}
   {# Overview #}
   <div class="row">
     <div class="col-md-6">
@@ -104,6 +104,8 @@
               </span>
               {{ frequency.label }}
             </li>
+          {% else %}
+            <li class="list-group-item">No frequencies.</li>
           {% endfor %}
         </ul>
       </div>

@@ -3,6 +3,7 @@ import logging
 
 from flask import Flask
 
+from .ext import bootstrap
 from .settings import BaseConfig
 
 logger = logging.getLogger(__name__)
@@ -57,3 +58,6 @@ def bind_extensions(app):
     # bind plugin to app object
     app.db = app.config['PUZZLE_BACKEND']
     app.db.init_app(app)
+
+    # bind bootstrap blueprints
+    bootstrap.init_app(app)
