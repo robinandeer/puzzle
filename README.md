@@ -66,6 +66,9 @@ Puzzle uses the ped file to show more information in family view and in variant 
 puzzle view -i tests/fixtures/hapmap.vcf --family_file/-f tests/fixtures/hapmap.vcf
 ```
 
+## Credits
+Puzzle Piece by Creative Stall from the Noun Project
+
 ## License
 MIT. See the [LICENSE](LICENSE) file for more details.
 
