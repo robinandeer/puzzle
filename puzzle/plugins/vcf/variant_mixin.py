@@ -8,7 +8,6 @@ from puzzle.plugins import BaseVariantMixin
 
 from puzzle.models import (Compound, Variant, Gene, Transcript,)
 from puzzle.models import Genotype as puzzle_genotype
-
 from puzzle.utils import (get_most_severe_consequence, get_omim_number,
                           get_cytoband_coord, IMPACT_SEVERITIES)
 
