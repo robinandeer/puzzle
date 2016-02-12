@@ -4,7 +4,7 @@ from puzzle.plugins import GeminiPlugin
 
 from sqlite3 import DatabaseError
 
-class TestGeminiAdapter:
+class TestInitGeminiAdapter:
     """Setup and test a gemini adapter"""
 
     def test_setup_no_db(self):
@@ -36,18 +36,65 @@ class TestGeminiAdapter:
         with pytest.raises(DatabaseError):
             adapter.test_gemini_db()
 
-    # def test_gemini_individuals(self):
-    #     """docstring for test_gemini_individuals"""
-    #     ind_ids = set([individual['ind_id']
-    #                    for individual in self.adapter.individuals])
-    #     assert ind_ids == set(['NA12877', 'NA12878', 'NA12882'])
-    #
-    # def test_gemini_cases(self):
-    #     """docstring for test_gemini_individuals"""
-    #     cases = set([case['name']
-    #                 for case in self.adapter.cases()])
-    #     assert cases == set(['643594'])
-    #
+class TestCaseMixin:
+    """Test the functionality for the case mixin"""
+    
+    def test_get_individuals(self, gemini_path):
+        adapter = GeminiPlugin(db=gemini_path)
+        
+        ind_ids = [ind.ind_id for ind in adapter.get_individuals()]
+        assert set(ind_ids) == set(['NA12877', 'NA12878', 'NA12882'])
+
+    def test_get_individuals_one_ind(self, gemini_path):
+        adapter = GeminiPlugin(db=gemini_path)
+        
+        ind_ids = [ind.ind_id for ind in adapter.get_individuals('NA12877')]
+        assert set(ind_ids) == set(['NA12877'])
+
+    def test_get_individuals_two_inds(self, gemini_path):
+        adapter = GeminiPlugin(db=gemini_path)
+        
+        ind_ids = [ind.ind_id for ind in adapter.get_individuals('NA12877', 'NA12878')]
+        assert set(ind_ids) == set(['NA12877', 'NA12878'])
+
+    def test__get_individuals(self, gemini_path):
+        adapter = GeminiPlugin(db=gemini_path)
+        
+        ind_ids = [ind.ind_id for ind in adapter._get_individuals()]
+        assert set(ind_ids) == set(['NA12877', 'NA12878', 'NA12882'])
+
+    def test__get_cases(self, gemini_path):
+        adapter = GeminiPlugin(db=gemini_path)
+        
+        individuals = adapter._get_individuals()
+        case_ids = [case.case_id for case in adapter._get_cases(individuals)]
+        assert set(case_ids) == set(['643594'])
+
+    def test_cases(self, gemini_path):
+        adapter = GeminiPlugin(db=gemini_path)
+        
+        case_ids = [case.case_id for case in adapter.cases()]
+        assert set(case_ids) == set(['643594'])
+
+    def test_case(self, gemini_path):
+        adapter = GeminiPlugin(db=gemini_path)
+        
+        case_id = '643594'
+        assert adapter.case(case_id).case_id == case_id
+
+    def test_case_no_id(self, gemini_path):
+        adapter = GeminiPlugin(db=gemini_path)
+        
+        case_id = '643594'
+        assert adapter.case().case_id == case_id
+
+    def test_case_wrong_id(self, gemini_path):
+        adapter = GeminiPlugin(db=gemini_path)
+        
+        case_id = 'hello'
+        assert adapter.case(case_id) == None
+
+
     # def test_get_variants(self):
     #     """Test to get some variants from the gemini adapter"""
     #     variants = []

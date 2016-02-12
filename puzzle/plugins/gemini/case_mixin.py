@@ -43,9 +43,9 @@ class CaseMixin(object):
             if cases:
                 return cases[0]
 
-        return Case(case_id='unknown')
-    
-    def individuals(self, ind_ids=None):
+        return None
+
+    def get_individuals(self, *ind_ids):
         """Return information about individuals
         
             Args:
@@ -60,7 +60,9 @@ class CaseMixin(object):
                     if ind.ind_id == ind_id:
                         yield ind
         else:
-            yield self.individuals
+            for ind in self.individuals:
+                yield ind
+
     
     def _get_cases(self, individuals):
         """Return the cases found in the database
