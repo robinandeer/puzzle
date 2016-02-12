@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+import codecs
 import json
 import os
-import pkg_resources
+from pkg_resources import resource_filename
 import gzip
 from intervaltree import Interval, IntervalTree
 
@@ -62,7 +63,7 @@ IMPACT_SEVERITIES = {
     "initiator_codon_variant": "HIGH",
     "chromosomal_deletion": "HIGH",
     "rare_amino_acid_variant": "HIGH",
-    "missense_variant": "MED", 
+    "missense_variant": "MED",
     "inframe_insertion": "MED",
     "inframe_deletion": "MED",
     "coding_sequence_variant": "MED",
@@ -112,18 +113,18 @@ for severity, term in enumerate(SO_TERMS):
     SEVERITY_DICT[term] = severity
 
 resource_package = puzzle.__name__
-hgnc_to_omim_path = os.path.join('resources', 'hgnc_to_omim.json')
-cytoband_path = os.path.join('resources', 'cytoBand.txt.gz')
-schema_path = os.path.join('configs', 'schema.sql')
+hgnc_to_omim_path = os.path.join('utils', 'resources', 'hgnc_to_omim.json')
+cytoband_path = os.path.join('utils', 'resources', 'cytoBand.txt.gz')
 
-converter_file = pkg_resources.resource_string(resource_package, hgnc_to_omim_path)
-cytoband_file = os.path.join(resource_package, cytoband_path)
+converter_path = resource_filename(resource_package, hgnc_to_omim_path)
+cytoband_path = resource_filename(resource_package, cytoband_path)
 
-HGNC_TO_OMIM = json.loads(converter_file.decode('utf-8'))
+with codecs.open(converter_path, 'r') as stream:
+    HGNC_TO_OMIM = json.load(stream)
 
 CYTOBANDS = {}
 
-with gzip.open(cytoband_file, 'r') as cytobands:
+with gzip.open(cytoband_path, 'r') as cytobands:
     for line in cytobands:
         line = line.rstrip().split('\t')
         chrom = line[0].strip('chr')
