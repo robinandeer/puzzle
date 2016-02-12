@@ -9,9 +9,7 @@ import os
 
 import phizz
 from sqlalchemy import create_engine
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.sql.expression import ClauseElement
 
 from puzzle.models import Case as BaseCase
 from puzzle.models import Individual as BaseIndividual
@@ -99,7 +97,7 @@ class Store(Plugin):
         """
         if reset:
             self.tear_down()
-        
+
         logger.info("Creating database")
         # create the tables
         BASE.metadata.create_all(self.engine)
@@ -142,6 +140,7 @@ class Store(Plugin):
         # build individuals
         inds = [Individual(
             ind_id=ind.ind_id,
+            name=ind.name,
             mother=ind.mother,
             father=ind.father,
             sex=ind.sex,

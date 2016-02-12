@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 
-from sqlalchemy import (Column, DateTime, Float, ForeignKey, Integer, String,
-                        Table, UniqueConstraint)
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
 from puzzle.models.mixins import PedigreeHumanMixin
@@ -52,6 +51,7 @@ class Case(BASE):
                 " variant_source:{self.variant_source}, variant_type:"\
                 "{self.variant_type}, variant_mode:{self.variant_mode})>".format(self=self))
 
+
 class Individual(BASE, PedigreeHumanMixin):
     """
     This is the class for storing individuals in the database.
@@ -61,6 +61,7 @@ class Individual(BASE, PedigreeHumanMixin):
     __tablename__ = "individual"
     id = Column(Integer, primary_key=True)
     ind_id = Column(String(32))
+    name = Column(String(32))
     mother = Column(String(32))
     father = Column(String(32))
     sex = Column(String(32))
