@@ -1,0 +1,55 @@
+{% import "macros/form_utils.html" as utils %}
+
+{% macro phenotype_table(phenotypes) %}
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>HPO</th>
+        <th>Description</th>
+        <th>Individual</th>
+        <th>Delete</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for term in phenotypes %}
+        <tr>
+          <td>{{ term.phenotype_id }}</td>
+          <td>{{ term.description }}</td>
+          <td>{{ term.individual.ind_id }}</td>
+          <td>
+            <form class="badge" action="{{ url_for('public.delete_phenotype', phenotype_id=term.phenotype_id) }}" method="POST" accept-charset="utf-8">
+              <input name="ind_id" value="{{ term.individual.ind_id }}" hidden></input>
+              <button class="no-style" type="submit">
+                <span class="glyphicon glyphicon-remove"></span>
+              </button>
+            </form>
+          </td>
+        </tr>
+      {% else %}
+        <tr>
+          <td colspan="4">No phenotypes added.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endmacro %}
+
+{% macro phenotype_form(individuals=None, individual_id=None) %}
+  <form action="{{ url_for('public.phenotypes') }}" method="POST" accept-charset="utf-8">
+    <div class=form-group>
+      <input name="phenotype_id" class="form-control" placeholder="HPO or OMIM id" required></input>
+    </div>
+    <div class="form-group row">
+      <div class="col-md-8">
+        {% if individuals %}
+          {{ utils.select_input('ind_id', individuals|map(attribute='ind_id')) }}
+        {% else %}
+          <input type="text" name="ind_id" value="{{ individual_id }}" hidden>
+        {% endif %}
+      </div>
+      <div class="col-md-4">
+        <button class="btn btn-default form-control" type="submit">Add</button>
+      </div>
+    </div>
+  </form>
+{% endmacro %}

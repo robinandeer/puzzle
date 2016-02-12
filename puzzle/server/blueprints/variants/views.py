@@ -3,7 +3,7 @@ from flask import (abort, current_app as app, Blueprint, render_template,
                    request)
 
 from puzzle.constants import (INHERITANCE_MODELS_SHORT, SO_TERMS, SV_TYPES,
-                            IMPACT_LEVELS)
+                              IMPACT_LEVELS)
 
 BP_NAME = __name__.split('.')[-2]
 blueprint = Blueprint(BP_NAME, __name__, url_prefix='/variants',
@@ -15,6 +15,8 @@ blueprint = Blueprint(BP_NAME, __name__, url_prefix='/variants',
 def variants(case_id):
     """Show all variants for a case."""
     filters = parse_filters()
+    is_active = any(value for value in filters.values()
+                    if not isinstance(value, dict))
     variants = app.db.variants(
         case_id,
         skip=filters['skip'],
@@ -35,8 +37,9 @@ def variants(case_id):
     kwargs = dict(variants=variants, case_id=case_id, db=app.db,
                   filters=filters, consequences=SO_TERMS,
                   inheritance_models=INHERITANCE_MODELS_SHORT,
-                  gene_lists=gene_lists, impact_severities=IMPACT_LEVELS)
-    
+                  gene_lists=gene_lists, impact_severities=IMPACT_LEVELS,
+                  is_active=is_active)
+
     if app.db.variant_type == 'sv':
         return render_template('sv_variants.html', sv_types=SV_TYPES, **kwargs)
     else:

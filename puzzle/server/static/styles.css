@@ -8,3 +8,7 @@ button.no-style {
   border: none;
   padding: 0;
 }
+
+.overflow-auto {
+  overflow: auto;
+}

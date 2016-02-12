@@ -12,7 +12,7 @@
   </li>
 {% endblock %}
 
-{% block body_content %}
+{% block container %}
   {# Overview #}
   <div class="row">
     <div class="col-md-6">
@@ -62,7 +62,7 @@
         </li>
 
         {% if variant.genes %}
-          <li class="list-group-item">
+          <li class="list-group-item overflow-auto">
             Genes (OMIM)
             <div class="pull-right">{{ omim_links(variant.genes) }}</div>
           </li>
@@ -89,6 +89,8 @@
               </span>
               {{ frequency.label }}
             </li>
+          {% else %}
+            <li class="list-group-item">No frequencies.</li>
           {% endfor %}
         </ul>
       </div>

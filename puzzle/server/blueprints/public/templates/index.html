@@ -1,11 +1,11 @@
 {% extends "layouts/base.html" %}
 
-{% block body_content %}
+{% block container %}
   <div class="row">
     <div class="col-md-8">
-      <ul class="list-group">
-        {% for case in cases %}
-          <li class="list-group-item">
+      {% for case in cases %}
+        <div class="panel panel-default">
+          <div class="panel-heading">
             <a href="{{ url_for('public.case', case_id=case.case_id) }}">
               {{ case.name }}
             </a>
@@ -13,9 +13,25 @@
             <a class="pull-right" href="{{ url_for('variants.variants', case_id=case.case_id) }}">
               Variants
             </a>
-          </li>
-        {% endfor %}
-      </ul>
+          </div>
+          <ul class="list-group">
+            {% for individual in case.individuals %}
+              <li class="list-group-item">
+                <a href="{{ url_for('public.individual', ind_id=individual.ind_id) }}">
+                  {{ individual.name }}
+                </a>
+                {% if individual.is_affected %}
+                  <span class="badge">
+                    <span class="glyphicon glyphicon-exclamation-sign"></span>
+                  </span>
+                {% endif %}
+              </li>
+            {% else %}
+              <li class="list-group-item">No individuals.</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
     </div>
 
     {% if config['STORE_ENABLED'] %}
@@ -37,11 +53,8 @@
               <li class="list-group-item">No gene lists added.</li>
             {% endfor %}
           </ul>
-        </div>
 
-        <div class="panel panel-default">
-          <div class="panel-heading">Upload a gene list</div>
-
+          <div class="panel-heading">Upload a new gene list</div>
           <div class="panel-body">
             <form action="{{ url_for('public.gene_list') }}" method="POST" enctype="multipart/form-data">
               <div class="form-group">

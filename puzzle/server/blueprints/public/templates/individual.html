@@ -1,0 +1,37 @@
+{% extends "layouts/base.html" %}
+{% import "public_utils.html" as public_utils %}
+
+{% block container %}
+  <div class="row">
+    <div class="col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-heading"><strong>{{ individual.name }}</strong></div>
+        <ul class="list-group">
+          <li class="list-group-item">
+            Case: <a href="{{ url_for('public.case', case_id=individual.case_name) }}">{{ individual.case_name }}</a>
+          </li>
+          <li class="list-group-item">Sex: {{ individual.sex_human }}</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col-md-6"></div>
+  </div>
+
+  {% if config['STORE_ENABLED'] %}
+    <div class="panel panel-default">
+      <div class="panel-heading">Phenotypes</div>
+      <div class="panel-body">
+        <div class="row">
+          <div class="col-md-8">
+            {{ public_utils.phenotype_table(individual.phenotypes) }}
+          </div>
+
+          <div class="col-md-4">
+            {{ public_utils.phenotype_form(individual_id=individual.ind_id) }}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}

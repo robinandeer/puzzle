@@ -6,8 +6,6 @@ from flask import (abort, Blueprint, current_app as app, render_template,
                    send_from_directory)
 from werkzeug import secure_filename
 
-from puzzle.utils import hpo_genes
-
 BP_NAME = __name__.split('.')[-2]
 blueprint = Blueprint(BP_NAME, __name__, template_folder='templates',
                       static_folder='static',
@@ -39,21 +37,10 @@ def phenotypes():
         return abort(500, 'no phenotype_id submitted')
 
     ind_obj = app.db.individual(ind_id)
-    terms_added = app.db.add_phenotype(ind_obj, phenotype_id)
-
-    if len(terms_added) > 0:
-        # update the HPO gene list for the case
-        hpo_list = app.db.case_genelist(ind_obj.case)
-        hpo_results = hpo_genes(ind_obj.case.phenotype_ids())
-
-        if hpo_results is None:
-            return abort(500, "couldn't link to genes, try again"
-                              .format(phenotype_id))
-
-        gene_ids = [result['gene_id'] for result in hpo_results
-                    if result['gene_id']]
-        hpo_list.gene_ids = gene_ids
-        app.db.save()
+    try:
+        app.db.add_phenotype(ind_obj, phenotype_id)
+    except RuntimeError as error:
+        return abort(500, error.message)
 
     return redirect(request.referrer)
 
@@ -63,7 +50,10 @@ def delete_phenotype(phenotype_id):
     """Delete phenotype from an individual."""
     ind_id = request.form['ind_id']
     ind_obj = app.db.individual(ind_id)
-    app.db.remove_phenotype(ind_obj, phenotype_id)
+    try:
+        app.db.remove_phenotype(ind_obj, phenotype_id)
+    except RuntimeError as error:
+        return abort(500, error.message)
     return redirect(request.referrer)
 
 
@@ -171,3 +161,17 @@ def delete_resource(resource_id):
 
     app.db.delete_resource(resource_id)
     return redirect(request.referrer)
+
+
+@blueprint.route('/individuals')
+def individuals():
+    """Show an overview of all individuals."""
+    individual_objs = app.db.get_individuals()
+    return render_template('individuals.html', individuals=individual_objs)
+
+
+@blueprint.route('/individuals/<ind_id>')
+def individual(ind_id):
+    """Show details for a specific individual."""
+    individual_obj = app.db.individual(ind_id)
+    return render_template('individual.html', individual=individual_obj)
