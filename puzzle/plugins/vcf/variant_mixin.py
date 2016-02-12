@@ -28,7 +28,7 @@ class VariantMixin(object):
         case_obj = self.case(case_id=case_id)
         vcf_file_path = case_obj.variant_source
         head = self._get_header(vcf_file_path)
-        
+
         handle = get_vcf_handle(infile=vcf_file_path)
         relevant_lines = (line for line in handle if not line.startswith('#'))
         for index, variant_line in enumerate(relevant_lines):
@@ -36,12 +36,12 @@ class VariantMixin(object):
             line_id = get_variant_id(variant_line=variant_line).lstrip('chrCHR')
             if line_id == variant_id:
                 return self._format_variant(
-                    variant_line=variant_line, 
-                    index=index, 
-                    case_obj=case_obj, 
+                    variant_line=variant_line,
+                    index=index,
+                    case_obj=case_obj,
                     head=head
                 )
-        
+
         return None
 
     def variants(self, case_id, skip=0, count=30, filters=None):
@@ -66,7 +66,7 @@ class VariantMixin(object):
         filters = filters or {}
         case_obj = self.case(case_id=case_id)
         limit = count + skip
-        
+
         genes = None
         if filters.get('genes'):
             genes = set(filters['genes'])
@@ -74,15 +74,15 @@ class VariantMixin(object):
         frequency = None
         if filters.get('frequency'):
             frequency = float(filters['frequency'])
-        
+
         cadd = None
         if filters.get('cadd'):
             cadd_score = float(filters['cadd'])
-        
+
         genetic_models = None
         if filters.get('genetic_models'):
             genetic_models = set(filters['genetic_models'])
-        
+
         sv_len = None
         if filters.get('sv_len'):
             sv_len = float(filters['sv_len'])
@@ -90,24 +90,24 @@ class VariantMixin(object):
         impact_severities = None
         if filters.get('impact_severities'):
             impact_severities = set(filters['impact_severities'])
-        
+
         vcf_file_path = case_obj.variant_source
-        
+
         head = self._get_header(vcf_file_path)
-        
+
         raw_variants = self._get_filtered_variants(vcf_file_path, filters)
-        
+
         skip_index = 0
-        for index,variant_line in enumerate(raw_variants):
+        for index, variant_line in enumerate(raw_variants):
             index += 1
             if skip_index >= skip:
                 variant_obj = self._format_variant(
-                     variant_line=variant_line, 
-                     index=index, 
-                     case_obj=case_obj, 
+                     variant_line=variant_line,
+                     index=index,
+                     case_obj=case_obj,
                      head=head
                 )
-            
+
                 if genes and variant_obj:
                     if not set(variant_obj['genes']).intersection(genes):
                         variant_obj = None
@@ -115,26 +115,26 @@ class VariantMixin(object):
                 if impact_severities and variant_obj:
                     if not variant_obj['impact_severity'] in impact_severities:
                         variant_obj = None
-                
+
                 if frequency and variant_obj:
-                    if variant_obj['max_freq'] >frequency:
+                    if variant_obj['max_freq'] > frequency:
                         variant_obj = None
-                
+
                 if cadd and variant_obj:
-                    if variant['cadd_score'] < cadd_score:
+                    if variant_obj['cadd_score'] < cadd_score:
                         variant_obj = None
-                
+
                 if genetic_models and variant_obj:
-                    if not set(variant.genetic_models).intersection(genetic_models):
+                    if not set(variant_obj.genetic_models).intersection(genetic_models):
                         variant_obj = None
-                
+
                 if sv_len and variant_obj:
                     if variant_obj.sv_len < sv_len:
                         variant_obj = None
-                
+
                 if variant_obj:
                     skip_index += 1
-                    
+
                     if skip_index <= limit:
                         yield variant_obj
                     else:
@@ -142,10 +142,10 @@ class VariantMixin(object):
 
     def _get_header(self, vcf_file_path):
         """Parse the header and return a header object
-            
+
             Args:
                 vcf_file_path(str): Path to vcf
-            
+
             Returns:
                 head: A HeaderParser object
         """
@@ -164,9 +164,9 @@ class VariantMixin(object):
                 break
 
         handle.close()
-        
+
         return head
-    
+
     def _get_filtered_variants(self, vcf_file_path, filters={}):
         """Check if variants follows the filters
 
@@ -175,7 +175,7 @@ class VariantMixin(object):
             Args:
                 vcf_file_path(str): Path to vcf
                 filters (dict): A dictionary with filters
-            
+
             Yields:
                 varian_line (str): A vcf variant line
         """
@@ -224,7 +224,6 @@ class VariantMixin(object):
 
                 if keep_variant:
                     yield variant_line
-
 
     def _add_compounds(self, variant, info_dict):
         """Check if there are any compounds and add them to the variant
@@ -450,9 +449,9 @@ class VariantMixin(object):
                     variant_dict['FORMAT'].split(':'),
                     variant_dict[sample_id].split(':'))
                 )
-                
+
                 genotype = Genotype(**raw_call)
-                
+
                 variant.add_individual(puzzle_genotype(
                     sample_id = sample_id,
                     genotype = genotype.genotype,
@@ -486,15 +485,15 @@ class VariantMixin(object):
             for transcript_info in snpeff_info:
                 transcript = self._get_snpeff_transcripts(transcript_info)
                 variant.add_transcript(transcript)
-        
+
         most_severe_consequence = get_most_severe_consequence(
             variant['transcripts']
         )
         if most_severe_consequence:
             variant['most_severe_consequence'] = most_severe_consequence
-        
+
             variant['impact_severity'] = IMPACT_SEVERITIES.get(most_severe_consequence)
-        
+
         for gene in self._get_genes(variant):
             variant.add_gene(gene)
 

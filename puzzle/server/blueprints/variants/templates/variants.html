@@ -11,7 +11,7 @@
         </h4>
       </div>
 
-      <div id="view-filters" class="panel-collapse collapse">
+      <div id="view-filters" class="panel-collapse collapse {% if is_active %}in{% endif %}">
         <div class="panel-body">
           {{ filters_form(case_id, db, inheritance_models, consequences, impact_severities, filters, gene_lists=gene_lists) }}
         </div>
