@@ -1,0 +1,46 @@
+{% extends "layouts/base.html" %}
+
+{% block container %}
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Case</th>
+        <th>Sex</th>
+        <th>Affected</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for individual in individuals %}
+        {{ ind_row(loop.index, individual) }}
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+
+{% macro ind_row(index, individual) %}
+  <tr>
+    <td>{{ index }}</td>
+    <td>
+      <a href="{{ url_for('public.individual', ind_id=individual.ind_id) }}">
+        {{ individual.name }}
+      </a>
+    </td>
+    <td>
+      <a href="{{ url_for('public.case', case_id=individual.case_name) }}">
+        {{ individual.case_name }}
+      </a>
+    </td>
+    <td>
+      {{ individual.sex_human }}
+    </td>
+    <td class="text-center">
+      {% if individual.is_affected %}
+        <span class="badge">
+          <span class="glyphicon glyphicon-exclamation-sign"></span>
+        </span>
+      {% endif %}
+    </td>
+  </tr>
+{% endmacro %}

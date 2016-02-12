@@ -17,7 +17,9 @@
           <ul class="list-group">
             {% for individual in case.individuals %}
               <li class="list-group-item">
-                {{ individual.name }}
+                <a href="{{ url_for('public.individual', ind_id=individual.ind_id) }}">
+                  {{ individual.name }}
+                </a>
                 {% if individual.is_affected %}
                   <span class="badge">
                     <span class="glyphicon glyphicon-exclamation-sign"></span>

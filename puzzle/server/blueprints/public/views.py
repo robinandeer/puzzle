@@ -51,7 +51,7 @@ def delete_phenotype(phenotype_id):
     ind_id = request.form['ind_id']
     ind_obj = app.db.individual(ind_id)
     try:
-    app.db.remove_phenotype(ind_obj, phenotype_id)
+        app.db.remove_phenotype(ind_obj, phenotype_id)
     except RuntimeError as error:
         return abort(500, error.message)
     return redirect(request.referrer)
@@ -161,3 +161,17 @@ def delete_resource(resource_id):
 
     app.db.delete_resource(resource_id)
     return redirect(request.referrer)
+
+
+@blueprint.route('/individuals')
+def individuals():
+    """Show an overview of all individuals."""
+    individual_objs = app.db.get_individuals()
+    return render_template('individuals.html', individuals=individual_objs)
+
+
+@blueprint.route('/individuals/<ind_id>')
+def individual(ind_id):
+    """Show details for a specific individual."""
+    individual_obj = app.db.individual(ind_id)
+    return render_template('individual.html', individual=individual_obj)
