@@ -265,17 +265,11 @@ class VariantMixin(object):
                     index=index
                 )
                 yield variant
-
-    def _format_variant(self, gemini_variant, individual_objs, index=0):
-        """Make a puzzle variant from a gemini variant
-
-            Args:
-                gemini_variant (GeminiQueryRow): The gemini variant
-                individual_objs (list(dict)): A list of Individuals
-                index(int): The index of the variant
-
-            Returns:
-                variant (dict): A Variant object
+    
+    def _get_puzzle_variant(self, gemini_variant):
+        """Take a gemini variant and return a basic puzzle variant
+        
+            For the overview we only need limited variant information
         """
         variant_dict = {
             'CHROM':gemini_variant['chrom'].lstrip('chrCHR'),
@@ -287,11 +281,27 @@ class VariantMixin(object):
             'FILTER':gemini_variant['filter']
         }
 
-        variant = Variant(**variant_dict)
+        return Variant(**variant_dict)
+        
+    
+    def _format_variant(self, gemini_variant, individual_objs, index=0):
+        """Make a puzzle variant from a gemini variant
+
+            Args:
+                gemini_variant (GeminiQueryRow): The gemini variant
+                individual_objs (list(dict)): A list of Individuals
+                index(int): The index of the variant
+
+            Returns:
+                variant (dict): A Variant object
+        """
+        variant = self._get_puzzle_variant(gemini_variant)
+        
         variant['index'] = index
 
         # Use the gemini id for fast search
         variant.update_variant_id(gemini_variant['variant_id'])
+        
         # Update the individuals
         individual_genotypes = self._get_genotypes(
             gemini_variant=gemini_variant,
@@ -384,19 +394,26 @@ class VariantMixin(object):
         return variant
 
 
-    def _is_variant(self, gemini_variant, indexes):
+    def _is_variant(self, gemini_variant, ind_objs):
         """Check if the variants is a variation in any of the individuals
+        
+        This means that at least one of the individuals should have the 
+        alternative symbol.
 
-            Args:
-                gemini_variant (GeminiQueryRow): The gemini variant
-                indexes (list(int)): A list of indexes for the individuals
+        Args:
+            gemini_variant (GeminiQueryRow): The gemini variant
+            ind_objs (list(puzzle.models.individual)): A list of individuals to check
 
-            Returns:
-                bool : If any of the individuals has the variant
+        Returns:
+            bool : If any of the individuals has the variant
         """
-
-        for index in indexes:
-            if gemini_variant['gts'][index] != 0:
-                return True
-
+        
+        alt = gemini_variant['alt']
+        indexes = (ind.ind_index for ind in ind_objs)
+        #Merge all genotypes into one string
+        genotypes = [gemini_variant['gts'][idnex] for index in indexes].join()
+        #Check if the alternative allele is found within the genotypes    
+        if alt in genotypes:
+            return True
+        
         return False

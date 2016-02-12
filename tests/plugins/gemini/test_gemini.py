@@ -94,21 +94,25 @@ class TestCaseMixin:
         case_id = 'hello'
         assert adapter.case(case_id) == None
 
+class TestVariantMixin:
+    """Test the functionalty for the variant mixin"""
+    
+    def test_get_variants(self, gemini_path):
+        """Test to get some variants from the gemini adapter"""
+        adapter = GeminiPlugin(db=gemini_path)
+        variants = []
+        for variant in adapter.variants('643594', count=5):
+            variants.append(variant)
 
-    # def test_get_variants(self):
-    #     """Test to get some variants from the gemini adapter"""
-    #     variants = []
-    #     for variant in self.adapter.variants('643594', count=5):
-    #         variants.append(variant)
-    #
-    #     assert len(variants) == 5
-    #
-    # def test_get_variant(self):
-    #     """Test to get one variant"""
-    #     variant = self.adapter.variant(
-    #         case_id='643594',
-    #         variant_id=4
-    #     )
-    #
-    #     assert variant['CHROM'] == '6'
-    #     assert variant['POS'] == '32487163'
+        assert len(variants) == 5
+
+    def test_variant(self, gemini_path):
+        """Test to get one variant"""
+        adapter = GeminiPlugin(db=gemini_path)
+        variant = adapter.variant(
+            case_id='643594',
+            variant_id=4
+        )
+
+        assert variant['CHROM'] == '6'
+        assert variant['POS'] == '32487163'
