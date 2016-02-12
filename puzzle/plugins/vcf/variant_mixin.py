@@ -30,19 +30,17 @@ class VariantMixin(object):
         head = self._get_header(vcf_file_path)
         
         handle = get_vcf_handle(infile=vcf_file_path)
-        
-        index = 0
-        for variant_line in handle:
-            if not variant_line.startswith('#'):
-                index += 1
-                line_id = get_variant_id(variant_line=variant_line).lstrip('chrCHR')
-                if line_id == variant_id:
-                    return self._format_variant(
-                        variant_line=variant_line, 
-                        index=index, 
-                        case_obj=case_obj, 
-                        head=head
-                    )
+        relevant_lines = (line for line in handle if not line.startswith('#'))
+        for index, variant_line in enumerate(relevant_lines):
+            index += 1
+            line_id = get_variant_id(variant_line=variant_line).lstrip('chrCHR')
+            if line_id == variant_id:
+                return self._format_variant(
+                    variant_line=variant_line, 
+                    index=index, 
+                    case_obj=case_obj, 
+                    head=head
+                )
         
         return None
 
