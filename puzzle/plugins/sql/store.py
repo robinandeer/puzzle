@@ -20,6 +20,7 @@ try:
     from puzzle.plugins import GeminiPlugin
 except ImportError as e:
     pass
+from puzzle.utils import hpo_genes
 
 logger = logging.getLogger(__name__)
 
@@ -253,7 +254,25 @@ class Store(Plugin):
         logger.debug('storing new HPO terms')
         self.save()
 
+        if len(added_terms) > 0:
+            self.update_hpolist(ind_obj.ind_id)
+
         return added_terms
+
+    def update_hpolist(self, ind_id):
+        """Update the HPO gene list for a case based on current terms."""
+        ind_obj = self.individual(ind_id)
+        # update the HPO gene list for the case
+        hpo_list = self.case_genelist(ind_obj.case)
+        hpo_results = hpo_genes(ind_obj.case.phenotype_ids())
+
+        if hpo_results is None:
+            raise RuntimeError("couldn't link to genes, try again")
+
+        gene_ids = [result['gene_id'] for result in hpo_results
+                    if result['gene_id']]
+        hpo_list.gene_ids = gene_ids
+        self.save()
 
     def remove_phenotype(self, ind_obj, phenotypes=None):
         """Remove multiple phenotypes from an individual."""
@@ -268,6 +287,7 @@ class Store(Plugin):
                     self.session.delete(term)
         logger.debug('persist removals')
         self.save()
+        self.update_hpolist(ind_obj.ind_id)
 
     def gene_list(self, list_id):
         """Get a gene list from the database."""
