@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
 
+from sqlite3 import DatabaseError
+
 from gemini import GeminiQuery
 
 from puzzle.plugins import Plugin
@@ -38,9 +40,12 @@ class GeminiPlugin(CaseMixin, VariantMixin, Plugin):
         self.filters.can_filter_impact_severity = True
 
     def test_gemini_db(self):
-        """Check if self.db is a valid gemini database"""
+        """Check if self.db is a valid gemini database
+            
+            Raises sqlite3.DatabaseError if not a valid databse
+        """
         gq = GeminiQuery(self.db)
-        return
+        return True
 
     def init_app(self, app):
         """Initialize plugin via Flask."""
