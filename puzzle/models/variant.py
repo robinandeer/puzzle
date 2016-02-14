@@ -38,6 +38,11 @@ class Variant(DotDict):
         self['cytoband_stop'] = None
     
     @property
+    def consequences(self):
+        """Return a list of consequences"""
+        return [transcript.consequence for transcript in self.transcripts]
+    
+    @property
     def nr_genes(self):
         """Return the number of genes"""
         return len(self['genes'])

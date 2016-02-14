@@ -13,8 +13,32 @@ logger = logging.getLogger(__name__)
 class VariantMixin(object):
     """Class to store variant specific functions for gemini plugin"""
 
+
+    def build_gemini_query(self, query, extra_info):
+        """Append sql to a gemini query
+        
+        Args:
+            query(str): The gemini query
+            extra_info(str): The text that should be added
+        
+        Return:
+            extended_query(str)
+        """
+        if 'WHERE' in query:
+            return "{0} AND {1}".format(query, extra_info)
+        else:
+            return "{0} WHERE {1}".format(query, extra_info)
+
     def variants(self, case_id, skip=0, count=30, filters=None):
         """Return count variants for a case.
+        
+        This function needs to have different behaviours based on what is asked
+        for. It should allways try to give minimal information back to improve
+        on speed. For example, if consequences are not asked for we will not 
+        build all transcripts. If not sv variants we will not build sv 
+        coordinates.
+        So the minimal case is to just show what is asked for in the variants 
+        interface.
 
             Args:
                 case_id (str): A gemini db
@@ -42,21 +66,21 @@ class VariantMixin(object):
 
         if filters.get('frequency'):
             frequency = filters['frequency']
-            gemini_query += " WHERE (max_aaf_all < {0} or max_aaf_all is"\
-                            " Null)".format(frequency)
-            any_filter = True
+            
+            extra_info = "(max_aaf_all < {0} or max_aaf_all is"\
+                         " Null)".format(frequency)
+            gemini_query = self.build_gemini_query(gemini_query, extra_info)
 
         if filters.get('cadd'):
             cadd_score = filters['cadd']
-            if any_filter:
-                gemini_query += " AND (cadd_scaled > {0})".format(cadd_score)
-            else:
-                gemini_query += " WHERE (cadd_scaled > {0})".format(cadd_score)
-            any_filter = True
+            
+            extra_info = "(cadd_scaled > {0})".format(cadd_score)
+            gemini_query = self.build_gemini_query(gemini_query, extra_info)
 
         if filters.get('gene_ids'):
             gene_list = [gene_id.strip() for gene_id in filters['gene_ids']]
-            gene_string = "("
+            
+            gene_string = "gene in ("
             for index, gene_id in enumerate(gene_list):
                 if index == 0:
                     gene_string += "'{0}'".format(gene_id)
@@ -64,17 +88,13 @@ class VariantMixin(object):
                     gene_string += ", '{0}'".format(gene_id)
             gene_string += ")"
 
-            if any_filter:
-                gemini_query += " AND gene in " + gene_string
-            else:
-                gemini_query += " WHERE gene in " + gene_string
+            gemini_query = self.build_gemini_query(gemini_query, gene_string)
 
-            any_filter = True
 
         if filters.get('impact_severities'):
             severities_list = [severity.strip() 
                     for severity in filters['impact_severities']]
-            severity_string = "("
+            severity_string = "impact_severity in ("
             for index, severity in enumerate(severities_list):
                 if index == 0:
                     severity_string += "'{0}'".format(severity)
@@ -82,28 +102,19 @@ class VariantMixin(object):
                     severity_string += ", '{0}'".format(severity)
             severity_string += ")"
 
-            if any_filter:
-                gemini_query += " AND impact_severity in " + severity_string
-            else:
-                gemini_query += " WHERE impact_severity in " + severity_string
-
-            any_filter = True
+            gemini_query = self.build_gemini_query(gemini_query, severity_string)
 
         filtered_variants = self._variants(
             case_id=case_id,
-            gemini_query=gemini_query
+            gemini_query=gemini_query,
+            filters=filters,
         )
 
         if filters.get('consequence'):
             consequences = set(filters['consequence'])
-            cons_variants = []
-            for variant in filtered_variants:
-                for transcript in variant.get('transcripts', []):
-                    if transcript['consequence'] in consequences:
-                        cons_variants.append(variant)
-                        break
-
-            filtered_variants = cons_variants
+            
+            filtered_varants = (variant for variant in filtered_varants if
+                set(variant.consequences).intersection(consequences))
 
         for index, variant_obj in enumerate(filtered_variants):
             if index >= skip:
@@ -125,6 +136,7 @@ class VariantMixin(object):
                 variant_obj (dict): A puzzle variant
 
         """
+        #Use the gemini id for fast lookup
         variant_id = int(variant_id)
         gemini_query = "SELECT * from variants WHERE variant_id = {0}".format(
             variant_id
@@ -132,10 +144,9 @@ class VariantMixin(object):
 
         individuals = []
         # Get the individuals for the case
-        for case in self.cases():
-            if case.name == case_id:
-                for individual in case.individuals:
-                    individuals.append(individual)
+        case_obj = self.case(case_id)
+        for individual in case_obj:
+            individuals.append(individual)
 
         gq = GeminiQuery(self.db)
 
@@ -147,7 +158,6 @@ class VariantMixin(object):
                 individual_objs=individuals,
                 index=gemini_variant['variant_id']
             )
-
             return variant
 
         return None
@@ -179,7 +189,26 @@ class VariantMixin(object):
         return individuals
     
     def _get_hgnc_symbols(self, gemini_variant):
-        """Get the hgnc symbols for all transcripts in a variant"""
+        """Get the hgnc symbols for all transcripts in a variant
+        
+            Args:
+                gemini_variant (GeminiQueryRow): The gemini variant
+
+            Returns:
+                transcripts list: List of affected transcripts
+            
+        """
+        
+        query = "SELECT * from variant_impacts WHERE variant_id = {0}".format(
+            gemini_variant['variant_id']
+        )
+        gq = GeminiQuery(self.db)
+        gq.run(query)
+
+        hgnc_symbols = set([transcript['gene']])
+
+        return hgnc_symbols
+         
     
     def _get_genes(self, variant):
         """Add the genes for a variant
@@ -199,14 +228,13 @@ class VariantMixin(object):
     def _get_transcripts(self, gemini_variant):
         """Return a Transcript object
 
-            Gemini stores the information for the most severe transcript
-            so only one transcript is connected to one variant.
-
+        Go through all transcripts found for the variant
+        
             Args:
                 gemini_variant (GeminiQueryRow): The gemini variant
 
-            Returns:
-                transcripts list: List of affected transcripts
+            Yields:
+                transcript (puzzle.models.Transcript)
 
         """
         query = "SELECT * from variant_impacts WHERE variant_id = {0}".format(
@@ -215,31 +243,29 @@ class VariantMixin(object):
         gq = GeminiQuery(self.db)
         gq.run(query)
 
-        transcripts = []
-        for transcript in gq:
-            transcripts.append(Transcript(
-                hgnc_symbol = transcript['gene'],
-                transcript_id = transcript['transcript'],
-                consequence=transcript['impact_so'],
-                biotype = transcript['biotype'],
-                polyphen = transcript['polyphen_pred'],
-                sift = transcript['sift_pred'],
-                HGVSc = transcript['codon_change'],
-                HGVSp = transcript['aa_change']
+        for genimi_transcript in gq:
+            transcript = Transcript(
+                hgnc_symbol=genimi_transcript['gene'],
+                transcript_id=genimi_transcript['transcript'],
+                consequence=genimi_transcript['impact_so'],
+                biotype=genimi_transcript['biotype'],
+                polyphen=genimi_transcript['polyphen_pred'],
+                sift=genimi_transcript['sift_pred'],
+                HGVSc=genimi_transcript['codon_change'],
+                HGVSp=genimi_transcript['aa_change']
                 )
-            )
+            yield transcript
 
-        return transcripts
-
-    def _variants(self, case_id, gemini_query):
+    def _variants(self, case_id, gemini_query, filters=None):
         """Return variants found in the gemini database
 
             Args:
                 case_id (str): The case for which we want to see information
                 gemini_query (str): What variants should be chosen
+                filters (dict): A dictionary with filters
 
             Yields:
-                variant_obj (dict): A Variant formatted doctionary
+                variant_obj (dict): A Variant formatted dictionary
         """
 
         gq = GeminiQuery(self.db)
@@ -248,26 +274,36 @@ class VariantMixin(object):
 
         individuals = []
         # Get the individuals for the case
-        for case in self.cases():
-            if case.name == case_id:
-                for individual in case.individuals:
-                    individuals.append(individual)
+        case = self.case(case_id)
+        for individual in case.individuals:
+            individuals.append(individual)
 
         index = 0
         for gemini_variant in gq:
             # Check if variant is non ref in the individuals
-            if self._is_variant(gemini_variant, individuals):
-                index += 1
-                logger.debug("Updating index to: {0}".format(index))
+            if self.variant_type = 'sv':
+                variant = self._format_sv_variants(
+                        gemini_variant=gemini_variant,
+                        individual_objs=individuals,
+                        index=index,
+                        filters=filters
+                        )
+            else:
+                if self._is_variant(gemini_variant, individuals):
+                    index += 1
+                    logger.debug("Updating index to: {0}".format(index))
 
-                variant = self._format_variant(
-                    gemini_variant=gemini_variant,
-                    individual_objs=individuals,
-                    index=index
-                )
+                    variant = self._format_variants(
+                        gemini_variant=gemini_variant,
+                        individual_objs=individuals,
+                        index=index,
+                        filters=filters
+                        )
+
+            if variant:
                 yield variant
     
-    def _get_puzzle_variant(self, gemini_variant):
+    def _get_puzzle_variant(self, gemini_variant, index):
         """Take a gemini variant and return a basic puzzle variant
         
             For the overview we only need limited variant information
@@ -293,10 +329,19 @@ class VariantMixin(object):
         #Add the impact severity
         variant['impact_severity'] = gemini_variant['impact_severity']
         
+        max_freq = gemini_variant['max_aaf_all']
+        if max_freq:
+            variant.set_max_freq(max_freq)
+        
+        #### Check the impact annotations ####
+        if gemini_variant['cadd_scaled']:
+            variant['cadd_score'] = gemini_variant['cadd_scaled']
+        
+        variant['genes'] = [gemini_variant['gene']]
         
         return variant
     
-    def format_variants(self, gemini_variant, ind_objs, index=0):
+    def _format_variants(self, gemini_variant, ind_objs, index=0, filters=None):
         """Format the variant for the variants view
         
             We want to have it's own function for doing this since it includes 
@@ -311,6 +356,15 @@ class VariantMixin(object):
                 variant (dict): A Variant object
         """
         variant = self._get_puzzle_variant(gemini_variant, index)
+        if filters.get('consequence'):
+            #If filter for consequence we need to parse the transcript 
+            #information
+            if len(filters['consequence']) > 0:
+                for transcript in self._get_transcripts(gemini_variant):
+                    variant.add_transcript(transcript)
+                
+        
+        return variant
     
     def _format_variant(self, gemini_variant, individual_objs, index=0):
         """Make a puzzle variant from a gemini variant
@@ -376,10 +430,6 @@ class VariantMixin(object):
                                         pos=variant['stop'])
 
 
-        #### Check the impact annotations ####
-        if gemini_variant['cadd_scaled']:
-            variant['cadd_score'] = gemini_variant['cadd_scaled']
-
         # We use the prediction in text
         polyphen = gemini_variant['polyphen_pred']
         if polyphen:
@@ -404,9 +454,6 @@ class VariantMixin(object):
         if esp:
             variant.add_frequency(name='ESP', value=float(esp))
 
-        max_freq = gemini_variant['max_aaf_all']
-        if max_freq:
-            variant.set_max_freq(max_freq)
 
         return variant
 
