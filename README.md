@@ -73,7 +73,7 @@ Puzzle Piece by Creative Stall from the Noun Project
 MIT. See the [LICENSE](LICENSE) file for more details.
 
 
-[travis-url]: https://travis-ci.org/robinandeer/puzzle
+[travis-url]: https://travis-ci.org/robinandeer/puzzle?branch=master
 [travis-image]: https://img.shields.io/travis/robinandeer/puzzle/master.svg?style=flat-square
 [coveralls-url]: https://coveralls.io/github/robinandeer/puzzle
 [coveralls-img]: https://img.shields.io/coveralls/robinandeer/puzzle.svg?style=flat-square
