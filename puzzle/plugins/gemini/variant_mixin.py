@@ -2,15 +2,17 @@ import logging
 
 from gemini import GeminiQuery
 
+from puzzle.plugins import BaseVariantMixin
+
 from puzzle.models import (Compound, Variant, Gene, Genotype, Transcript,)
 
 from puzzle.utils import (get_most_severe_consequence, get_omim_number,
-                          get_cytoband_coord, get_gene_info)
+                          get_cytoband_coord)
 
 
 logger = logging.getLogger(__name__)
 
-class VariantMixin(object):
+class VariantMixin(BaseVariantMixin):
     """Class to store variant specific functions for gemini plugin"""
 
 
@@ -115,7 +117,12 @@ class VariantMixin(object):
             
             filtered_varants = (variant for variant in filtered_varants if
                 set(variant.consequences).intersection(consequences))
-
+        
+        if filters.get('sv_len'):
+            sv_len = int(filters['sv_len'])
+            filters = (variant for variant in filtered_variants if 
+                variant.sv_len >= sv_len)
+        
         for index, variant_obj in enumerate(filtered_variants):
             if index >= skip:
                 if index < limit:
@@ -145,11 +152,10 @@ class VariantMixin(object):
         individuals = []
         # Get the individuals for the case
         case_obj = self.case(case_id)
-        for individual in case_obj:
+        for individual in case_obj.individuals:
             individuals.append(individual)
-
+        
         gq = GeminiQuery(self.db)
-
         gq.run(gemini_query)
 
         for gemini_variant in gq:
@@ -191,39 +197,25 @@ class VariantMixin(object):
     def _get_hgnc_symbols(self, gemini_variant):
         """Get the hgnc symbols for all transcripts in a variant
         
+        Right now this function only use the 
             Args:
                 gemini_variant (GeminiQueryRow): The gemini variant
 
             Returns:
-                transcripts list: List of affected transcripts
+                hgnc_symbols(list(str)): List hgnc symbols
             
         """
         
-        query = "SELECT * from variant_impacts WHERE variant_id = {0}".format(
-            gemini_variant['variant_id']
-        )
-        gq = GeminiQuery(self.db)
-        gq.run(query)
+        # query = "SELECT * from variant_impacts WHERE variant_id = {0}".format(
+        #     gemini_variant['variant_id']
+        # )
+        # gq = GeminiQuery(self.db)
+        # gq.run(query)
 
-        hgnc_symbols = set([transcript['gene']])
+        # hgnc_symbols = set([transcript['gene']])
+        hgnc_symbols = [gemini_variant['gene']]
 
         return hgnc_symbols
-         
-    
-    def _get_genes(self, variant):
-        """Add the genes for a variant
-
-            Get the hgnc symbols from all transcripts and add them
-            to the variant
-
-            Args:
-                variant (dict): A variant dictionary
-
-            Returns:
-                genes (list): A list of Genes
-        """
-        genes = get_gene_info(variant['transcripts'])
-        return genes
 
     def _get_transcripts(self, gemini_variant):
         """Return a Transcript object
@@ -281,10 +273,11 @@ class VariantMixin(object):
         index = 0
         for gemini_variant in gq:
             # Check if variant is non ref in the individuals
-            if self.variant_type = 'sv':
+            variant = None
+            if self.variant_type == 'sv':
+                index += 1
                 variant = self._format_sv_variants(
                         gemini_variant=gemini_variant,
-                        individual_objs=individuals,
                         index=index,
                         filters=filters
                         )
@@ -295,7 +288,6 @@ class VariantMixin(object):
 
                     variant = self._format_variants(
                         gemini_variant=gemini_variant,
-                        individual_objs=individuals,
                         index=index,
                         filters=filters
                         )
@@ -337,11 +329,9 @@ class VariantMixin(object):
         if gemini_variant['cadd_scaled']:
             variant['cadd_score'] = gemini_variant['cadd_scaled']
         
-        variant['genes'] = [gemini_variant['gene']]
-        
         return variant
     
-    def _format_variants(self, gemini_variant, ind_objs, index=0, filters=None):
+    def _format_variants(self, gemini_variant, index=0, filters=None):
         """Format the variant for the variants view
         
             We want to have it's own function for doing this since it includes 
@@ -356,6 +346,12 @@ class VariantMixin(object):
                 variant (dict): A Variant object
         """
         variant = self._get_puzzle_variant(gemini_variant, index)
+        
+        
+        hgnc_symbols = self._get_hgnc_symbols(gemini_variant)
+        for gene in self._get_genes(variant):
+            variant.add_gene(gene)
+        
         if filters.get('consequence'):
             #If filter for consequence we need to parse the transcript 
             #information
@@ -365,7 +361,37 @@ class VariantMixin(object):
                 
         
         return variant
-    
+
+    def _format_sv_variants(self, gemini_variant, index=0, filters=None):
+        """Format the variant for the sv variants view
+        
+            We want to have it's own function for doing this since it includes 
+            much less information than in the variant view
+            
+            Args:
+                gemini_variant (GeminiQueryRow): The gemini variant
+                ind_objs (list(puzzle.models.individual))
+                index(int): The index of the variant
+
+            Returns:
+                variant (dict): A Variant object
+        """
+        variant = self._get_puzzle_variant(gemini_variant, index)
+        
+        variant.sv_type = gemini_variant['sub_type']
+        variant.stop = int(gemini_variant['end'])
+        
+        ##TODO this whould be replaced with a faster lookup via phizz
+        for transcript in self._get_transcripts(gemini_variant):
+            variant.add_transcript(transcript)
+        ##TODO same as above
+        for gene in self._get_genes(variant):
+            variant.add_gene(gene)
+        
+        self._add_sv_coordinates(variant)
+
+        return variant
+
     def _format_variant(self, gemini_variant, individual_objs, index=0):
         """Make a puzzle variant from a gemini variant
 
@@ -392,43 +418,14 @@ class VariantMixin(object):
         for transcript in self._get_transcripts(gemini_variant):
             variant.add_transcript(transcript)
 
+        hgnc_symbols = (transcript.hgnc_symbol for transcript in variant.transcripts)
         for gene in self._get_genes(variant):
             variant.add_gene(gene)
 
-        variant['start'] = int(variant.POS)
+        variant.start = int(variant.POS)
 
         if self.variant_type == 'sv':
-            other_chrom = variant['CHROM']
-            # If we have a translocation:
-            if ':' in variant.ALT:
-                other_coordinates = variant.ALT.strip('ACGTN[]').split(':')
-                other_chrom = other_coordinates[0].lstrip('chrCHR')
-                other_position = other_coordinates[1]
-                variant['stop'] = other_position
-
-                #Set 'infinity' to length if translocation
-                variant['sv_len'] = float('inf')
-                variant['sv_type'] = 'BND'
-            else:
-                variant['stop'] = int(gemini_variant['end'])
-                variant['sv_len'] = variant.stop - variant.start
-                variant['sv_type'] = gemini_variant['sub_type']
-
-            variant['stop_chrom'] = other_chrom
-
-        else:
-            variant['stop'] = int(variant.POS) + \
-                (len(variant.REF) - len(variant.ALT))
-
-        variant['cytoband_start'] = get_cytoband_coord(
-                                        chrom=variant.CHROM,
-                                        pos=variant.start)
-
-        if variant.get('stop_chrom'):
-            variant['cytoband_stop'] = get_cytoband_coord(
-                                        chrom=variant['stop_chrom'],
-                                        pos=variant['stop'])
-
+            self._add_sv_coordinates(variant, gemini_variant)
 
         # We use the prediction in text
         polyphen = gemini_variant['polyphen_pred']
@@ -454,9 +451,7 @@ class VariantMixin(object):
         if esp:
             variant.add_frequency(name='ESP', value=float(esp))
 
-
         return variant
-
 
     def _is_variant(self, gemini_variant, ind_objs):
         """Check if the variants is a variation in any of the individuals

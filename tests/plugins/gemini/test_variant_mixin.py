@@ -22,6 +22,7 @@ def test_variant(gemini_path):
 
     assert variant['CHROM'] == '6'
     assert variant['POS'] == '32487163'
+    assert type(variant['genes']) == type([])
 
 def test_is_variant(case_obj):
     adapter = GeminiPlugin()
