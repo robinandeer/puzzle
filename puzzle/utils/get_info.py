@@ -8,7 +8,7 @@ from puzzle.models import Gene
 logger = logging.getLogger(__name__)
 
 
-def get_gene_info(transcripts):
+def get_gene_info(ensembl_ids=None, hgnc_symbols=None):
     """Return the genes info based on the transcripts found
     
         Args:
@@ -17,10 +17,11 @@ def get_gene_info(transcripts):
         Returns:
             genes (iterable): An iterable with Genes
     """
-    ensembl_ids = set([transcript['ensembl_id'] for transcript in 
-                        transcripts if transcript['ensembl_id']])
-    hgnc_symbols = set([transcript['hgnc_symbol'] for transcript in 
-                        transcripts if transcript['hgnc_symbol']])
+    if ensembl_ids:
+        ensembl_ids = set([ens_id for ens_id in ensembl_ids])
+    elif hgnc_symbols:
+        hgnc_symbols = set([symbol for symbol in hgnc_symbols])
+
     genes = []
     
     if ensembl_ids:

@@ -19,9 +19,11 @@ def hpo_genes(phenotype_ids):
             'raw_line': str
         }
     """
-    try:
-        results = query_phenomizer.query(phenotype_ids)
-        return [result for result in results
-                if result['p_value'] is not None]
-    except SystemExit:
-        return None
+    if phenotype_ids:
+        try:
+            results = query_phenomizer.query(phenotype_ids)
+            return [result for result in results
+                    if result['p_value'] is not None]
+        except SystemExit, RuntimeError:
+            pass
+    return None

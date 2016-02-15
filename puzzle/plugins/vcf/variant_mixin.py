@@ -4,15 +4,17 @@ from vcftoolbox import (get_variant_dict, HeaderParser, get_info_dict,
                         get_vep_info, get_snpeff_info, get_vcf_handle,
                         get_variant_id, Genotype)
 
+from puzzle.plugins import BaseVariantMixin
+
 from puzzle.models import (Compound, Variant, Gene, Transcript,)
 from puzzle.models import Genotype as puzzle_genotype
 
 from puzzle.utils import (get_most_severe_consequence, get_omim_number,
-                          get_cytoband_coord, get_gene_info, IMPACT_SEVERITIES)
+                          get_cytoband_coord, IMPACT_SEVERITIES)
 
 logger = logging.getLogger(__name__)
 
-class VariantMixin(object):
+class VariantMixin(BaseVariantMixin):
     """Class to store variant specific functions for vcf plugin"""
 
     def variant(self, case_id, variant_id):
@@ -245,21 +247,6 @@ class VariantMixin(object):
                         variant_id=compound_id,
                         combined_score=compound_score
                     ))
-
-    def _get_genes(self, variant):
-        """Add the genes for a variant
-
-            Get the hgnc symbols from all transcripts and add them
-            to the variant
-
-            Args:
-                variant (dict): A variant dictionary
-
-            Returns:
-                genes (list): A list of Genes
-        """
-        genes = get_gene_info(variant['transcripts'])
-        return genes
 
     def _get_vep_transcripts(self, transcript_info):
         """Get all transcripts for a variant

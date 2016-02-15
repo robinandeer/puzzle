@@ -267,12 +267,14 @@ class Store(Plugin):
         hpo_results = hpo_genes(ind_obj.case.phenotype_ids())
 
         if hpo_results is None:
-            raise RuntimeError("couldn't link to genes, try again")
-
-        gene_ids = [result['gene_id'] for result in hpo_results
-                    if result['gene_id']]
-        hpo_list.gene_ids = gene_ids
-        self.save()
+            pass
+            #Why raise here?
+            # raise RuntimeError("couldn't link to genes, try again")
+        else:
+            gene_ids = [result['gene_id'] for result in hpo_results
+                        if result['gene_id']]
+            hpo_list.gene_ids = gene_ids
+            self.save()
 
     def remove_phenotype(self, ind_obj, phenotypes=None):
         """Remove multiple phenotypes from an individual."""
