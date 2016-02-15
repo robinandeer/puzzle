@@ -95,6 +95,25 @@ def test_get_genotypes(gemini_variant):
     assert individual.depth == 17
     assert individual.genotype_quality == 99
 
+def test_get_transcripts(gemini_path):
+    adapter = GeminiPlugin(db=gemini_path)
+    gemini_variant = {'variant_id': 1}
+    transcripts = []
+    for transcript in adapter._get_transcripts(gemini_variant):
+        transcripts.append(transcript)
+    
+    assert len(transcripts) == 2
+    
+    first_transcript = transcripts[0]
+    
+    assert first_transcript.transcript_id == 'ENST00000370383'
+    assert first_transcript.hgnc_symbol == 'EPHX4'
+    assert first_transcript.consequence == 'missense_variant'
+    assert first_transcript.ensembl_id == None
+    assert first_transcript.biotype == 'protein_coding'
+    assert first_transcript.sift == 'deleterious'
+    assert first_transcript.polyphen == 'probably_damaging'
+
 class TestFilters:
 
     def test_filters_frequency(self, gemini_path):

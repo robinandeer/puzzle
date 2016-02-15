@@ -355,6 +355,8 @@ class VariantMixin(BaseVariantMixin):
             if len(filters['consequence']) > 0:
                 for transcript in self._get_transcripts(gemini_variant):
                     variant.add_transcript(transcript)
+                
+                self._add_consequences(variant)
         else:
             for hgnc_symbol in self._get_hgnc_symbols(gemini_variant):
                 variant.add_transcript(Transcript(
