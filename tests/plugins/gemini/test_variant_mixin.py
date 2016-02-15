@@ -1,7 +1,7 @@
 ##TODO mock a gemini db
 import pytest
 from puzzle.plugins import GeminiPlugin
-from puzzle.models import Individual
+from puzzle.models import Individual, Variant, DotDict
 
 def test_get_all_variants(gemini_path):
     """Test to get some variants from the gemini adapter"""
@@ -73,6 +73,27 @@ def test_build_gemini_query():
     extra_info = "cadd_score > 10"
     new_query = adapter.build_gemini_query(new_query, extra_info)
     assert new_query == "SELECT * from variants WHERE max_aaf_all < 0.01 AND cadd_score > 10"
+
+def test_get_genotypes(gemini_variant):
+    adapter = GeminiPlugin()
+    ind = DotDict()
+    ind.ind_index = 0
+    ind.ind_id = '1'
+    ind.case_id = 'Case_1'
+    ind.phenotype = 2
+    ind_objs = [ind]
+    
+    individual = adapter._get_genotypes(gemini_variant, ind_objs)[0]
+    
+    assert individual.sample_id == ind.ind_id
+    assert individual.sample_id == ind.ind_id
+    assert individual.genotype == 'G/A'
+    assert individual.case_id == ind.case_id
+    assert individual.phenotype == ind.phenotype
+    assert individual.ref_depth == 10
+    assert individual.alt_depth == 7
+    assert individual.depth == 17
+    assert individual.genotype_quality == 99
 
 class TestFilters:
 

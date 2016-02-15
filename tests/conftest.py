@@ -70,6 +70,61 @@ def gemini_db_path(request):
     hapmap = "tests/fixtures/HapMapFew.db"
     return hapmap
 
+@pytest.fixture(scope='function')
+def gemini_variant(request):
+    "Return dictionary to mock a gemini variant"
+    variant = {
+        'chrom': 'chr1',
+        'start': 36636644,
+        'end': 36636645,
+        'variant_id': 1,
+        'ref': 'G',
+        'alt': 'A',
+        'qual': 360.829986572,
+        'type': 'snp',
+        'sub_type': 'ts',
+        'gts': ['G/A', 'G/A', './.', './.', './.'],
+        'gt_types': [1, 1, 2, 2, 2],
+        'gt_depths': [17, 19, -1, -1, -1],
+        'gt_ref_depths': [10, 13, -1, -1, -1],
+        'gt_alt_depths': [7, 6, -1, -1, -1],
+        'gt_quals': [99, 99, -1, -1, -1],
+        'in_dbsnp': 0,
+        'rs_ids': None,
+        'gene': 'MAP7D1',
+        'transcript': 'ENST00000530729',
+        'is_exonic': 1,
+        'is_coding': 1,
+        'is_lof': 1,
+        'exon': 2/4,
+        'codon_change': 'atG/atA',
+        'aa_change': 'M/I',
+        'aa_length': '1/140',
+        'biotype': 'protein_coding',
+        'impact': 'transcript_codon_change',
+        'impact_so': 'initiator_codon_variant',
+        'impact_severity': 'HIGH',
+        'polyphen_pred': 'benign',
+        'polyphen_score': 0.304,
+        'sift_pred': 'deleterious',
+        'sift_score': 0.0,
+        'aaf_esp_ea': None,
+        'aaf_esp_aa': None,
+        'aaf_esp_all': None,
+        'aaf_1kg_amr': None,
+        'aaf_1kg_eas': None,
+        'aaf_1kg_sas': None,
+        'aaf_1kg_afr': None,
+        'aaf_1kg_eur': None,
+        'aaf_1kg_all': None,
+        'cadd_raw': 2.49,
+        'cadd_scaled': 14.3,
+        'aaf_exac_all': 1.647e-05,
+        'aaf_adj_exac_all': 1.67162582328e-05,
+        'max_aaf_all': 3.03471716436e-05,
+    }
+    return variant
+
 
 @pytest.fixture(scope='function')
 def populated_puzzle_db(request, dir_path, case_obj):
