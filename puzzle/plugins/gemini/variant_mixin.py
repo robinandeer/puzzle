@@ -349,17 +349,22 @@ class VariantMixin(BaseVariantMixin):
         """
         variant = self._get_puzzle_variant(gemini_variant, index)
         
-        
-        hgnc_symbols = self._get_hgnc_symbols(gemini_variant)
-        for gene in self._get_genes(variant):
-            variant.add_gene(gene)
-        
         if filters.get('consequence'):
             #If filter for consequence we need to parse the transcript 
             #information
             if len(filters['consequence']) > 0:
                 for transcript in self._get_transcripts(gemini_variant):
                     variant.add_transcript(transcript)
+        else:
+            for hgnc_symbol in self._get_hgnc_symbols(gemini_variant):
+                variant.add_transcript(Transcript(
+                                hgnc_symbol=hgnc_symbol, 
+                                transcript_id='dummy', 
+                                consequence='dummy')
+                                )
+
+        for gene in self._get_genes(variant):
+            variant.add_gene(gene)
                 
         
         return variant
@@ -406,28 +411,38 @@ class VariantMixin(BaseVariantMixin):
                 variant (dict): A Variant object
         """
         variant = self._get_puzzle_variant(gemini_variant, index)
-        
-        # Update the individuals
+
+        ### GENOTYPE ANNOATTIONS ###
+        #Get the genotype info
         individual_genotypes = self._get_genotypes(
             gemini_variant=gemini_variant,
             individual_objs=individual_objs
             )
 
+        #Add the genotype info to the variant
         for individual in individual_genotypes:
             # Add the genotype calls to the variant
             variant.add_individual(individual)
+        
+        ### POSITON ANNOATTIONS ###
+        variant.start = int(variant.POS)
+        
+        #Add the sv specific coordinates
+        if self.variant_type == 'sv':
+            variant.sv_type = gemini_variant['sub_type']
+            variant.stop = int(gemini_variant['end'])
+            self._add_sv_coordinates(variant, gemini_variant)
 
+        ### Consequence and region annotations
+        #Add the transcript information
         for transcript in self._get_transcripts(gemini_variant):
             variant.add_transcript(transcript)
-
+        
+        #Add the genes based on the hgnc symbols
         hgnc_symbols = (transcript.hgnc_symbol for transcript in variant.transcripts)
         for gene in self._get_genes(variant):
             variant.add_gene(gene)
-
-        variant.start = int(variant.POS)
-
-        if self.variant_type == 'sv':
-            self._add_sv_coordinates(variant, gemini_variant)
+        
 
         # We use the prediction in text
         polyphen = gemini_variant['polyphen_pred']
@@ -438,8 +453,9 @@ class VariantMixin(BaseVariantMixin):
         sift = gemini_variant['sift_pred']
         if sift:
             variant.add_severity('SIFT', sift)
-
-        #### Check the frequencies ####
+        
+        
+        #### Frequencies ####
         thousand_g = gemini_variant['aaf_1kg_all']
         if thousand_g:
             variant['thousand_g'] = float(thousand_g)
