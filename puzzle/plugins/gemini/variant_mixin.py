@@ -52,7 +52,7 @@ class VariantMixin(BaseVariantMixin):
                     frequency: None (float),
                     cadd: None (float),
                     consequence: [] (list of consequences),
-                    is_lof: None (Bool),
+                    impact_severities: [] (list of consequences),
                     genetic_models [] (list of genetic models)
                 }
 
@@ -115,7 +115,7 @@ class VariantMixin(BaseVariantMixin):
         if filters.get('consequence'):
             consequences = set(filters['consequence'])
             
-            filtered_varants = (variant for variant in filtered_varants if
+            filtered_variants = (variant for variant in filtered_variants if
                 set(variant.consequences).intersection(consequences))
         
         if filters.get('sv_len'):
@@ -232,6 +232,7 @@ class VariantMixin(BaseVariantMixin):
         query = "SELECT * from variant_impacts WHERE variant_id = {0}".format(
             gemini_variant['variant_id']
         )
+        
         gq = GeminiQuery(self.db)
         gq.run(query)
 
@@ -293,6 +294,7 @@ class VariantMixin(BaseVariantMixin):
                         )
 
             if variant:
+                
                 yield variant
     
     def _get_puzzle_variant(self, gemini_variant, index):

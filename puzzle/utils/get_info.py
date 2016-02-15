@@ -22,8 +22,6 @@ def get_gene_info(ensembl_ids=None, hgnc_symbols=None):
     elif hgnc_symbols:
         hgnc_symbols = set([symbol for symbol in hgnc_symbols])
 
-    print("ensembl_ids", ensembl_ids)
-    print("hgnc_symbols", hgnc_symbols)
     genes = []
     
     if ensembl_ids:
