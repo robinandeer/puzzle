@@ -65,10 +65,12 @@
     $('.selectpicker').selectpicker();
     $(document).ready(function() {
       $('#variants_list').DataTable({
+        dom: 'Bfrtip',
         "paging":   false,
         "searching": false,
         "info": false,
-        "colReorder": true
+        "colReorder": true,
+        buttons: ['colvis']
       });
     });
   </script>
