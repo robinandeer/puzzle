@@ -32,6 +32,7 @@ class VariantMixin(BaseVariantMixin):
 
         handle = get_vcf_handle(infile=vcf_file_path)
         relevant_lines = (line for line in handle if not line.startswith('#'))
+        
         for index, variant_line in enumerate(relevant_lines):
             index += 1
             line_id = get_variant_id(variant_line=variant_line).lstrip('chrCHR')
@@ -41,7 +42,7 @@ class VariantMixin(BaseVariantMixin):
                     index=index,
                     case_obj=case_obj,
                     head=head
-                )
+                    )
 
         return None
 
