@@ -17,8 +17,6 @@ from puzzle.models.sql import (BASE, Case, Individual, PhenotypeTerm, GeneList,
                                CaseGenelistLink, Resource)
 from puzzle.plugins import VcfPlugin, Plugin
 
-from . import VariantMixin, CaseMixin
-
 try:
     from puzzle.plugins import GeminiPlugin
 except ImportError as e:
