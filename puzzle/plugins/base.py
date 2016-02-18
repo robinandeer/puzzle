@@ -29,20 +29,6 @@ class Plugin(object):
         """Initialize plugin via Flask."""
         raise NotImplementedError
 
-    def cases(self, pattern=None):
-        """Return all cases."""
-        raise NotImplementedError
-    
-    def variants(self, case_id, skip=0, count=30, filters=None):
-        """Return count variants for a case.
-
-        """
-        raise NotImplementedError
-
-    def variant(self, variant_id):
-        """Return a specific variant."""
-        raise NotImplementedError
-
     def individual_dict(self, ind_ids):
         """Return a dict with ind_id as key and Individual as values."""
         ind_dict = {ind.ind_id: ind for ind in self.individuals(ind_ids=ind_ids)}

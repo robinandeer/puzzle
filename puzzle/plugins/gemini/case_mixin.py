@@ -5,10 +5,12 @@ from gemini import GeminiQuery
 
 from puzzle.models import (Case, Individual)
 
+from puzzle.plugins import BaseCaseMixin
+
 
 logger = logging.getLogger(__name__)
 
-class CaseMixin(object):
+class CaseMixin(BaseCaseMixin):
     """Class to store methods that deal with Cases in geimni plugin"""
 
     def cases(self, pattern=None):
@@ -43,6 +45,20 @@ class CaseMixin(object):
             if cases:
                 return cases[0]
 
+        return None
+
+    def individual(self, ind_id=None):
+        """Return a individual object
+        
+            Args:
+                ind_id (str): A individual id
+            
+            Returns:
+                individual (puzzle.models.individual)
+        """
+        for ind_obj in self.individuals:
+            if ind_obj.ind_id == ind_id:
+                return ind_obj
         return None
 
     def get_individuals(self, *ind_ids):

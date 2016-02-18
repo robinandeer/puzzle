@@ -3,10 +3,11 @@ import logging
 
 from puzzle.models import Case
 
+from puzzle.plugins import BaseCaseMixin
+
 logger = logging.getLogger(__name__)
 
-
-class CaseMixin(object):
+class CaseMixin(BaseCaseMixin):
     """Class to store methods that deal with Cases in vcf plugin"""
 
     def cases(self, pattern=None):
@@ -34,6 +35,20 @@ class CaseMixin(object):
                 return list(self.case_objs)[0]
 
         return Case(case_id='unknown')
+    
+    def individual(self, ind_id=None):
+        """Return a individual object
+        
+            Args:
+                ind_id (str): A individual id
+            
+            Returns:
+                individual (puzzle.models.individual)
+        """
+        for ind_obj in self.individuals:
+            if ind_obj.ind_id == ind_id:
+                return ind_obj
+        return None
     
     def individuals(self, ind_ids=None):
         """Return information about individuals
