@@ -4,6 +4,16 @@ from puzzle.utils import (get_gene_info, get_cytoband_coord)
 class BaseVariantMixin(object):
     """Base class for variant mixins"""
     
+    def variants(self, case_id, skip=0, count=30, filters=None):
+        """Return count variants for a case.
+
+        """
+        raise NotImplementedError
+
+    def variant(self, variant_id):
+        """Return a specific variant."""
+        raise NotImplementedError
+    
     def _get_genes(self, variant):
         """Add the genes for a variant
 
