@@ -16,6 +16,7 @@ from puzzle.models import Individual as BaseIndividual
 from puzzle.models.sql import (BASE, Case, Individual, PhenotypeTerm, GeneList,
                                CaseGenelistLink, Resource)
 from puzzle.plugins import VcfPlugin, Plugin
+
 try:
     from puzzle.plugins import GeminiPlugin
 except ImportError as e:
@@ -124,7 +125,7 @@ class Store(Plugin):
         self.session.flush()
         self.session.commit()
         return self
-
+    
     def add_case(self, case_obj, vtype='snv', mode='vcf', ped_svg=None):
         """Load a case with individuals.
 
@@ -204,7 +205,7 @@ class Store(Plugin):
         if ind_ids:
             query = query.filter(Individual.ind_id.in_(ind_ids))
         return query
-
+    
     def variants(self, case_id, skip=0, count=30, filters=None):
         """Fetch variants for a case."""
         filters = filters or {}
