@@ -28,6 +28,8 @@ logger = logging.getLogger(__name__)
 @click.option('--debug', is_flag=True)
 @click.option('-p', '--pattern', default='*.vcf', show_default=True)
 @click.option('--no-browser', is_flag=True, help='Prevent auto-opening browser')
+@click.option('--phenomizer', nargs=2, help='Phenomizer username/password',
+              envvar='PHENOMIZER_AUTH')
 @family_file
 @family_type
 @version
@@ -36,7 +38,7 @@ logger = logging.getLogger(__name__)
 @variant_type
 @click.pass_context
 def view(ctx, host, port, debug, pattern, family_file, family_type,
-         variant_source, variant_type, root, mode, no_browser):
+         variant_source, variant_type, root, mode, no_browser, phenomizer):
     """Visualize DNA variant resources.
 
     1. Look for variant source(s) to visualize and inst. the right plugin
@@ -58,7 +60,7 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
             logger.warn("database not initialized, run 'puzzle init'")
             ctx.abort()
 
-        plugin = SqlStore(db_path)
+        plugin = SqlStore(db_path, phenomizer_auth=phenomizer)
         BaseConfig.STORE_ENABLED = True
 
     elif mode == 'vcf':

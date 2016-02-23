@@ -22,6 +22,4 @@ def base(ctx, verbose):
 
     # launch the command line interface
     logger.debug('Booting up command line interface')
-    
     ctx.obj = {}
-

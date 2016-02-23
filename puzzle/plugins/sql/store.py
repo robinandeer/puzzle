@@ -29,12 +29,16 @@ logger = logging.getLogger(__name__)
 class Store(Plugin):
 
     """SQLAlchemy-based database object.
+
     .. note::
         For testing pourposes use ``:memory:`` as the ``path`` argument to
         set up in-memory (temporary) database.
+
     Args:
         uri (Optional[str]): path/URI to the database to connect to
         debug (Optional[bool]): whether to output logging information
+        phenomizer_auth (Optional[tuple]): username and password
+
     Attributes:
         uri (str): path/URI to the database to connect to
         engine (class): SQLAlchemy engine, defines what database to use
@@ -43,12 +47,14 @@ class Store(Plugin):
         classes (dict): bound ORM classes
     """
 
-    def __init__(self, uri=None, debug=False, vtype='snv'):
+    def __init__(self, uri=None, debug=False, vtype='snv',
+                 phenomizer_auth=None):
         super(Store, self).__init__()
         self.uri = uri
         if uri:
             self.connect(uri, debug=debug)
         self.variant_type = vtype
+        self.phenomizer_auth = phenomizer_auth
 
         # ORM class shortcuts to enable fetching models dynamically
         # self.classes = {'gene': Gene, 'transcript': Transcript,
@@ -125,7 +131,7 @@ class Store(Plugin):
         self.session.flush()
         self.session.commit()
         return self
-    
+
     def add_case(self, case_obj, vtype='snv', mode='vcf', ped_svg=None):
         """Load a case with individuals.
 
@@ -205,7 +211,7 @@ class Store(Plugin):
         if ind_ids:
             query = query.filter(Individual.ind_id.in_(ind_ids))
         return query
-    
+
     def variants(self, case_id, skip=0, count=30, filters=None):
         """Fetch variants for a case."""
         filters = filters or {}
@@ -265,11 +271,12 @@ class Store(Plugin):
         ind_obj = self.individual(ind_id)
         # update the HPO gene list for the case
         hpo_list = self.case_genelist(ind_obj.case)
-        hpo_results = hpo_genes(ind_obj.case.phenotype_ids())
+        hpo_results = hpo_genes(ind_obj.case.phenotype_ids(),
+                                *self.phenomizer_auth)
 
         if hpo_results is None:
             pass
-            #Why raise here?
+            # Why raise here?
             # raise RuntimeError("couldn't link to genes, try again")
         else:
             gene_ids = [result['gene_id'] for result in hpo_results
