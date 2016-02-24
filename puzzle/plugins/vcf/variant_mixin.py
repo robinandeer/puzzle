@@ -140,6 +140,8 @@ class VariantMixin(BaseVariantMixin):
                         yield variant_obj
                     else:
                         break
+            else:
+                skip_index += 1
 
     def _get_header(self, vcf_file_path):
         """Parse the header and return a header object
@@ -197,7 +199,6 @@ class VariantMixin(BaseVariantMixin):
         logger.info("Get variants from {0}".format(vcf_file_path))
 
         handle = get_vcf_handle(infile=vcf_file_path)
-
         for variant_line in handle:
             if not variant_line.startswith('#'):
                 keep_variant = True
