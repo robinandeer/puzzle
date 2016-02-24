@@ -15,3 +15,4 @@ intervaltree
 phizz>=0.1.1
 sqlalchemy
 query-phenomizer>=0.5
+pyyaml
