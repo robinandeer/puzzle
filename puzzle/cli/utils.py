@@ -35,3 +35,8 @@ family_type = click.option('--family_type',
 )
 version = click.version_option(puzzle.__version__)
 
+phenomizer = click.option('--phenomizer', 
+                nargs=2, 
+                help='Phenomizer username/password',
+                envvar='PHENOMIZER_AUTH'
+                )

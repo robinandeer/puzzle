@@ -5,7 +5,8 @@ import webbrowser
 import click
 import logging
 
-from . import base, family_file, family_type, version, root, mode, variant_type
+from . import (base, family_file, family_type, version, root, mode, 
+               variant_type, phenomizer)
 
 from puzzle.plugins import SqlStore, VcfPlugin
 try:
@@ -28,8 +29,7 @@ logger = logging.getLogger(__name__)
 @click.option('--debug', is_flag=True)
 @click.option('-p', '--pattern', default='*.vcf', show_default=True)
 @click.option('--no-browser', is_flag=True, help='Prevent auto-opening browser')
-@click.option('--phenomizer', nargs=2, help='Phenomizer username/password',
-              envvar='PHENOMIZER_AUTH')
+@phenomizer
 @family_file
 @family_type
 @version
