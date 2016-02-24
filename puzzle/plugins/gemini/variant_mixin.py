@@ -61,7 +61,7 @@ class VariantMixin(BaseVariantMixin):
 
         limit = count + skip
 
-        gemini_query = "SELECT * from variants"
+        gemini_query = filters.get('gemini_query') or "SELECT * from variants"
 
         any_filter = False
 

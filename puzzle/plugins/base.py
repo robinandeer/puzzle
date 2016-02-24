@@ -24,6 +24,7 @@ class Plugin(object):
             can_filter_inheritance=False,
             can_filter_sv=False,
             can_filter_impact_severity=False,
+            can_query_gemini=False,
         )
 
     def init_app(self, app):

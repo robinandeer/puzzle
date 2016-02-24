@@ -31,7 +31,19 @@
 
           <div class="col-md-12">
             <label class="control-label">Genes</label>
-            <input type="text" class="form-control" name="gene_symbol" type="text" placeholder="ADK,LPP" value="{{ (filters.gene_symbols or '')|join(',') }}">
+            <input type="text" class="form-control" name="gene_symbol" placeholder="ADK,LPP" value="{{ (filters.gene_symbols or '')|join(',') }}">
+          </div>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if db.filters.can_query_gemini %}
+    <div class="form-group">
+      <div class="row">
+
+          <div class="col-md-6">
+            <label class="control-label">Gemini Query</label>
+            <input type="text" class="form-control" name="gemini_query" placeholder="SELECT * variants" value="{{ filters.gemini_query }}">
           </div>
       </div>
     </div>

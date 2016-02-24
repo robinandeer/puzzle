@@ -30,6 +30,7 @@ def variants(case_id):
             'sv_types': filters['selected_sv_types'],
             'gene_lists': filters['gene_lists'],
             'impact_severities': filters['impact_severities'],
+            'gemini_query': filters['gemini_query'],
         }
     )
     gene_lists = ([gene_list.list_id for gene_list in app.db.gene_lists()]
@@ -78,6 +79,7 @@ def parse_filters():
     filters['selected_sv_types'] = request.args.getlist('sv_types')
     filters['skip'] = int(request.args.get('skip', 0))
     filters['gene_lists'] = request.args.getlist('gene_lists')
+    filters['gemini_query'] = request.args.get('gemini_query')
     filters['impact_severities'] = request.args.getlist('impact_severities')
 
     filters['query_dict'] = {key: request.args.getlist(key) for key
