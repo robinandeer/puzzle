@@ -25,6 +25,7 @@ def vcf():
     db = VcfPlugin()
     return db
 
+
 @pytest.fixture(scope='function')
 def puzzle_dir(request, dir_path):
     """Return a puzzle dir with a database initialized"""
@@ -41,10 +42,11 @@ def puzzle_dir(request, dir_path):
     logger.debug('Connect to database and create tables')
     store = SqlStore(db_path)
     store.set_up(reset=False)
-    
-    #It's getting tear downed by dir_path()...
-    
+
+    # It's getting tear downed by dir_path()...
+
     return dir_path
+
 
 @pytest.fixture(scope='function')
 def gemini_path(request):
@@ -52,11 +54,13 @@ def gemini_path(request):
     gemini_db = "tests/fixtures/HapMapFew.db"
     return gemini_db
 
+
 @pytest.fixture(scope='function')
 def vcf_file(request):
     "Return the path to the hapmap vcf"
     hapmap = "tests/fixtures/hapmap.vcf"
     return hapmap
+
 
 @pytest.fixture(scope='function')
 def ped_file(request):
@@ -64,11 +68,13 @@ def ped_file(request):
     hapmap = "tests/fixtures/hapmap.ped"
     return hapmap
 
+
 @pytest.fixture(scope='function')
 def gemini_db_path(request):
     "Return the path to the hapmap gemini db"
     hapmap = "tests/fixtures/HapMapFew.db"
     return hapmap
+
 
 @pytest.fixture(scope='function')
 def gemini_variant(request):
@@ -142,12 +148,13 @@ def populated_puzzle_db(request, dir_path, case_obj):
     logger.debug('Connect to database and create tables')
     store = SqlStore(db_path)
     store.set_up(reset=False)
-    
+
     store.add_case(case_obj, vtype='sv', mode='vcf')
 
     #It's getting tear downed by dir_path()...
 
     return dir_path
+
 
 @pytest.fixture(scope='function')
 def dir_path(request):
@@ -160,8 +167,9 @@ def dir_path(request):
         if os.path.exists(path_to_dir):
             shutil.rmtree(path_to_dir)
     request.addfinalizer(teardown)
-    
+
     return path_to_dir
+
 
 @pytest.fixture
 def variant():
@@ -228,3 +236,11 @@ def test_db(sql_store, case_obj):
     yield sql_store
     sql_store.tear_down()
     sql_store.set_up()
+
+
+@pytest.yield_fixture(scope='session')
+def phenomizer_auth():
+    """Fetch phenomizer auth details from ENV variables."""
+    raw_auth = os.environ['PHENOMIZER_AUTH']
+    auth = raw_auth.split()
+    yield auth

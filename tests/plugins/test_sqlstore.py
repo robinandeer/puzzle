@@ -11,7 +11,10 @@ def test_add_case(sql_store, case_obj):
     assert case and case.case_id == case_obj['case_id']
 
 
-def test_add_phenotype(test_db):
+def test_add_phenotype(test_db, phenomizer_auth):
+    # setup phenomizer auth
+    test_db.phenomizer_auth = phenomizer_auth
+
     ind_id = 'ADM1059A2'
     ind_obj = test_db.individual(ind_id)
 
@@ -41,7 +44,10 @@ def test_add_phenotype(test_db):
     assert len(ind_obj.phenotypes) == len(hpo_ids) + 1
 
 
-def test_remove_phenotype(test_db):
+def test_remove_phenotype(test_db, phenomizer_auth):
+    # setup phenomizer auth
+    test_db.phenomizer_auth = phenomizer_auth
+
     ind_id = 'ADM1059A2'
     ind_obj = test_db.individual(ind_id)
 

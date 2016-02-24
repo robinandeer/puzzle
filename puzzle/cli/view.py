@@ -5,7 +5,8 @@ import webbrowser
 import click
 import logging
 
-from . import base, family_file, family_type, version, root, mode, variant_type
+from . import (base, family_file, family_type, version, root, mode, 
+               variant_type, phenomizer)
 
 from puzzle.plugins import SqlStore, VcfPlugin
 try:
@@ -28,6 +29,7 @@ logger = logging.getLogger(__name__)
 @click.option('--debug', is_flag=True)
 @click.option('-p', '--pattern', default='*.vcf', show_default=True)
 @click.option('--no-browser', is_flag=True, help='Prevent auto-opening browser')
+@phenomizer
 @family_file
 @family_type
 @version
@@ -36,13 +38,12 @@ logger = logging.getLogger(__name__)
 @variant_type
 @click.pass_context
 def view(ctx, host, port, debug, pattern, family_file, family_type,
-         variant_source, variant_type, root, mode, no_browser):
+         variant_source, variant_type, root, mode, no_browser, phenomizer):
     """Visualize DNA variant resources.
 
     1. Look for variant source(s) to visualize and inst. the right plugin
     """
-    if root is None:
-        root = os.path.expanduser("~/.puzzle")
+    root = root or ctx.obj.get('root') or os.path.expanduser("~/.puzzle")
 
     if os.path.isfile(root):
         logger.error("'root' can't be a file")
@@ -57,8 +58,8 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
         if not os.path.exists(db_path):
             logger.warn("database not initialized, run 'puzzle init'")
             ctx.abort()
-
-        plugin = SqlStore(db_path)
+        phenomizer_auth = phenomizer or ctx.obj.get('phenomizer_auth')
+        plugin = SqlStore(db_path, phenomizer_auth=phenomizer_auth)
         BaseConfig.STORE_ENABLED = True
 
     elif mode == 'vcf':

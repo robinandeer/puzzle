@@ -1,3 +1,4 @@
+import itertools
 import logging
 from .constants import (SEVERITY_DICT, HGNC_TO_OMIM, CYTOBANDS)
 
@@ -10,54 +11,35 @@ logger = logging.getLogger(__name__)
 
 def get_gene_info(ensembl_ids=None, hgnc_symbols=None):
     """Return the genes info based on the transcripts found
-    
-        Args:
-            transcript(Transcript): A dictionary with transcript info
-        
-        Returns:
-            genes (iterable): An iterable with Genes
-    """
-    if ensembl_ids:
-        ensembl_ids = set([ens_id for ens_id in ensembl_ids])
-    elif hgnc_symbols:
-        hgnc_symbols = set([symbol for symbol in hgnc_symbols])
 
-    genes = []
-    
-    if ensembl_ids:
-        for ensembl_id in ensembl_ids:
-            if ensembl_id:
-                for gene in query_gene(ensembl_id=ensembl_id):
-                    genes.append(Gene(
-                        symbol=gene['hgnc_symbol'],
-                        hgnc_id=gene['hgnc_id'],
-                        ensembl_id=gene['ensembl_id'],
-                        description=gene['description'],
-                        chrom=gene['chrom'],
-                        start=gene['start'],
-                        stop=gene['stop'],
-                        location=get_cytoband_coord(gene['chrom'], gene['start']),
-                        hi_score=gene['hi_score'],
-                        constraint_score=gene['constraint_score'],
-                        omim_number=get_omim_number(gene['hgnc_symbol']),
-                    ))
-    elif hgnc_symbols:
-        for hgnc_symbol in hgnc_symbols:
-            if hgnc_symbol:
-                for gene in query_gene(hgnc_symbol=hgnc_symbol):
-                    genes.append(Gene(
-                        symbol=gene['hgnc_symbol'],
-                        hgnc_id=gene['hgnc_id'],
-                        ensembl_id=gene['ensembl_id'],
-                        description=gene['description'],
-                        chrom=gene['chrom'],
-                        start=gene['start'],
-                        stop=gene['stop'],
-                        location=get_cytoband_coord(gene['chrom'], gene['start']),
-                        hi_score=gene['hi_score'],
-                        constraint_score=gene['constraint_score'],
-                        omim_number=get_omim_number(gene['hgnc_symbol']),
-                    ))
+    Args:
+        ensembl_ids (Optional[list]): list of Ensembl gene ids
+        hgnc_symbols (Optional[list]): list of HGNC gene symbols
+
+    Returns:
+        iterable: an iterable with `Gene` objects
+    """
+    uniq_ensembl_ids = set(ensembl_id for ensembl_id in (ensembl_ids or []))
+    uniq_hgnc_symbols = set(hgnc_symbol for hgnc_symbol in (hgnc_symbols or []))
+
+    ensembl = itertools.chain(*[query_gene(ensembl_id=ensembl_id)
+                                for ensembl_id in uniq_ensembl_ids])
+    hgnc = itertools.chain(*[query_gene(hgnc_symbol=hgnc_symbol)
+                             for hgnc_symbol in uniq_hgnc_symbols])
+
+    gene_data = list(itertools.chain.from_iterable([ensembl, hgnc]))
+    genes = [Gene(symbol=gene['hgnc_symbol'],
+                  hgnc_id=gene['hgnc_id'],
+                  ensembl_id=gene['ensembl_id'],
+                  description=gene['description'],
+                  chrom=gene['chrom'],
+                  start=gene['start'],
+                  stop=gene['stop'],
+                  location=get_cytoband_coord(gene['chrom'], gene['start']),
+                  hi_score=gene['hi_score'],
+                  constraint_score=gene['constraint_score'],
+                  omim_number=get_omim_number(gene['hgnc_symbol']))
+             for gene in gene_data]
     return genes
 
 def get_most_severe_consequence(transcripts):
@@ -98,11 +80,11 @@ def get_most_severe_consequence(transcripts):
 
 def get_cytoband_coord(chrom, pos):
     """Get the cytoband coordinate for a position
-    
+
         Args:
             chrom(str): A chromosome
             pos(int): The position
-        
+
         Returns:
             cytoband
     """
@@ -113,7 +95,7 @@ def get_cytoband_coord(chrom, pos):
     if chrom in CYTOBANDS:
         for interval in CYTOBANDS[chrom][pos]:
             result = "{0}{1}".format(chrom, interval.data)
-    
+
     return result
 
 def get_omim_number(hgnc_symbol):

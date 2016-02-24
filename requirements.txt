@@ -14,4 +14,4 @@ ped-parser
 intervaltree
 phizz>=0.1.1
 sqlalchemy
-query-phenomizer>=0.4
+query-phenomizer>=0.5

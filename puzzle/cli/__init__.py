@@ -1,5 +1,5 @@
 from .utils import (version, family_file, family_type, verbose, root, 
- mode, variant_type)
+ mode, variant_type, phenomizer)
 
 from .base import base
 from .init import init
