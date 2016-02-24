@@ -432,7 +432,7 @@ class VariantMixin(BaseVariantMixin):
         if self.variant_type == 'sv':
             variant.sv_type = gemini_variant['sub_type']
             variant.stop = int(gemini_variant['end'])
-            self._add_sv_coordinates(variant, gemini_variant)
+            self._add_sv_coordinates(variant)
 
         ### Consequence and region annotations
         #Add the transcript information
