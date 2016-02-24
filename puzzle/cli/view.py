@@ -43,8 +43,7 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
 
     1. Look for variant source(s) to visualize and inst. the right plugin
     """
-    if root is None:
-        root = os.path.expanduser("~/.puzzle")
+    root = root or ctx.obj.get('root') or os.path.expanduser("~/.puzzle")
 
     if os.path.isfile(root):
         logger.error("'root' can't be a file")
@@ -59,8 +58,8 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
         if not os.path.exists(db_path):
             logger.warn("database not initialized, run 'puzzle init'")
             ctx.abort()
-
-        plugin = SqlStore(db_path, phenomizer_auth=phenomizer)
+        phenomizer_auth = phenomizer or ctx.obj.get('phenomizer_auth')
+        plugin = SqlStore(db_path, phenomizer_auth=phenomizer_auth)
         BaseConfig.STORE_ENABLED = True
 
     elif mode == 'vcf':

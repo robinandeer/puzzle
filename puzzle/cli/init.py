@@ -1,11 +1,14 @@
+import codecs
 import os
 
 import logging
 import click
+import yaml
 
-from . import (base, root)
+from . import (base, root, phenomizer)
 
 from puzzle.plugins import SqlStore
+from puzzle.constants import PUZZLE_CONFIG_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -15,8 +18,9 @@ logger = logging.getLogger(__name__)
     help="Wipe the database and initialize a new one"
 )
 @root
+@phenomizer
 @click.pass_context
-def init(ctx, reset, root):
+def init(ctx, reset, root, phenomizer):
     """Initialize a database that store metadata
 
         Check if "root" dir exists, otherwise create the directory and
@@ -31,9 +35,12 @@ def init(ctx, reset, root):
         GEMINI:
             A sqlite database will be built in the home directory of the user
     """
+    configs = {}
     if root is None:
-        root = os.path.expanduser("~/.puzzle")
-
+        root = ctx.obj.get('root') or os.path.expanduser("~/.puzzle")
+    configs['root'] = root
+    print(phenomizer)
+    
     if os.path.isfile(root):
         logger.error("'root' can't be a file")
         ctx.abort()
@@ -42,7 +49,7 @@ def init(ctx, reset, root):
 
     db_path = os.path.join(root, 'puzzle_db.sqlite3')
     logger.info("db path is: {}".format(db_path))
-
+    
     resource_dir = os.path.join(root, 'resources')
     logger.info("resource dir is: {}".format(resource_dir))
 
@@ -59,4 +66,15 @@ def init(ctx, reset, root):
     logger.debug('Connect to database and create tables')
     store = SqlStore(db_path)
     store.set_up(reset=reset)
+    
+    if phenomizer:
+        phenomizer = [str(term) for term in phenomizer]
+        configs['phenomizer_auth'] = phenomizer
+    
+    if not ctx.obj.get('config_path'):
+        logger.info("Creating puzzle config file in {0}".format(PUZZLE_CONFIG_PATH))
+        with codecs.open(PUZZLE_CONFIG_PATH, 'w', encoding='utf-8') as f:
+            f.write(yaml.dump(configs))
+        logger.debug("Config created")
+            
 

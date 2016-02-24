@@ -36,10 +36,8 @@ def load(ctx, variant_source, family_file, family_type, root, mode,
     1. VCF: If a vcf file is used it can be loaded with a ped file
     2. GEMINI: Ped information will be retreived from the gemini db
     """
-    if root is None:
-        #This is the default puzzle folder
-        root = os.path.expanduser("~/.puzzle")
-
+    root = root or ctx.obj.get('root') or os.path.expanduser("~/.puzzle")
+    
     if os.path.isfile(root):
         logger.error("'root' can't be a file")
         ctx.abort()

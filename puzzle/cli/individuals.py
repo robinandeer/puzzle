@@ -18,8 +18,7 @@ def individuals(ctx, root):
 
     If no database was found run puzzle init first.
     """
-    if root is None:
-        root = os.path.expanduser("~/.puzzle")
+    root = root or ctx.obj.get('root') or os.path.expanduser("~/.puzzle")
 
     if os.path.isfile(root):
         logger.error("'root' can't be a file")
