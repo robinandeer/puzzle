@@ -43,7 +43,7 @@
 
           <div class="col-md-6">
             <label class="control-label">Gemini Query</label>
-            <input type="text" class="form-control" name="gemini_query" placeholder="SELECT * variants" value="{{ filters.gemini_query }}">
+            <input type="text" class="form-control" name="gemini_query" placeholder="SELECT * variants" value="{{ filters.gemini_query if filters.gemini_query }}">
           </div>
       </div>
     </div>
