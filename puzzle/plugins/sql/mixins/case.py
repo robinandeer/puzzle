@@ -71,8 +71,6 @@ class CaseMixin(BaseCaseMixin):
     def case(self, case_id):
         """Fetch a case from the database."""
         case_obj = self.query(Case).filter_by(case_id=case_id).first()
-        if case_obj is None:
-            case_obj = BaseCase(case_id='unknown')
         return case_obj
 
     def individual(self, ind_id):

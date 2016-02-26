@@ -14,7 +14,7 @@ class GeminiActions(object):
             name (str)
         """
         logger.debug("Looking for query with name {0}".format(name))
-        return self.query(GeminiQuery).get(name=name)
+        return self.query(GeminiQuery).filter_by(name=name).first()
 
     def gemini_queries(self):
         """Return all gemini queries"""
@@ -31,6 +31,7 @@ class GeminiActions(object):
         new_query = GeminiQuery(name=name, query=query)
         self.session.add(new_query)
         self.save()
+        return new_query
 
     def delete_gemini_query(self, name):
         """Delete a gemini query
