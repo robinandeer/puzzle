@@ -216,7 +216,7 @@ def ped_lines():
 @pytest.yield_fixture(scope='session')
 def case_obj(ped_lines):
     """Return a test case object with individuals."""
-    _case = get_case('test.vcf', case_lines=ped_lines)
+    _case = get_case('./tests/fixtures/minimal.vcf', case_lines=ped_lines)
     yield _case
 
 
@@ -232,7 +232,10 @@ def sql_store():
 @pytest.yield_fixture(scope='function')
 def test_db(sql_store, case_obj):
     """Populate database with some sample data."""
-    sql_store.add_case(case_obj)
+    new_case = sql_store.add_case(case_obj)
+    sql_store.add_gemini_query('Chuck Norris Query', "SELECT * FROM variants")
+    sql_store.add_genelist('test-list', ['ADK', 'KRAS', 'DIABLO'],
+                           case_obj=new_case)
     yield sql_store
     sql_store.tear_down()
     sql_store.set_up()
