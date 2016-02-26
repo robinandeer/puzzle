@@ -32,12 +32,12 @@ def load(ctx, variant_source, family_file, family_type, root, mode,
     Load a variant source into the database.
 
     If no database was found run puzzle init first.
-    
+
     1. VCF: If a vcf file is used it can be loaded with a ped file
     2. GEMINI: Ped information will be retreived from the gemini db
     """
     root = root or ctx.obj.get('root') or os.path.expanduser("~/.puzzle")
-    
+
     if os.path.isfile(root):
         logger.error("'root' can't be a file")
         ctx.abort()
@@ -86,7 +86,7 @@ def load(ctx, variant_source, family_file, family_type, root, mode,
     store = SqlStore(db_path)
 
     for case_obj in plugin.cases():
-        if store.case(case_id=case_obj.case_id).case_id == case_obj.case_id:
+        if store.case(case_obj.case_id) is not None:
             logger.warn("{} already exists in the database"
                         .format(case_obj.case_id))
             continue
