@@ -47,7 +47,7 @@
                     {% set freq=frequency.value %}	        
 	          {% endif %}
 	        {% if loop.last %}
-	           {{ freq }}
+	           {{ freq|round(4) }}
 	        {% endif %}
               {% else %}
                 <small class="text-muted">-</small>
