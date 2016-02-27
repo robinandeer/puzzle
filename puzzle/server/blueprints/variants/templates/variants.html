@@ -27,8 +27,8 @@
           <th>Score</th>
           <th>Chromosome</th>
           <th>Gene</th>
-          <th>Consequence</th>
-          <th>1000G</th>
+          <th>Consequence</th>	  
+          <th>MaxAF</th>
           <th>CADD</th>
         </tr>
       </thead>
@@ -40,12 +40,18 @@
             <td>{{ variant.CHROM }}</td>
             <td>{{ omim_links(variant.genes) }}</td>
             <td>{{ variant.most_severe_consequence or '-' }}</td>
-            <td>
-              {% if variant.thousand_g %}
-                {{ variant.thousand_g|round(4) }}
+            <td>	     
+	      {% for frequency in variant.frequencies %}
+                {% set freq=0 %}
+                  {% if frequency.value > freq %}
+                    {% set freq=frequency.value %}	        
+	          {% endif %}
+	        {% if loop.last %}
+	           {{ freq }}
+	        {% endif %}
               {% else %}
                 <small class="text-muted">-</small>
-              {% endif %}
+	      {% endfor %}
             </td>
             <td>{{ variant.cadd_score or '-' }}</td>
           </tr>
