@@ -11,7 +11,7 @@ You should expect a considerably faster turn around if you submit two or more PR
 
 
 ## Issue tracker
-puzzle uses the excellent [GitHub issue tracker][issues].
+`Puzzle` uses the excellent [GitHub issue tracker][issues].
 
 Personally, I also recommend giving [ZenHub][zenhub] a try. After installing the Google Chrome plugin, visit the [puzzle boards][repo-boards]. This way, it's very easy to get an overview of the current bug/feature request situation.
 
@@ -38,7 +38,7 @@ Look through the [GitHub issues][issues] for features. Anything tagged with "fea
 ### Write Documentation
 Puzzle could always use more documentation, whether as part of the official Puzzle docs, in inline docstrings, or even on the web in blog posts, articles, and such.
 
-If you have written your own tutorial or review of the software, please consider adding a refferal link to the repository.
+If you have written your own tutorial or review of the software, please consider adding a referral link to the repository.
 
 ### Submit Feedback
 The best way to send feedback is to [open a new issue][issues].
@@ -52,7 +52,7 @@ If you are requesting a feature:
 ## Get Started!
 Ready to contribute? Here's how to set up `Puzzle` for local development.
 
-> Over time my ambition is to provide a reproducable and automated setup through Vagrant.
+> Over time my ambition is to provide a reproducible and automated setup through Vagrant.
 
 1. Fork the [robinandeer/puzzle][repo] repo on GitHub
 
@@ -71,6 +71,8 @@ Ready to contribute? Here's how to set up `Puzzle` for local development.
   $ cd puzzle/
   $ pip install --editable .
   ```
+
+  [Conda](conda) is another excellent option to manage virtual environments.
 
 4. Create a branch for local development:
 
@@ -104,7 +106,7 @@ Ready to contribute? Here's how to set up `Puzzle` for local development.
 	$ invoke coverage
 	```
 
-9. Submit a pull request through the GitHub website. I would encourage you to submit your pull request early in the process. This makes it easier to maintain an overview of current development and opens up for continous discussion.
+9. Submit a pull request through the GitHub website. I would encourage you to submit your pull request early in the process. This makes it easier to maintain an overview of current development and opens up for continuous discussion.
 
 
 ## Pull Request Guidelines
@@ -148,3 +150,4 @@ $ python -m pytest tests.test_find
 [sourcetree]: http://www.sourcetreeapp.com/
 [travis]: https://travis-ci.org/robinandeer/puzzle/pull_requests
 [zenhub]: https://www.zenhub.io/
+[conda]: http://conda.pydata.org/docs/intro.html
