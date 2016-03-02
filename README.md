@@ -50,7 +50,7 @@ wget https://s3-us-west-2.amazonaws.com/robinandeer/HapMapFew.db -O tests/fixtur
 
 Then, just run `py.test tests/`
 
-## Use a gemini database ##
+## Use a gemini database
 
 Make sure you have gemini installed in your local environment
 
@@ -63,8 +63,26 @@ puzzle --mode gemini view -i path/to/gemini_database.db
 Puzzle uses the ped file to show more information in family view and in variant calls:
 
 ```
-puzzle view -i tests/fixtures/hapmap.vcf --family_file/-f tests/fixtures/hapmap.vcf
+puzzle view -i tests/fixtures/hapmap.vcf --family_file/-f tests/fixtures/hapmap.ped
 ```
+
+## Establish a persistent local database
+
+Puzzle can establish a persistent local database, so you can keep work between sessions.
+This enables other key features, such as gene lists for filtering and variant triage.
+First, you need to initialize a local database. Then one or more cases can be loaded and 
+are then ready for viewing as soon as the web server is started.
+
+```
+puzzle init --root tests/fixtures
+puzzle load --root tests/fixtures tests/fixtures/hapmap.vcf
+puzzle view --root tests/fixtures
+```
+
+## Structural variant visualisation
+
+Puzzle enables visualisation also of structural variants with the use of '--variant-type sv' with '--load' or '--view'.
+Enjoy a list view of SVs as stored in gemini or vcf format. Key fields such as chromosomal band and size are enabled by default.
 
 ## Credits
 Puzzle Piece by Creative Stall from the Noun Project

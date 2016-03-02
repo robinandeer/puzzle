@@ -9,13 +9,10 @@ from puzzle.plugins import SqlStore
 
 logger = logging.getLogger(__name__)
 
+
 @base.command()
-@click.option('-f', '--family_id',
-    type=str,
-)
-@click.option('-i', '--individual_id',
-    type=str,
-)
+@click.option('-f', '--family_id', type=str)
+@click.option('-i', '--individual_id', type=str)
 @root
 @click.pass_context
 def delete(ctx, family_id, individual_id, root):
@@ -43,17 +40,18 @@ def delete(ctx, family_id, individual_id, root):
 
     if family_id:
         case_obj = store.case(case_id=family_id)
-        if case_obj.case_id != family_id:
-            logger.warning("Family {0} does not exist in database".format(family_id))
+        if case_obj is None:
+            logger.warning("Family {0} does not exist in database"
+                           .format(family_id))
             ctx.abort()
         store.delete_case(case_obj)
     elif individual_id:
         ind_obj = store.individual(ind_id=individual_id)
         if ind_obj.ind_id != individual_id:
-            logger.warning("Individual {0} does not exist in database".format(individual_id))
+            logger.warning("Individual {0} does not exist in database"
+                           .format(individual_id))
             ctx.abort()
         store.delete_individual(ind_obj)
     else:
         logger.warning("Please provide a family or individual id")
         ctx.abort()
-        

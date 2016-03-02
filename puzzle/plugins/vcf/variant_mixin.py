@@ -455,18 +455,27 @@ class VariantMixin(BaseVariantMixin):
 
         # Add transcript information:
         gmaf = None
+        exac = None
         if vep_string:
             for transcript_info in vep_info:
                 transcript = self._get_vep_transcripts(transcript_info)
                 gmaf_raw = transcript_info.get('GMAF')
                 if gmaf_raw:
                     gmaf = float(gmaf_raw.split(':')[-1])
+
+                exac_raw = transcript_info.get('ExAC_MAF')
+                if exac_raw:
+                    exac = float(exac_raw.split(':')[-1])
+
                 variant.add_transcript(transcript)
 
         if gmaf:
             variant.add_frequency('GMAF', gmaf)
             if not variant.thousand_g:
                 variant.thousand_g = gmaf
+
+        if exac:
+            variant.add_frequency('ExAC', exac)
 
         elif snpeff_string:
             for transcript_info in snpeff_info:

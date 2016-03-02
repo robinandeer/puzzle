@@ -9,6 +9,7 @@ from puzzle.plugins import SqlStore
 
 logger = logging.getLogger(__name__)
 
+
 @base.command()
 @root
 @click.pass_context
