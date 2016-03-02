@@ -11,3 +11,4 @@ pytest-flakes
 sphinx
 sphinxcontrib-napoleon
 wheel>=0.23.0
+mkdocs
