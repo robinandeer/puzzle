@@ -7,7 +7,7 @@ from path import path
 from puzzle.plugins import Plugin
 from puzzle.models import DotDict
 from puzzle.utils import get_case
-from . import VariantMixin, CaseMixin
+from .mixins import VariantMixin, CaseMixin
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,15 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
 
         self.pattern = pattern
         logger.debug("Updating pattern to {0}".format(pattern))
-
+        
+        self.variant_columns = ['CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER']
+        
+        
+        self.head = None
+        self.vep_header = None
+        self.snpeff_header = None
+        
+        
         if root_path:
             if os.path.isdir(root_path):
                 logger.info("Looking for vcf files in {0}".format(root_path))

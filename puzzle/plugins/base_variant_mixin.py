@@ -49,12 +49,13 @@ class BaseVariantMixin(object):
         """
         variant.stop_chrom = variant.CHROM
         variant.start = int(variant.POS)
+        
         # If we have a translocation:
         if ':' in variant.ALT:
             other_coordinates = variant.ALT.strip('ACGTN[]').split(':')
             variant.stop_chrom = other_coordinates[0].lstrip('chrCHR')
             other_position = other_coordinates[1]
-            variant.stop = other_position
+            # variant.stop = other_position
 
             #Set 'infinity' to length if translocation
             variant.sv_len = float('inf')
@@ -72,17 +73,17 @@ class BaseVariantMixin(object):
                                     pos=variant.stop
                                     )
     
-    def _add_consequences(self, variant):
-        """Add the consequences found in all transcripts
-        
-        Args:
-            variant (puzzle.models.variant)
-        """
-        
-        consequences = set()
-        for transcript in variant.transcripts:
-            for consequence in transcript.consequence.split('&'):
-                consequences.add(consequence)
-        
-        variant.consequences = list(consequences)
+    # def _add_consequences(self, variant):
+    #     """Add the consequences found in all transcripts
+    #
+    #     Args:
+    #         variant (puzzle.models.variant)
+    #     """
+    #
+    #     consequences = set()
+    #     for transcript in variant.transcripts:
+    #         for consequence in transcript.consequence.split('&'):
+    #             consequences.add(consequence)
+    #
+    #     variant.consequences = list(consequences)
     

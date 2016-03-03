@@ -2,12 +2,17 @@ import itertools
 import logging
 from .constants import (SEVERITY_DICT, HGNC_TO_OMIM, CYTOBANDS)
 
-from phizz.utils import query_gene
+from phizz.utils import (query_gene, query_gene_symbol)
 
 from puzzle.models import Gene
 
 logger = logging.getLogger(__name__)
 
+def get_gene_symbols(chrom, start, stop):
+    """Get the gene symbols that a interval overlaps"""
+    gene_symbols = query_gene_symbol(chrom, start, stop)
+    logger.debug("Found gene symbols: {0}".format(', '.join(gene_symbols)))
+    return gene_symbols
 
 def get_gene_info(ensembl_ids=None, hgnc_symbols=None):
     """Return the genes info based on the transcripts found
