@@ -1,3 +1,2 @@
-from .variant_mixin import VariantMixin
-from .case_mixin import CaseMixin
+from .mixins import (VariantMixin, CaseMixin)
 from .vcf import VcfPlugin
