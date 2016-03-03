@@ -30,8 +30,11 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         """
         case_obj = self.case(case_id=case_id)
         vcf_file_path = case_obj.variant_source
-        # self.head = self._get_header(vcf_file_path)
-
+        self.head = self._get_header(vcf_file_path)
+        
+        self.vep_header = self.head.vep_columns
+        self.snpeff_header = self.head.snpeff_columns
+        
         handle = get_vcf_handle(infile=vcf_file_path)
         relevant_lines = (line for line in handle if not line.startswith('#'))
         

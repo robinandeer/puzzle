@@ -166,7 +166,21 @@ class VariantMixin(BaseVariantMixin):
             return variant
 
         return None
+    
+    def _add_consequences(self, variant):
+        """Add the consequences found in all transcripts
 
+        Args:
+            variant (puzzle.models.variant)
+        """
+
+        consequences = set()
+        for transcript in variant.transcripts:
+            for consequence in transcript.consequence.split('&'):
+                consequences.add(consequence)
+
+        variant.consequences = list(consequences)
+    
     def _get_genotypes(self, gemini_variant, individual_objs):
         """Add the genotypes for a variant for all individuals
 
