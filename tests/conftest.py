@@ -61,6 +61,12 @@ def vcf_file(request):
     hapmap = "tests/fixtures/hapmap.vcf"
     return hapmap
 
+@pytest.fixture(scope='function')
+def root_path(request):
+    "Return the path to the test root dir"
+    root = "tests/fixtures/"
+    return root
+
 
 @pytest.fixture(scope='function')
 def ped_file(request):

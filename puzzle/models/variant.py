@@ -18,6 +18,7 @@ class Variant(DotDict):
         self['thousand_g'] = None  # float
         self['max_freq'] = None  # float
         self['cadd_score'] = None  # float
+        self['consequences'] = []
         self['most_severe_consequence'] = None  # str
         self['impact_severity'] = None  # str
         self['rank_score'] = None  # float
@@ -27,6 +28,7 @@ class Variant(DotDict):
         self['transcripts'] = []  # List of Transcripts
         self['individuals'] = []  # List of Genotypes
         self['genes'] = []  # List of Genes
+        self['gene_symbols'] = []  # List of gene symbols
         self['compounds'] = []  # List of Compounds
         self['genetic_models'] = []  # List of genetic models followed
         #SV specific fields:
@@ -36,11 +38,7 @@ class Variant(DotDict):
         self['stop'] = None
         self['cytoband_start'] = None
         self['cytoband_stop'] = None
-    
-    @property
-    def consequences(self):
-        """Return a list of consequences"""
-        return [transcript.consequence for transcript in self.transcripts]
+        self['consequences'] = []
     
     @property
     def nr_genes(self):

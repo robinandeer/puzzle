@@ -10,6 +10,7 @@ recursive-include requirements *
 recursive-include tests *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
+recursive-exclude * *.db
 
 recursive-include puzzle *.html
 recursive-include puzzle *.css
