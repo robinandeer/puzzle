@@ -18,6 +18,8 @@ class BaseConfig:
     # default blueprints
     BLUEPRINTS = [public_bp, variants_bp]
 
+    #Phemonizer credentials
+    PHENOMIZER_AUTH = False
 
 class DevConfig(BaseConfig):
     DEBUG = True

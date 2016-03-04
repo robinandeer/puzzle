@@ -21,6 +21,10 @@ def test_add_phenotype(test_db, phenomizer_auth):
 
     # test with a missing HPO id
     hpo_id = 'HP:0000118'
+    assert test_db.add_phenotype(ind_obj, hpo_id) is None
+
+    # test with a repeated HPO id
+    hpo_id = 'HP:0002497'
     assert test_db.add_phenotype(ind_obj, hpo_id) == []
 
     # test adding with OMIM id

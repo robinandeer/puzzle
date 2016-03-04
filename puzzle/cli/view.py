@@ -5,7 +5,7 @@ import webbrowser
 import click
 import logging
 
-from . import (base, family_file, family_type, version, root, mode, 
+from . import (base, family_file, family_type, version, root, mode,
                variant_type, phenomizer)
 
 from puzzle.plugins import SqlStore, VcfPlugin
@@ -59,6 +59,7 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
             logger.warn("database not initialized, run 'puzzle init'")
             ctx.abort()
         phenomizer_auth = phenomizer or ctx.obj.get('phenomizer_auth')
+        BaseConfig.PHENOMIZER_AUTH = True if ctx.obj.get('phenomizer_auth') else False
         plugin = SqlStore(db_path, phenomizer_auth=phenomizer_auth)
         BaseConfig.STORE_ENABLED = True
 
