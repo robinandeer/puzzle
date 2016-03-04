@@ -34,7 +34,7 @@ class ConsequenceExtras(object):
         for consequence in variant_obj.consequences:
             logger.debug("Checking severity score for consequence: {0}".format(
                 consequence))
-                
+            
             severity_score = SEVERITY_DICT.get(consequence)
             
             if severity_score != None:

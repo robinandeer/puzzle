@@ -427,11 +427,11 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             self._add_genetic_models(variant, info_dict)
             self._add_transcripts(variant, info_dict)
             
-            if add_all_info:
-                self._add_genotype_calls(variant, variant_dict, case_obj, 
-                                         vcf_individuals)
-                self._add_compounds(variant, info_dict)
-                self._add_gmaf(variant, info_dict)
+        if add_all_info:
+            self._add_genotype_calls(variant, variant_dict, case_obj, 
+                                     vcf_individuals)
+            self._add_compounds(variant, info_dict)
+            self._add_gmaf(variant, info_dict)
                 
         
         self._add_genes(variant)
