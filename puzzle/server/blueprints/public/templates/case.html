@@ -45,11 +45,11 @@
   </div>
 </div>
 
-{% if config['STORE_ENABLED'] %}
+{% if config['STORE_ENABLED'] and config['PHENOMIZER_AUTH'] %}
   <div class="panel panel-default">
     <div class="panel-heading"><a href="http://compbio.charite.de/hpoweb/showterm?id=HP:0000118" target="_blank">Phenotypes</a></div>
-    
-    
+
+
     <div class="panel-body">
       <div class="row">
         <div class="col-md-8">
