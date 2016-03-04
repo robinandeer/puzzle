@@ -20,32 +20,39 @@ def get_case(variant_source, case_lines=None, case_type='ped', variant_type='snv
                 case_type (str): Format of case lines
 
             Returns:
-                case_objs (list): List with Case objects
+                case_obj (puzzle.models.Case)
         """
         individuals = get_individuals(
             vcf=variant_source,
             case_lines=case_lines,
             case_type=case_type,
         )
-        
+        compressed = False
+        tabix_index = False
         #If no individuals we still need to have a case id
         case_id = os.path.basename(variant_source)
+        if variant_source.endswith('.gz'):
+            compressed = True
+            tabix_file = '.'.join([variant_source, 'tbi'])
+            if os.path.exists(tabix_file):
+                tabix_index = True
         
         for individual in individuals:
             case_id = individual.case_id
 
-        case = Case(case_id=case_id, variant_source=variant_source,
+        case_obj = Case(case_id=case_id, variant_source=variant_source,
                     name=case_id, variant_type=variant_type, 
-                    variant_mode=variant_mode,
+                    variant_mode=variant_mode, compressed=compressed,
+                    tabix_index=tabix_index
                     )
 
         logger.debug("Found case with case_id: {0} and name: {1}".format(
-            case.case_id, case.name))
+            case_obj.case_id, case_obj.name))
 
         for individual in individuals:
-            case.add_individual(individual)
+            case_obj.add_individual(individual)
 
-        return case
+        return case_obj
 
 
 def get_individuals(vcf=None, case_lines=None, case_type='ped'):
