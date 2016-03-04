@@ -41,18 +41,13 @@
             <td>{{ omim_links(variant.genes) }}</td>
             <td>{{ variant.most_severe_consequence or '-' }}</td>
             <td>
-            {% for frequency in variant.frequencies %}
-              {% set freq=0 %}
-              {% if frequency.value > freq %}
-                {% set freq=frequency.value %}
+	      {% if(variant.max_freq) %}
+	         {{ variant.max_freq|round(4) }}
+	      {% else %}
+	          <small class="text-muted">-</small>
               {% endif %}
-              {% if loop.last %}
-                {{ freq|round(4) }}
-              {% endif %}
-            {% else %}
-              -
-            {% endfor %}
             </td>
+
             <td>{{ variant.cadd_score or '-' }}</td>
           </tr>
         {% else %}
