@@ -19,7 +19,7 @@ class PhenotypeActions(object):
             logger.debug('querying on OMIM term')
             hpo_results = phizz.query_disease([phenotype_id])
 
-        added_terms = []
+        added_terms = [] if hpo_results else None
         existing_ids = set(term.phenotype_id for term in ind_obj.phenotypes)
         for result in hpo_results:
             if result['hpo_term'] not in existing_ids:
@@ -32,7 +32,7 @@ class PhenotypeActions(object):
         logger.debug('storing new HPO terms')
         self.save()
 
-        if len(added_terms) > 0:
+        if added_terms is not None and len(added_terms) > 0:
             self.update_hpolist(ind_obj.ind_id)
 
         return added_terms

@@ -3,7 +3,7 @@ import os
 
 from flask import (abort, Blueprint, current_app as app, render_template,
                    redirect, request, url_for, make_response,
-                   send_from_directory)
+                   send_from_directory, flash)
 from werkzeug import secure_filename
 
 BP_NAME = __name__.split('.')[-2]
@@ -38,7 +38,11 @@ def phenotypes():
 
     ind_obj = app.db.individual(ind_id)
     try:
-        app.db.add_phenotype(ind_obj, phenotype_id)
+        added_terms = app.db.add_phenotype(ind_obj, phenotype_id)
+        if added_terms is None:
+            flash("Term with id {} was not found".format(phenotype_id), 'danger')
+        elif added_terms == []:
+            flash("Term with id {} was already added".format(phenotype_id), 'warning')
     except RuntimeError as error:
         return abort(500, error.message)
 
