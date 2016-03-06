@@ -4,12 +4,14 @@ from vcftoolbox import (get_variant_dict, HeaderParser, get_info_dict,
                         get_vep_info, get_snpeff_info, get_vcf_handle,
                         get_variant_id, Genotype)
 
+from cyvcf2 import VCF
+
 from puzzle.plugins import BaseVariantMixin
 
 from puzzle.models import (Compound, Variant, Gene)
 from puzzle.models import Genotype as puzzle_genotype
 from puzzle.utils import (get_most_severe_consequence, get_omim_number,
-                          IMPACT_SEVERITIES)
+                          get_csq, IMPACT_SEVERITIES)
 
 from .variant_extras import VariantExtras
 
