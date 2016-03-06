@@ -55,7 +55,7 @@ Then, just run `py.test tests/`
 Make sure you have gemini installed in your local environment
 
 ```
-puzzle --mode gemini view -i path/to/gemini_database.db
+puzzle view --mode gemini path/to/gemini_database.db
 ```
 
 ## Use ped info ##
@@ -63,7 +63,7 @@ puzzle --mode gemini view -i path/to/gemini_database.db
 Puzzle uses the ped file to show more information in family view and in variant calls:
 
 ```
-puzzle view -i tests/fixtures/hapmap.vcf --family_file/-f tests/fixtures/hapmap.ped
+puzzle view tests/fixtures/hapmap.vcf --family_file/-f tests/fixtures/hapmap.ped
 ```
 
 ## Establish a persistent local database
