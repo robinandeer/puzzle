@@ -8,6 +8,18 @@ from puzzle.models import Gene
 
 logger = logging.getLogger(__name__)
 
+def get_variant_id(variant):
+    """Get a variant id from a cyvcf variant
+    
+        Build a variant id from chrom, pos, ref, alt
+        Args:
+            variant (cyvcf2.Variant)
+        
+        Returns:
+            variant_id (str): A variant id
+    """
+    pass
+
 def get_gene_symbols(chrom, start, stop):
     """Get the gene symbols that a interval overlaps"""
     gene_symbols = query_gene_symbol(chrom, start, stop)

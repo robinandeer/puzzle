@@ -1,17 +1,15 @@
 import logging
 
-from vcftoolbox import (get_variant_dict, HeaderParser, get_info_dict,
-                        get_vep_info, get_snpeff_info, get_vcf_handle,
-                        get_variant_id, Genotype)
+from vcftoolbox import (get_vcf_handle,get_variant_id)
 
 from cyvcf2 import VCF
 
 from puzzle.plugins import BaseVariantMixin
 
-from puzzle.models import (Compound, Variant, Gene)
-from puzzle.models import Genotype as puzzle_genotype
+from puzzle.models import (Compound, Variant)
+
 from puzzle.utils import (get_most_severe_consequence, get_omim_number,
-                          get_csq, IMPACT_SEVERITIES)
+                          get_csq, IMPACT_SEVERITIES, get_header)
 
 from .variant_extras import VariantExtras
 
@@ -32,20 +30,19 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         """
         case_obj = self.case(case_id=case_id)
         vcf_file_path = case_obj.variant_source
-        self.head = self._get_header(vcf_file_path)
+        self.head = get_header(vcf_file_path)
         
         self.vep_header = self.head.vep_columns
         self.snpeff_header = self.head.snpeff_columns
         
-        handle = get_vcf_handle(infile=vcf_file_path)
-        relevant_lines = (line for line in handle if not line.startswith('#'))
+        handle = VCF(vcf_file_path)
         
-        for index, variant_line in enumerate(relevant_lines):
+        for index, variant in enumerate(handle):
             index += 1
-            line_id = get_variant_id(variant_line=variant_line).lstrip('chrCHR')
+            line_id = get_variant_id(variant_line=str(variant)).lstrip('chrCHR')
             if line_id == variant_id:
                 return self._format_variants(
-                    variant_line=variant_line,
+                    variant=variant,
                     index=index,
                     case_obj=case_obj,
                     add_all_info=True
@@ -105,20 +102,19 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
 
         vcf_file_path = case_obj.variant_source
 
-        self.head = self._get_header(vcf_file_path)
+        self.head = get_header(vcf_file_path)
         
         self.vep_header = self.head.vep_columns
         self.snpeff_header = self.head.snpeff_columns
 
-        raw_variants = self._get_filtered_variants(vcf_file_path, filters)
+        variants = self._get_filtered_variants(vcf_file_path, filters)
         
         skip_index = 0
-        for index, variant_line in enumerate(raw_variants):
+        for index, variant in enumerate(variants):
             index += 1
             if skip_index >= skip:
-                print(skip_index, index, skip)
                 variant_obj = self._format_variants(
-                     variant_line=variant_line,
+                     variant=variant,
                      index=index,
                      case_obj=case_obj,
                 )
@@ -157,33 +153,6 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             else:
                 skip_index += 1
 
-    def _get_header(self, vcf_file_path):
-        """Parse the header and return a header object
-
-            Args:
-                vcf_file_path(str): Path to vcf
-
-            Returns:
-                head: A HeaderParser object
-        """
-        logger.info("Parsing header of file {0}".format(vcf_file_path))
-        head = HeaderParser()
-        handle = get_vcf_handle(infile=vcf_file_path)
-        # Parse the header
-        for line in handle:
-            line = line.rstrip()
-            if line.startswith('#'):
-                if line.startswith('##'):
-                    head.parse_meta_data(line)
-                else:
-                    head.parse_header_line(line)
-            else:
-                break
-
-        handle.close()
-
-        return head
-
     def _get_filtered_variants(self, vcf_file_path, filters={}):
         """Check if variants follows the filters
 
@@ -212,34 +181,35 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
 
         logger.info("Get variants from {0}".format(vcf_file_path))
 
-        handle = get_vcf_handle(infile=vcf_file_path)
-        for variant_line in handle:
-            if not variant_line.startswith('#'):
-                keep_variant = True
+        handle = VCF(vcf_file_path)
+        
+        for variant in handle:
+            variant_line = str(variant)
+            keep_variant = True
 
-                if genes and keep_variant:
-                    keep_variant = False
-                    for gene in genes:
-                        if "{0}".format(gene) in variant_line:
-                            keep_variant = True
-                            break
+            if genes and keep_variant:
+                keep_variant = False
+                for gene in genes:
+                    if "{0}".format(gene) in variant_line:
+                        keep_variant = True
+                        break
 
-                if consequences and keep_variant:
-                    keep_variant = False
-                    for consequence in consequences:
-                        if consequence in variant_line:
-                            keep_variant = True
-                            break
+            if consequences and keep_variant:
+                keep_variant = False
+                for consequence in consequences:
+                    if consequence in variant_line:
+                        keep_variant = True
+                        break
 
-                if sv_types and keep_variant:
-                    keep_variant = False
-                    for sv_type in sv_types:
-                        if sv_type in variant_line:
-                            keep_variant = True
-                            break
+            if sv_types and keep_variant:
+                keep_variant = False
+                for sv_type in sv_types:
+                    if sv_type in variant_line:
+                        keep_variant = True
+                        break
 
-                if keep_variant:
-                    yield variant_line
+            if keep_variant:
+                yield variant
 
     def _add_compounds(self, variant_obj, info_dict):
         """Check if there are any compounds and add them to the variant
@@ -262,56 +232,6 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
                         combined_score=compound_score
                     ))
 
-    
-    def _add_coordinates(self, variant_obj, variant_dict):
-        """Add the coordinates for a variant
-        
-            Args:
-                variant_obj (puzzle.models.Variant)
-                variant_dict (dict): A variant dictionary
-        """
-        variant_obj.CHROM = variant_obj.CHROM.lstrip('chrCHR')
-        variant_obj.start = int(variant_dict['POS'])
-        variant_obj.stop = int(variant_dict['POS']) + \
-                (len(variant_dict['REF']) - len(variant_dict['ALT']))
-    
-    def _add_genotype_calls(self, variant_obj, variant_dict, case_obj, 
-                            vcf_individuals):
-        """Add the genotype calls for the variant
-        
-        Args:
-            variant_obj (puzzle.models.Variant)
-            variant_dict (dict): A variant dictionary
-            case_obj (puzzle.models.Case)
-            vcf_individuals (set): The vcf individuals
-            
-        """
-        for individual in case_obj.individuals:
-            sample_id = individual.ind_id
-
-            if sample_id in vcf_individuals:
-
-                raw_call = dict(zip(
-                    variant_dict['FORMAT'].split(':'),
-                    variant_dict[sample_id].split(':'))
-                )
-
-                genotype = Genotype(**raw_call)
-
-                variant_obj.add_individual(puzzle_genotype(
-                    sample_id = sample_id,
-                    genotype = genotype.genotype,
-                    case_id = individual.case_name,
-                    phenotype = individual.phenotype,
-                    ref_depth = genotype.ref_depth,
-                    alt_depth = genotype.alt_depth,
-                    genotype_quality = genotype.genotype_quality,
-                    depth = genotype.depth_of_coverage,
-                    supporting_evidence = genotype.supporting_evidence,
-                    pe_support = genotype.pe_support,
-                    sr_support = genotype.sr_support,
-                ))
-    
     def _add_cadd_score(self, variant_obj, info_dict):
         """Add the cadd score to the variant
         
@@ -363,7 +283,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
                 rank_score))
             variant_obj.rank_score = float(rank_score)
 
-    def _format_variants(self, variant_line, index, case_obj, add_all_info=False):
+    def _format_variants(self, variant, index, case_obj, add_all_info=False):
         """Return a Variant object
         
         Format variant make a variant that includes enough information for 
@@ -371,7 +291,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         If add_all_info then all transcripts will be parsed
 
         Args:
-            variant_line (str): A raw vcf variant line
+            variant (cython2.Variant): A variant object
             index (int): The index of the variant
             case_obj (puzzle.models.Case): A case object
             head (vcftoolbox.Head): A header object
@@ -380,69 +300,67 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         header_line = self.head.header
         # Get the individual ids for individuals in vcf file
         vcf_individuals = set([ind_id for ind_id in self.head.individuals])
-
-        #Create a variant dict:
-        variant_dict =  get_variant_dict(
-            variant_line = variant_line,
-            header_line = header_line
-        )
+        
         #Create a info dict:
-        info_dict = get_info_dict(
-            info_line = variant_dict['INFO']
-        )
-
-        variant = Variant(
-            **{column: variant_dict.get(column, '.')
-                for column in self.variant_columns}
+        info_dict = dict(variant.INFO)
+        
+        variant_obj = Variant(
+                CHROM=variant.CHROM.lstrip('chrCHR'),
+                POS=variant.POS,
+                ID=variant.ID,
+                REF=variant.REF,
+                ALT=variant.ALT[0],
+                QUAL=variant.QUAL,
+                FILTER=variant.FILTER,
             )
+        # variant_obj._set_variant_id()
+        
+        # logger.debug("Creating a variant object of variant {0}".format(
+        #     variant_obj.variant_id))
 
-        logger.debug("Creating a variant object of variant {0}".format(
-            variant.get('variant_id')))
-
-        variant.index = index
+        variant_obj.index = index
         logger.debug("Updating index to: {0}".format(
             index))
 
         ########### Get the coordinates for the variant ##############
-        # Get the chromosome
-        self._add_coordinates(variant, variant_dict)
+        variant_obj.start = variant.start
+        variant_obj.stop = variant.end
         
         #SV variants needs to be handeled a bit different since the can be huge
         #it would take to much power to parse all vep/snpeff entrys for these.
         if self.variant_type == 'sv':
-            variant.stop = int(info_dict.get('END', variant_dict['POS']))
-            self._add_sv_coordinates(variant)
-            variant.sv_type = info_dict.get('SVTYPE')
+            variant_obj.stop = int(info_dict.get('END', variant_obj.POS))
+            self._add_sv_coordinates(variant_obj)
+            variant_obj.sv_type = info_dict.get('SVTYPE')
             
             # Special for FindSV software:
-            #SV specific tag for number of occurances
+            # SV specific tag for number of occurances
             occurances = info_dict.get('OCC')
             if occurances:
                 logger.debug("Updating occurances to: {0}".format(
                     occurances))
-                variant['occurances'] = float(occurances)
-                variant.add_frequency('OCC', occurances)
+                variant_obj['occurances'] = float(occurances)
+                variant_obj.add_frequency('OCC', occurances)
         
         else:
-            self._add_thousand_g(variant, info_dict)
-            self._add_cadd_score(variant, info_dict)
-            self._add_genetic_models(variant, info_dict)
-            self._add_transcripts(variant, info_dict)
+            self._add_thousand_g(variant_obj, info_dict)
+            self._add_cadd_score(variant_obj, info_dict)
+            self._add_genetic_models(variant_obj, info_dict)
+            self._add_transcripts(variant_obj, info_dict)
             
         if add_all_info:
-            self._add_genotype_calls(variant, variant_dict, case_obj, 
-                                     vcf_individuals)
-            self._add_compounds(variant, info_dict)
-            self._add_gmaf(variant, info_dict)
+            self._add_genotype_calls(variant_obj, str(variant), case_obj)
+            self._add_compounds(variant_obj, info_dict)
+            self._add_gmaf(variant_obj, info_dict)
                 
         
-        self._add_genes(variant)
+        self._add_genes(variant_obj)
         ##### Add consequences ####
-        self._add_consequences(variant, variant_line)
-        self._add_most_severe_consequence(variant)
-        self._add_impact_severity(variant)
-        self._add_rank_score(variant, info_dict)
-        variant.set_max_freq()
+        self._add_consequences(variant_obj, str(variant))
+        self._add_most_severe_consequence(variant_obj)
+        self._add_impact_severity(variant_obj)
+        self._add_rank_score(variant_obj, info_dict)
+        variant_obj.set_max_freq()
 
-        return variant
+        return variant_obj
 

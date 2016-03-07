@@ -3,9 +3,11 @@ import logging
 import os
 
 from ped_parser import FamilyParser
-from vcftoolbox import HeaderParser, get_vcf_handle
+from ped_parser.exceptions import PedigreeError
 
 from puzzle.models import Case, Individual
+
+from . import get_header
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +57,7 @@ def get_case(variant_source, case_lines=None, case_type='ped', variant_type='snv
         return case_obj
 
 
-def get_individuals(vcf=None, case_lines=None, case_type='ped'):
+def get_individuals(vcf, case_lines=None, case_type='ped'):
         """Get the individuals from a vcf file, and/or a ped file.
 
             Args:
@@ -67,6 +69,13 @@ def get_individuals(vcf=None, case_lines=None, case_type='ped'):
                 individuals (generator): generator with Individuals
         """
         individuals = []
+        
+        head = get_header(vcf)
+        #Dictionary with ind_id:index where index show where in vcf ind info is
+        ind_dict ={} 
+        
+        for index, ind in enumerate(head.individuals):
+            ind_dict[ind] = index
 
         if case_lines:
             # read individuals from ped file
@@ -84,40 +93,36 @@ def get_individuals(vcf=None, case_lines=None, case_type='ped'):
             for ind_id in family_parser.individuals:
                 ind = family_parser.individuals[ind_id]
                 logger.info("Found individual {0}".format(ind.individual_id))
+                try:
+                    individual = Individual(
+                        ind_id=ind_id,
+                        case_id=case_id,
+                        mother=ind.mother,
+                        father=ind.father,
+                        sex=str(ind.sex),
+                        phenotype=str(ind.phenotype),
+                        variant_source=vcf,
+                        ind_index=ind_dict[ind_id],
+                    )
+                    individuals.append(individual)
+                except KeyError as err:
+                    #This is the case when individuals in ped does not exist 
+                    #in vcf
+                    raise PedigreeError(
+                        family_id=case_id, 
+                        individual_id=ind_id, 
+                        message="Individual {0} exists in ped file but not in vcf".format(ind_id)
+                    )
 
-                individual = Individual(
-                    ind_id=ind.individual_id,
-                    case_id=case_id,
-                    mother=ind.mother,
-                    father=ind.father,
-                    sex=str(ind.sex),
-                    phenotype=str(ind.phenotype),
-                    variant_source=vcf,
-                )
-                individuals.append(individual)
-
-        elif vcf:
-            # read individuals from vcf file
+        else:
             case_id = os.path.basename(vcf)
-            head = HeaderParser()
-            handle = get_vcf_handle(infile=vcf)
-            for line in handle:
-                line = line.rstrip()
-                if line.startswith('#'):
-                    if line.startswith('##'):
-                        head.parse_meta_data(line)
-                    else:
-                        head.parse_header_line(line)
-                else:
-                    break
-
-            for index, ind in enumerate(head.individuals):
-                # If we only have a vcf file we can not get metadata about the
-                # individuals
+            
+            for ind in ind_dict:
                 individual = Individual(
                     ind_id=ind,
                     case_id=case_id,
                     variant_source=vcf,
+                    ind_index=ind_dict[ind]
                 )
                 individuals.append(individual)
 
