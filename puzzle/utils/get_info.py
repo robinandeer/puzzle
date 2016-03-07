@@ -38,25 +38,48 @@ def get_gene_info(ensembl_ids=None, hgnc_symbols=None):
     """
     uniq_ensembl_ids = set(ensembl_id for ensembl_id in (ensembl_ids or []))
     uniq_hgnc_symbols = set(hgnc_symbol for hgnc_symbol in (hgnc_symbols or []))
+    genes = []
+    gene_data = []
+    
+    if uniq_ensembl_ids:
+        for ensembl_id in uniq_ensembl_ids:
+            for res in query_gene(ensembl_id=ensembl_id):
+                gene_data.append(res) 
 
-    ensembl = itertools.chain(*[query_gene(ensembl_id=ensembl_id)
-                                for ensembl_id in uniq_ensembl_ids])
-    hgnc = itertools.chain(*[query_gene(hgnc_symbol=hgnc_symbol)
-                             for hgnc_symbol in uniq_hgnc_symbols])
+    elif uniq_hgnc_symbols:
+        for hgnc_symbol in uniq_hgnc_symbols:
+            query_res = query_gene(hgnc_symbol=hgnc_symbol)
+            if query_res:
+                for res in query_res:
+                    gene_data.append(res)
+            else:
+                # If no result we add just the symbol
+                gene_data.append({
+                    'hgnc_symbol': hgnc_symbol,
+                    'hgnc_id': None,
+                    'ensembl_id': None,
+                    'description': None,
+                    'chrom': 'unknown',
+                    'start': 0,
+                    'stop': 0,
+                    'hi_score': None,
+                    'constraint_score': None,
+                })
+    for gene in gene_data:
+        genes.append(Gene(
+            symbol=gene ['hgnc_symbol'],
+            hgnc_id=gene['hgnc_id'],
+            ensembl_id=gene['ensembl_id'],
+            description=gene['description'],
+            chrom=gene['chrom'],
+            start=gene['start'],
+            stop=gene['stop'],
+            location=get_cytoband_coord(gene['chrom'], gene['start']),
+            hi_score=gene['hi_score'],
+            constraint_score=gene['constraint_score'],
+            omim_number=get_omim_number(gene['hgnc_symbol'])
+            ))
 
-    gene_data = list(itertools.chain.from_iterable([ensembl, hgnc]))
-    genes = [Gene(symbol=gene['hgnc_symbol'],
-                  hgnc_id=gene['hgnc_id'],
-                  ensembl_id=gene['ensembl_id'],
-                  description=gene['description'],
-                  chrom=gene['chrom'],
-                  start=gene['start'],
-                  stop=gene['stop'],
-                  location=get_cytoband_coord(gene['chrom'], gene['start']),
-                  hi_score=gene['hi_score'],
-                  constraint_score=gene['constraint_score'],
-                  omim_number=get_omim_number(gene['hgnc_symbol']))
-             for gene in gene_data]
     return genes
 
 def get_most_severe_consequence(transcripts):

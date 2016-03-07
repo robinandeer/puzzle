@@ -222,7 +222,6 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             variant (cython2.Variant): A variant object
             index (int): The index of the variant
             case_obj (puzzle.models.Case): A case object
-            head (vcftoolbox.Head): A header object
 
         """
         header_line = self.head.header
@@ -241,7 +240,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
                 QUAL=variant.QUAL,
                 FILTER=variant.FILTER,
             )
-        # variant_obj._set_variant_id()
+        variant_obj._set_variant_id()
         
         # logger.debug("Creating a variant object of variant {0}".format(
         #     variant_obj.variant_id))
@@ -253,6 +252,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         ########### Get the coordinates for the variant ##############
         variant_obj.start = variant.start
         variant_obj.stop = variant.end
+
         
         #SV variants needs to be handeled a bit different since the can be huge
         #it would take to much power to parse all vep/snpeff entrys for these.
@@ -275,14 +275,16 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             self._add_cadd_score(variant_obj, info_dict)
             self._add_genetic_models(variant_obj, info_dict)
             self._add_transcripts(variant_obj, info_dict)
-            
+        
+        self._add_hgnc_symbols(variant_obj)
+        self._add_genes(variant_obj)
+        
         if add_all_info:
             self._add_genotype_calls(variant_obj, str(variant), case_obj)
             self._add_compounds(variant_obj, info_dict)
             self._add_gmaf(variant_obj, info_dict)
                 
         
-        self._add_genes(variant_obj)
         ##### Add consequences ####
         self._add_consequences(variant_obj, str(variant))
         self._add_most_severe_consequence(variant_obj)

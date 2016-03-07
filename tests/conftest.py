@@ -8,10 +8,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 # from puzzle.factory import create_app
-from puzzle.models import Variant
+from puzzle.models import Variant, DotDict
 from puzzle.models.sql import BASE
 from puzzle.plugins import VcfPlugin, SqlStore
-from puzzle.utils import get_case
+from puzzle.utils import (get_case, get_header)
 # from puzzle.settings import TestConfig
 
 from puzzle.log import configure_stream
@@ -207,6 +207,72 @@ def phenomizer_auth():
     raw_auth = os.environ['PHENOMIZER_AUTH']
     auth = raw_auth.split()
     yield auth
+
+@pytest.fixture(scope='function')
+def header(vcf_file):
+    """Return a header object."""
+    head = get_header(vcf_file)
+    return head
+
+@pytest.fixture(scope='function')
+def cyvcf_variant(request):
+    "Return dictionary to mock a cyvcf variant"
+    variant = DotDict()
+    variant.CHROM = 'X'
+    variant.POS = 84563218
+    variant.REF = 'C'
+    variant.ALT = ['G']
+    variant.FILTER = 'PASS'
+    variant.ID ='rs1'
+    variant.QUAL = 360.829986572
+    variant.INFO = {
+            'CADD': 25,
+            'CSQ': "G|missense_variant|MODERATE|POF1B|ENSG00000124429|"\
+            "Transcript|ENST00000373145|protein_coding|10/16||ENST00000373145"\
+            ".3:c.962G>C|ENSP00000362238.3:p.Arg321Thr|1082|962|321|R/T|aGg/"\
+            "aCg|||-1|HGNC|13711|||ENSP00000362238|POF1B_HUMAN||UPI00001AE9F1"\
+            "|deleterious|possibly_damaging|hmmpanther:PTHR22546|||||,G|"\
+            "missense_variant|MODERATE|POF1B|ENSG00000124429|Transcript|"\
+            "ENST00000262753|protein_coding|10/17||ENST00000262753.4:c.962G"\
+            ">C|ENSP00000262753.4:p.Arg321Thr|1108|962|321|R/T|aGg/aCg|||-"\
+            "1|HGNC|13711||CCDS14452.1|ENSP00000262753|POF1B_HUMAN||"\
+            "UPI0000212116|deleterious|probably_damaging|hmmpanther:PTHR22546|||||",
+        'Compounds': '643594:X_84615532_GTA_G>12',
+        'Ensembl_gene_id': 'ENSG00000124429',
+        'GeneticModels': '643594:XD_dn|AR_comp_dn|XR_dn',
+        'ModelScore': '643594:16.0',
+        'RankScore': '643594:19',
+         }
+    variant.start = 84563217
+    variant.end = 84563218
+    variant.var_type = 'snp'
+    variant.sub_vartype = 'tv'
+    variant.gt_types = ['C/C', 'C/G', 'C/C']
+    variant.gt_types = [0, 1, 0]
+    variant.gt_depths = [20,  7, 20]
+    variant.gt_ref_depths = [20,  1, 20]
+    variant.gt_alt_depths = [0, 6, 0]
+    variant.gt_quals = [ 57.,  16.,  54.]
+    variant.aaf = 0.16666666666666666
+    variant.call_rate =  1.0
+    variant.gt_phases = [False, False, False]
+    variant.gt_phred_ll_het = [57,0,54]
+    variant.gt_phred_ll_homalt = [855,16,810]
+    variant.gt_phred_ll_homref = [0,154,0]
+    variant.is_deletion = False
+    variant.is_indel = False
+    variant.is_snp = True
+    variant.is_sv = False
+    variant.is_transition = False
+    variant.nucl_diversity = 0.3333333333333333
+    variant.num_called = 3
+    variant.num_het = 1
+    variant.num_hom_alt = 0
+    variant.num_hom_ref = 2
+    variant.num_unknown = 0
+    
+    return variant
+
 
 @pytest.fixture(scope='function')
 def gemini_variant(request):
