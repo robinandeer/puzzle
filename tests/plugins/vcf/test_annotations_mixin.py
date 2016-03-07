@@ -32,5 +32,19 @@ def test_add_cadd_score_no_score(variant):
     plugin._add_cadd_score(variant, info_dict)
     
     assert variant.cadd_score == None
+
+def test_add_genetic_models(variant):
+    """docstring for test_add_cadd_score"""
+    plugin = VcfPlugin()
+    info_dict = {'GeneticModels': '643594:AD_dn|AR_comp_dn'}
+    plugin._add_genetic_models(variant, info_dict)
     
+    assert set(variant.genetic_models) == set(['AD_dn', 'AR_comp_dn'])
+
+def test_add_genetic_models_no_models(variant):
+    """docstring for test_add_cadd_score"""
+    plugin = VcfPlugin()
+    info_dict = {}
+    plugin._add_genetic_models(variant, info_dict)
     
+    assert variant.genetic_models == []

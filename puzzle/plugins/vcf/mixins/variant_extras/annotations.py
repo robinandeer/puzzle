@@ -53,3 +53,22 @@ class AnnotationExtras(object):
         ##TODO if cadd score is annotated with vep or snpeff,
         ## extract from transcripts
     
+    def _add_genetic_models(self, variant_obj, info_dict):
+        """Add the genetic models found
+        
+        Args:
+            variant_obj (puzzle.models.Variant)
+            info_dict (dict): A info dictionary
+        
+        """
+        genetic_models_entry = info_dict.get('GeneticModels')
+        if genetic_models_entry:
+            genetic_models = []
+            for family_annotation in genetic_models_entry.split(','):
+                for genetic_model in family_annotation.split(':')[-1].split('|'):
+                    genetic_models.append(genetic_model)
+            logger.debug("Updating genetic models to: {0}".format(
+                ', '.join(genetic_models)))
+                
+            variant_obj.genetic_models = genetic_models
+    
