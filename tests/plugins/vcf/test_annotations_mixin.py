@@ -16,4 +16,21 @@ def test_add_compounds_no_compounds(variant):
     info_dict = {}
     plugin._add_compounds(variant, info_dict)
     assert variant.compounds == []
+
+def test_add_cadd_score(variant):
+    """docstring for test_add_cadd_score"""
+    plugin = VcfPlugin()
+    info_dict = {'CADD': '24'}
+    plugin._add_cadd_score(variant, info_dict)
+    
+    assert float(variant.cadd_score) == 24.0
+
+def test_add_cadd_score_no_score(variant):
+    """docstring for test_add_cadd_score"""
+    plugin = VcfPlugin()
+    info_dict = {}
+    plugin._add_cadd_score(variant, info_dict)
+    
+    assert variant.cadd_score == None
+    
     

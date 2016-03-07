@@ -37,4 +37,19 @@ class AnnotationExtras(object):
         
         for compound in compound_list:
             variant_obj.add_compound(compound)
+
+    def _add_cadd_score(self, variant_obj, info_dict):
+        """Add the cadd score to the variant
+        
+            Args:
+                variant_obj (puzzle.models.Variant)
+                info_dict (dict): A info dictionary
+        """
+        cadd_score = info_dict.get('CADD')
+        if cadd_score:
+            logger.debug("Updating cadd_score to: {0}".format(
+                cadd_score))
+            variant_obj.cadd_score = float(cadd_score)
+        ##TODO if cadd score is annotated with vep or snpeff,
+        ## extract from transcripts
     
