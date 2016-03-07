@@ -211,22 +211,6 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             if keep_variant:
                 yield variant
 
-    def _add_rank_score(self, variant_obj, info_dict):
-        """Add the rank score if found
-        
-        Args:
-            variant_obj (puzzle.models.Variant)
-            info_dict (dict): A info dictionary
-        
-        """
-        rank_score_entry = info_dict.get('RankScore')
-        if rank_score_entry:
-            for family_annotation in rank_score_entry.split(','):
-                rank_score = family_annotation.split(':')[-1]
-            logger.debug("Updating rank_score to: {0}".format(
-                rank_score))
-            variant_obj.rank_score = float(rank_score)
-
     def _format_variants(self, variant, index, case_obj, add_all_info=False):
         """Return a Variant object
         
