@@ -25,7 +25,7 @@ class Plugin(object):
             can_filter_sv=False,
             can_filter_impact_severity=False,
             can_query_gemini=False,
-            can_filter_region=False,
+            can_filter_range=False,
         )
 
     def init_app(self, app):

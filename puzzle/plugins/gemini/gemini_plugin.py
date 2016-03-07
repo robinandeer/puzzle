@@ -39,7 +39,7 @@ class GeminiPlugin(CaseMixin, VariantMixin, Plugin):
         self.filters.can_filter_consequence = True
         self.filters.can_filter_impact_severity = True
         self.filters.can_query_gemini = True
-        self.filters.can_filter_range = True
+        self.filters.can_filter_range = False
 
     def test_gemini_db(self):
         """Check if self.db is a valid gemini database
