@@ -2,6 +2,7 @@
 from flask import (abort, current_app as app, Blueprint, render_template,
                    request)
 
+from puzzle._compat import iteritems
 from puzzle.constants import (INHERITANCE_MODELS_SHORT, SO_TERMS, SV_TYPES,
                               IMPACT_LEVELS)
 
@@ -15,8 +16,10 @@ blueprint = Blueprint(BP_NAME, __name__, url_prefix='/variants',
 def variants(case_id):
     """Show all variants for a case."""
     filters = parse_filters()
-    is_active = any(value for value in filters.values()
-                    if not isinstance(value, dict))
+    values = [value for key, value in iteritems(filters)
+              if not isinstance(value, dict) and key != 'skip']
+    print(values)
+    is_active = any(values)
     variants = app.db.variants(
         case_id,
         skip=filters['skip'],
