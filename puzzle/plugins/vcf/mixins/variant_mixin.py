@@ -6,7 +6,7 @@ from cyvcf2 import VCF
 
 from puzzle.plugins import BaseVariantMixin
 
-from puzzle.models import (Compound, Variant)
+from puzzle.models import (Variant)
 
 from puzzle.utils import (get_most_severe_consequence, get_omim_number,
                           get_csq, IMPACT_SEVERITIES, get_header)
@@ -210,27 +210,6 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
 
             if keep_variant:
                 yield variant
-
-    def _add_compounds(self, variant_obj, info_dict):
-        """Check if there are any compounds and add them to the variant
-
-        """
-        compound_entry = info_dict.get('Compounds')
-        if compound_entry:
-            for family_annotation in compound_entry.split(','):
-                compounds = family_annotation.split(':')[-1].split('|')
-                for compound in compounds:
-                    splitted_compound = compound.split('>')
-
-                    compound_score = None
-                    if len(splitted_compound) > 1:
-                        compound_id = splitted_compound[0]
-                        compound_score = splitted_compound[-1]
-
-                    variant_obj.add_compound(Compound(
-                        variant_id=compound_id,
-                        combined_score=compound_score
-                    ))
 
     def _add_cadd_score(self, variant_obj, info_dict):
         """Add the cadd score to the variant
