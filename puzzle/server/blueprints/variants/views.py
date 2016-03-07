@@ -82,6 +82,12 @@ def parse_filters():
     filters['gemini_query'] = request.args.get('gemini_query')
     filters['impact_severities'] = request.args.getlist('impact_severities')
 
+    if request.args.get('range'):
+        chromosome, raw_pos = request.args.get('range').split(':')
+        start, end = map(int, raw_pos.split('-'))
+        filters['range'] = {'chromosome': chromosome, 'start': start,
+                            'end': end}
+
     filters['query_dict'] = {key: request.args.getlist(key) for key
                              in request.args.keys()}
     filters['query_dict'].update({'skip': (filters['skip'] + 30)})

@@ -29,7 +29,7 @@ class GeminiPlugin(CaseMixin, VariantMixin, Plugin):
         if self.db:
             logger.info("Check if database is in correct format")
             self.test_gemini_db()
-            
+
             self.individuals = self._get_individuals()
             self.case_objs = self._get_cases(self.individuals)
 
@@ -38,11 +38,12 @@ class GeminiPlugin(CaseMixin, VariantMixin, Plugin):
         self.filters.can_filter_cadd = True
         self.filters.can_filter_consequence = True
         self.filters.can_filter_impact_severity = True
-        self.filters.can_query_gemini=True
+        self.filters.can_query_gemini = True
+        self.filters.can_filter_range = True
 
     def test_gemini_db(self):
         """Check if self.db is a valid gemini database
-            
+
             Raises sqlite3.DatabaseError if not a valid databse
         """
         gq = GeminiQuery(self.db)
