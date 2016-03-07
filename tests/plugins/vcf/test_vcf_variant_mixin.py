@@ -34,7 +34,7 @@ def test_variant(vcf_file):
     vcf_plugin = VcfPlugin(root_path=vcf_file)
     variant = vcf_plugin.variant('hapmap.vcf', 'X_155239821_G_A')
     assert variant['CHROM'] == 'X'
-    assert variant['POS'] == '155239821'
+    assert int(variant['POS']) == 155239821
 
     # get 10th variant
     variant = vcf_plugin.variant('hapmap.vcf', '3_124998098_C_A')
