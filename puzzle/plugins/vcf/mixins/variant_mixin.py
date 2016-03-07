@@ -231,8 +231,12 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         #Create a info dict:
         info_dict = dict(variant.INFO)
         
+        chrom = variant.CHROM
+        if chrom.startswith('chr') or chrom.startswith('CHR'):
+            chrom = chrom[3:]
+        
         variant_obj = Variant(
-                CHROM=variant.CHROM.lstrip('chrCHR'),
+                CHROM=chrom,
                 POS=variant.POS,
                 ID=variant.ID,
                 REF=variant.REF,
@@ -242,8 +246,8 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             )
         variant_obj._set_variant_id()
         
-        # logger.debug("Creating a variant object of variant {0}".format(
-        #     variant_obj.variant_id))
+        logger.debug("Creating a variant object of variant {0}".format(
+            variant_obj.variant_id))
 
         variant_obj.index = index
         logger.debug("Updating index to: {0}".format(
@@ -253,7 +257,6 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         variant_obj.start = variant.start
         variant_obj.stop = variant.end
 
-        
         #SV variants needs to be handeled a bit different since the can be huge
         #it would take to much power to parse all vep/snpeff entrys for these.
         if self.variant_type == 'sv':
