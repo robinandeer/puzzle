@@ -1,5 +1,7 @@
 # Puzzle [![Build Status][travis-image]][travis-url] [![Test Coverage][coveralls-img]][coveralls-url]
 
+Documentation at www.robinandeer.com/puzzle/
+
 Variant Caller GUI and genetic disease analysis tool.
 
 ```bash
@@ -48,6 +50,12 @@ You will also need to download the database used for testing, which you can do b
 wget https://s3-us-west-2.amazonaws.com/robinandeer/HapMapFew.db -O tests/fixtures/HapMapFew.db
 ```
 
+To test a gemini database with structural variants do:
+
+```
+wget https://s3-us-west-2.amazonaws.com/robinandeer/HapMapSv.db -O tests/fixtures/HapMapSv.db
+```
+
 Then, just run `py.test tests/`
 
 ## Use a gemini database
@@ -83,6 +91,13 @@ puzzle view --root tests/fixtures
 
 Puzzle enables visualisation also of structural variants with the use of '--variant-type sv' with '--load' or '--view'.
 Enjoy a list view of SVs as stored in gemini or vcf format. Key fields such as chromosomal band and size are enabled by default.
+
+If gemini database with sv:s is downloaded, as described above, do:
+```puzzle view -m gemini --variant-type sv tests/fixtures/HapMapSv.db```
+
+To view a example file with sv:s:
+```puzzle view --variant-type sv tests/fixtures/hapmap.sv.vep.vcf.gz```
+
 
 ## Credits
 Puzzle Piece by Creative Stall from the Noun Project
