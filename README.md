@@ -92,6 +92,13 @@ puzzle view --root tests/fixtures
 Puzzle enables visualisation also of structural variants with the use of '--variant-type sv' with '--load' or '--view'.
 Enjoy a list view of SVs as stored in gemini or vcf format. Key fields such as chromosomal band and size are enabled by default.
 
+If gemini database with sv:s is downloaded, as described above, do:
+```puzzle view -m gemini --variant-type sv tests/fixtures/HapMapSv.db```
+
+To view a example file with sv:s:
+```puzzle view --variant-type sv tests/fixtures/hapmap.sv.vep.vcf.gz```
+
+
 ## Credits
 Puzzle Piece by Creative Stall from the Noun Project
 
