@@ -39,11 +39,9 @@ Options:
   --help                Show this message and exit.
 ```
 
-[Phenomizer](phenomizer) needs login credentials, please send an email to sebastian.koehler@charite.de to get credentials.
+[Phenomizer][phenomizer] needs login credentials, please send an email to sebastian.koehler@charite.de to get credentials.
 The login will be stored in the database when added with `--phenomizer` option.
 
-
-[phenomizer]: http://compbio.charite.de/phenomizer/
 
 ## cases ##
 
@@ -147,3 +145,6 @@ Options:
 This command can be used to view a puzzle database or one or more puzzle databases.
 To view a puzzle database just run `puzzle view` or `puzzle view --root path/to/puzzle-dir`.
 If one or more sources should be viewed specify the path to a variant source or a directory with variant sources like `puzzle view path/to/my.vcf`
+
+
+[phenomizer]: http://compbio.charite.de/phenomizer/

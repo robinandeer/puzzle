@@ -4,7 +4,7 @@ Variant Caller GUI and genetic disease analysis tool.
 
 ## Overview
 
-Puzzle will look for variant calling resources such as VCF files and [GEMINI](gemini) databases and visualize their content. It lets you inspect, annotate, and analyze variant calls.
+Puzzle will look for variant calling resources such as VCF files and [GEMINI][gemini] databases and visualize their content. It lets you inspect, annotate, and analyze variant calls.
 
 Puzzle is not primarily meant to be run as a persistent server but think of it more as an web interface to quickly spin to visualize your variant calls.
 
@@ -20,7 +20,7 @@ Try it!
 
 ### Annotations ###
 
-Puzzle will work best if the variants are annotated with [VEP](vep) or [SnpEff](snpeff), and some additional annotations such as 1000G frequencies and CADD scores.
+Puzzle will work best if the variants are annotated with [VEP][vep] or [SnpEff][snpeff], and some additional annotations such as 1000G frequencies and CADD scores.
 
 ### Gemini support ###
 

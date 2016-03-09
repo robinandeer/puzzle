@@ -1,5 +1,7 @@
 # Puzzle [![Build Status][travis-image]][travis-url] [![Test Coverage][coveralls-img]][coveralls-url]
 
+Documentation at www.robinandeer.com/puzzle/
+
 Variant Caller GUI and genetic disease analysis tool.
 
 ```bash
@@ -46,6 +48,12 @@ You will also need to download the database used for testing, which you can do b
 
 ```
 wget https://s3-us-west-2.amazonaws.com/robinandeer/HapMapFew.db -O tests/fixtures/HapMapFew.db
+```
+
+To test a gemini database with structural variants do:
+
+```
+wget https://s3-us-west-2.amazonaws.com/robinandeer/HapMapSv.db -O tests/fixtures/HapMapSv.db
 ```
 
 Then, just run `py.test tests/`

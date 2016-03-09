@@ -9,3 +9,5 @@ pages:
 - Home: index.md
 - About:
     - 'Contributing': 'about/contributing.md'
+- Commands:
+    - 'Commands': 'commands/puzzle_commands.md'
