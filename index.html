@@ -68,6 +68,19 @@
                 </li>
             
             
+            
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Commands <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                    
+                        <li >
+                            <a href="commands/puzzle_commands/">Commands</a>
+                        </li>
+                    
+                    </ul>
+                </li>
+            
+            
             </ul>
 
             <!-- Search, Navigation and Repo links -->
@@ -115,22 +128,38 @@
 <h1 id="puzzle">Puzzle</h1>
 <p>Variant Caller GUI and genetic disease analysis tool.</p>
 <h2 id="overview">Overview</h2>
-<p>Puzzle will look for variant calling resources such as VCF files and <a href="./gemini">GEMINI</a> databases and visualize their content. It lets you inspect, annotate, and analyze variant calls.</p>
-<p>Puzzle is not primarily meant to be run as a persistant server but think of it more as an webinterface to quickly spin to visualize your variant calls.</p>
+<p>Puzzle will look for variant calling resources such as VCF files and <a href="https://github.com/arq5x/gemini">GEMINI</a> databases and visualize their content. It lets you inspect, annotate, and analyze variant calls.</p>
+<p>Puzzle is not primarily meant to be run as a persistent server but think of it more as an web interface to quickly spin to visualize your variant calls.</p>
 <p>We set out to make <code>Puzzle</code> both very simple to install as well as intuitive to use. You can be up and running in minutes with minimal prerequisites.</p>
 <p>When puzzle is installed, in its simplest form it will try to visualize the VCF files in the directory you point to with</p>
-<pre><code>puzzle tests/ view
+<pre><code>puzzle view tests/fixtures
 </code></pre>
 
 <p>Try it!</p>
 <h3 id="annotations">Annotations</h3>
-<p>Puzzle will work best if the variants are annotated with <a href="http://www.ensembl.org/info/docs/tools/vep/index.html">VEP</a>, and some additional annotations such as 1000G frequencies and CADD scores.</p>
+<p>Puzzle will work best if the variants are annotated with <a href="http://www.ensembl.org/info/docs/tools/vep/index.html">VEP</a> or <a href="http://snpeff.sourceforge.net/SnpEff_manual.html">SnpEff</a>, and some additional annotations such as 1000G frequencies and CADD scores.</p>
 <h3 id="gemini-support">Gemini support</h3>
-<p>If gemini is installed, the user can visualize a gemini database by running</p>
-<pre><code>puzzle path/to/geminidatabase.db --plugin gemini view
+<p>If the python package gemini is installed, the user can visualize a gemini database by running</p>
+<pre><code>puzzle view -m gemini path/to/geminidatabase.db
 </code></pre>
 
-<p>Right now it will only work well with databases that includes one family.</p>
+<h3 id="persist-information">Persist information</h3>
+<p>Even though puzzle is not meant to be persistent, you can still save information in puzzle's database
+for future querying running. First you need to initialize a puzzle database to store metainformation.</p>
+<pre><code>puzzle init --root path/to/dir
+</code></pre>
+
+<p>Default for root is $USER/.puzzle.
+When one or more databases are created they can be loaded with vcf files and or gemini databases.</p>
+<h3 id="loading">Loading</h3>
+<h5 id="vcfs">VCFs</h5>
+<pre><code>puzzle load /path/to/your/vcfs
+</code></pre>
+
+<h5 id="gemini-databases">GEMINI databases</h5>
+<pre><code>puzzle load -m gemini path/to/geminidatabase.db
+</code></pre>
+
 <h2 id="developing-puzzle">Developing Puzzle</h2>
 <p>Puzzle is a Python Flask app with a command line interface. It can work with multiple backends using plugins; raw VCFs, GEMINI, MongoDB.</p>
 <p>Anyone can help make this project better - read <a href="about/contributing/">CONTRIBUTING</a> to get started!</p></div>
