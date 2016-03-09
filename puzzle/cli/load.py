@@ -53,6 +53,10 @@ def load(ctx, variant_source, family_file, family_type, root, mode,
 
     logger.debug('Set puzzle backend to {0}'.format(mode))
 
+    if not os.path.isfile(variant_source):
+        logger.error("Variant source has to be a file")
+        ctx.abort()
+    
     logger.debug('Set variant type to {0}'.format(variant_type))
 
     if mode == 'vcf':

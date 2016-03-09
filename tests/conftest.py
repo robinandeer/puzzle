@@ -61,6 +61,12 @@ def vcf_file(request):
     return hapmap
 
 @pytest.fixture(scope='function')
+def vcf_file_sv(request):
+    "Return the path to the hapmap vcf with sv variants"
+    hapmap = "tests/fixtures/hapmap.sv.vep.vcf.gz"
+    return hapmap
+
+@pytest.fixture(scope='function')
 def compressed_vcf_file(request):
     "Return the path to the compressed hapmap vcf"
     hapmap = "tests/fixtures/hapmap.vcf.gz"

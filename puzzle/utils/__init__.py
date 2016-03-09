@@ -5,3 +5,4 @@ from .get_info import (get_most_severe_consequence, get_omim_number,
 from .ped import get_individuals, get_case
 from .phenomizer import hpo_genes
 from .constants import IMPACT_SEVERITIES
+from .get_file_info import (get_file_type, get_variant_type)
