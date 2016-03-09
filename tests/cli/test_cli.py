@@ -116,7 +116,7 @@ class TestCasesCommand:
         result = runner.invoke(cli, ['cases','--root', populated_puzzle_db])
 
         assert result.exit_code == 0
-        assert 'minimal.vcf' in result.output
+        assert 'hapmap.vcf' in result.output
 
     def test_cases_command_file(self, vcf_file):
         """Check if cases command work"""

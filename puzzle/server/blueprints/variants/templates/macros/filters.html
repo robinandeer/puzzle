@@ -5,49 +5,48 @@
   <div class="form-group">
     <div class="row">
       {% if db.filters.can_filter_frequency %}
-        <div class="col-md-4">
+        <div class="col-xs-3">
           <label class="control-label">Frequency</label>
-          <input type="text" class="form-control" name="frequency" type="number" placeholder="0.0004" step="0.0001" value="{{ filters.frequency or '' }}">
+          <input type="text" class="form-control" name="frequency" type="number" placeholder="0.0004" step="0.0001" value="{{ filters.frequency if filters.frequency }}">
         </div>
       {% endif %}
       {% if db.filters.can_filter_cadd %}
-        <div class="col-md-4">
+        <div class="col-xs-3">
           <label class="control-label">CADD</label>
-          <input type="text" class="form-control" name="cadd" type="number" placeholder="23.4" step="0.1" value="{{ filters.cadd or '' }}">
+          <input type="text" class="form-control" name="cadd" type="number" placeholder="23.4" step="0.1" value="{{ filters.cadd if filters.cadd }}">
         </div>
       {% endif %}
       {% if db.filters.can_filter_sv_len %}
-        <div class="col-md-4">
+        <div class="col-xs-3">
           <label class="control-label">SV Len</label>
-          <input type="text" class="form-control" name="sv_len" type="number" placeholder="23.4" step="0.1" value="{{ filters.sv_len or '' }}">
+          <input type="text" class="form-control" name="sv_len" type="number" placeholder="23.4" step="0.1" value="{{ filters.sv_len if filters.sv_len }}">
         </div>
       {% endif %}
+      {% if db.filters.can_filter_range %}
+          <div class="col-xs-3">
+            <label class="control-label">Range</label>
+            <input type="text" class="form-control" name="range" pattern="\d:\d{3}-\d{3}" placeholder="1:5000-5500" value="{{ filters.query_dict.range[0] if filters.range }}">
+          </div>
+        {% endif %}
     </div>
   </div>
 
-  {% if db.filters.can_filter_gene %}
-    <div class="form-group">
-      <div class="row">
-
-          <div class="col-md-12">
+  <div class="form-group">
+    <div class="row">
+        {% if db.filters.can_filter_gene %}
+          <div class="col-md-6">
             <label class="control-label">Genes</label>
-            <input type="text" class="form-control" name="gene_symbol" placeholder="ADK,LPP" value="{{ (filters.gene_symbols or '')|join(',') }}">
+            <input type="text" class="form-control" name="gene_symbol" placeholder="ADK,LPP" value="{{ filters.gene_symbols|join(',') if filters.gene_symbols }}">
           </div>
-      </div>
-    </div>
-  {% endif %}
-
-  {% if db.filters.can_query_gemini %}
-    <div class="form-group">
-      <div class="row">
-
+        {% endif %}
+        {% if db.filters.can_query_gemini %}
           <div class="col-md-6">
             <label class="control-label">Gemini Query</label>
             <input type="text" class="form-control" name="gemini_query" placeholder="SELECT * variants" value="{{ filters.gemini_query if filters.gemini_query }}">
           </div>
-      </div>
+        {% endif %}
     </div>
-  {% endif %}
+  </div>
 
   <div class="form-group">
     <div class="row">

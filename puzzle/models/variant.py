@@ -158,14 +158,17 @@ class Variant(DotDict):
         """Set the variant id for this variant"""
         if not variant_id:
             variant_id = '_'.join([
-                self['CHROM'],
-                self['POS'],
-                self['REF'],
-                self['ALT']
+                self.CHROM,
+                str(self.POS),
+                self.REF,
+                self.ALT
                 ])
 
         logger.debug("Updating variant id to {0}".format(
             variant_id))
 
         self['variant_id'] = variant_id
-
+    
+    def __repr__(self):
+        return ("Variant(CHROM={this.CHROM},POS={this.POS},REF={this.REF},ALT={this.ALT})"
+                        .format(this=self))

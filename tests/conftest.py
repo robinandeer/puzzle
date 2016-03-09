@@ -8,10 +8,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 # from puzzle.factory import create_app
-from puzzle.models import Variant
+from puzzle.models import Variant, DotDict
 from puzzle.models.sql import BASE
 from puzzle.plugins import VcfPlugin, SqlStore
-from puzzle.utils import get_case
+from puzzle.utils import (get_case, get_header)
 # from puzzle.settings import TestConfig
 
 from puzzle.log import configure_stream
@@ -24,7 +24,6 @@ logger = logging.getLogger(__name__)
 def vcf():
     db = VcfPlugin()
     return db
-
 
 @pytest.fixture(scope='function')
 def puzzle_dir(request, dir_path):
@@ -92,63 +91,6 @@ def gemini_db_path(request):
     "Return the path to the hapmap gemini db"
     hapmap = "tests/fixtures/HapMapFew.db"
     return hapmap
-
-
-@pytest.fixture(scope='function')
-def gemini_variant(request):
-    "Return dictionary to mock a gemini variant"
-    variant = {
-        'chrom': 'chr1',
-        'start': 36636644,
-        'end': 36636645,
-        'variant_id': 1,
-        'ref': 'G',
-        'alt': 'A',
-        'qual': 360.829986572,
-        'type': 'snp',
-        'sub_type': 'ts',
-        'gts': ['G/A', 'G/A', './.', './.', './.'],
-        'gt_types': [1, 1, 2, 2, 2],
-        'gt_depths': [17, 19, -1, -1, -1],
-        'gt_ref_depths': [10, 13, -1, -1, -1],
-        'gt_alt_depths': [7, 6, -1, -1, -1],
-        'gt_quals': [99, 99, -1, -1, -1],
-        'in_dbsnp': 0,
-        'rs_ids': None,
-        'gene': 'MAP7D1',
-        'transcript': 'ENST00000530729',
-        'is_exonic': 1,
-        'is_coding': 1,
-        'is_lof': 1,
-        'exon': 2/4,
-        'codon_change': 'atG/atA',
-        'aa_change': 'M/I',
-        'aa_length': '1/140',
-        'biotype': 'protein_coding',
-        'impact': 'transcript_codon_change',
-        'impact_so': 'initiator_codon_variant',
-        'impact_severity': 'HIGH',
-        'polyphen_pred': 'benign',
-        'polyphen_score': 0.304,
-        'sift_pred': 'deleterious',
-        'sift_score': 0.0,
-        'aaf_esp_ea': None,
-        'aaf_esp_aa': None,
-        'aaf_esp_all': None,
-        'aaf_1kg_amr': None,
-        'aaf_1kg_eas': None,
-        'aaf_1kg_sas': None,
-        'aaf_1kg_afr': None,
-        'aaf_1kg_eur': None,
-        'aaf_1kg_all': None,
-        'cadd_raw': 2.49,
-        'cadd_scaled': 14.3,
-        'aaf_exac_all': 1.647e-05,
-        'aaf_adj_exac_all': 1.67162582328e-05,
-        'max_aaf_all': 3.03471716436e-05,
-    }
-    return variant
-
 
 @pytest.fixture(scope='function')
 def populated_puzzle_db(request, dir_path, case_obj):
@@ -234,7 +176,7 @@ def ped_lines():
 @pytest.yield_fixture(scope='session')
 def case_obj(ped_lines):
     """Return a test case object with individuals."""
-    _case = get_case('./tests/fixtures/minimal.vcf', case_lines=ped_lines)
+    _case = get_case('tests/fixtures/hapmap.vcf', case_lines=ped_lines)
     yield _case
 
 
@@ -265,3 +207,124 @@ def phenomizer_auth():
     raw_auth = os.environ['PHENOMIZER_AUTH']
     auth = raw_auth.split()
     yield auth
+
+@pytest.fixture(scope='function')
+def header(vcf_file):
+    """Return a header object."""
+    head = get_header(vcf_file)
+    return head
+
+@pytest.fixture(scope='function')
+def cyvcf_variant(request):
+    "Return dictionary to mock a cyvcf variant"
+    variant = DotDict()
+    variant.CHROM = 'X'
+    variant.POS = 84563218
+    variant.REF = 'C'
+    variant.ALT = ['G']
+    variant.FILTER = 'PASS'
+    variant.ID ='rs1'
+    variant.QUAL = 360.829986572
+    variant.INFO = {
+            'CADD': 25,
+            'CSQ': "G|missense_variant|MODERATE|POF1B|ENSG00000124429|"\
+            "Transcript|ENST00000373145|protein_coding|10/16||ENST00000373145"\
+            ".3:c.962G>C|ENSP00000362238.3:p.Arg321Thr|1082|962|321|R/T|aGg/"\
+            "aCg|||-1|HGNC|13711|||ENSP00000362238|POF1B_HUMAN||UPI00001AE9F1"\
+            "|deleterious|possibly_damaging|hmmpanther:PTHR22546|||||,G|"\
+            "missense_variant|MODERATE|POF1B|ENSG00000124429|Transcript|"\
+            "ENST00000262753|protein_coding|10/17||ENST00000262753.4:c.962G"\
+            ">C|ENSP00000262753.4:p.Arg321Thr|1108|962|321|R/T|aGg/aCg|||-"\
+            "1|HGNC|13711||CCDS14452.1|ENSP00000262753|POF1B_HUMAN||"\
+            "UPI0000212116|deleterious|probably_damaging|hmmpanther:PTHR22546|||||",
+        'Compounds': '643594:X_84615532_GTA_G>12',
+        'Ensembl_gene_id': 'ENSG00000124429',
+        'GeneticModels': '643594:XD_dn|AR_comp_dn|XR_dn',
+        'ModelScore': '643594:16.0',
+        'RankScore': '643594:19',
+         }
+    variant.start = 84563217
+    variant.end = 84563218
+    variant.var_type = 'snp'
+    variant.sub_vartype = 'tv'
+    variant.gt_types = ['C/C', 'C/G', 'C/C']
+    variant.gt_types = [0, 1, 0]
+    variant.gt_depths = [20,  7, 20]
+    variant.gt_ref_depths = [20,  1, 20]
+    variant.gt_alt_depths = [0, 6, 0]
+    variant.gt_quals = [ 57.,  16.,  54.]
+    variant.aaf = 0.16666666666666666
+    variant.call_rate =  1.0
+    variant.gt_phases = [False, False, False]
+    variant.gt_phred_ll_het = [57,0,54]
+    variant.gt_phred_ll_homalt = [855,16,810]
+    variant.gt_phred_ll_homref = [0,154,0]
+    variant.is_deletion = False
+    variant.is_indel = False
+    variant.is_snp = True
+    variant.is_sv = False
+    variant.is_transition = False
+    variant.nucl_diversity = 0.3333333333333333
+    variant.num_called = 3
+    variant.num_het = 1
+    variant.num_hom_alt = 0
+    variant.num_hom_ref = 2
+    variant.num_unknown = 0
+    
+    return variant
+
+
+@pytest.fixture(scope='function')
+def gemini_variant(request):
+    "Return dictionary to mock a gemini variant"
+    variant = {
+        'chrom': 'chr1',
+        'start': 36636644,
+        'end': 36636645,
+        'variant_id': 1,
+        'ref': 'G',
+        'alt': 'A',
+        'qual': 360.829986572,
+        'type': 'snp',
+        'sub_type': 'ts',
+        'gts': ['G/A', 'G/A', './.', './.', './.'],
+        'gt_types': [1, 1, 2, 2, 2],
+        'gt_depths': [17, 19, -1, -1, -1],
+        'gt_ref_depths': [10, 13, -1, -1, -1],
+        'gt_alt_depths': [7, 6, -1, -1, -1],
+        'gt_quals': [99, 99, -1, -1, -1],
+        'in_dbsnp': 0,
+        'rs_ids': None,
+        'gene': 'MAP7D1',
+        'transcript': 'ENST00000530729',
+        'is_exonic': 1,
+        'is_coding': 1,
+        'is_lof': 1,
+        'exon': 2/4,
+        'codon_change': 'atG/atA',
+        'aa_change': 'M/I',
+        'aa_length': '1/140',
+        'biotype': 'protein_coding',
+        'impact': 'transcript_codon_change',
+        'impact_so': 'initiator_codon_variant',
+        'impact_severity': 'HIGH',
+        'polyphen_pred': 'benign',
+        'polyphen_score': 0.304,
+        'sift_pred': 'deleterious',
+        'sift_score': 0.0,
+        'aaf_esp_ea': None,
+        'aaf_esp_aa': None,
+        'aaf_esp_all': None,
+        'aaf_1kg_amr': None,
+        'aaf_1kg_eas': None,
+        'aaf_1kg_sas': None,
+        'aaf_1kg_afr': None,
+        'aaf_1kg_eur': None,
+        'aaf_1kg_all': None,
+        'cadd_raw': 2.49,
+        'cadd_scaled': 14.3,
+        'aaf_exac_all': 1.647e-05,
+        'aaf_adj_exac_all': 1.67162582328e-05,
+        'max_aaf_all': 3.03471716436e-05,
+    }
+    return variant

@@ -34,10 +34,20 @@ def test_variant(vcf_file):
     vcf_plugin = VcfPlugin(root_path=vcf_file)
     variant = vcf_plugin.variant('hapmap.vcf', 'X_155239821_G_A')
     assert variant['CHROM'] == 'X'
-    assert variant['POS'] == '155239821'
+    assert int(variant['POS']) == 155239821
 
     # get 10th variant
     variant = vcf_plugin.variant('hapmap.vcf', '3_124998098_C_A')
     assert variant['index'] == 10
 
-
+def test_format_variants(cyvcf_variant, case_obj, header):
+    vcf_plugin = VcfPlugin()
+    vcf_plugin.head = header
+    vcf_plugin.vep_header = header.vep_columns
+    vcf_plugin.snpeff_header = header.snpeff_columns
+    
+    variant_obj = vcf_plugin._format_variants(cyvcf_variant, index=1, 
+                             case_obj=case_obj, add_all_info=False)
+    
+    assert variant_obj.CHROM == cyvcf_variant.CHROM
+    assert variant_obj.start == cyvcf_variant.start

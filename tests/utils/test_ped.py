@@ -15,8 +15,8 @@ class TestGetIndividuals:
         ind_ids = set(['ADM1059A1','ADM1059A2','ADM1059A3'])
         assert ind_ids == set([ind.ind_id for ind in individuals])
     
-    def test_get_individuals_case_lines(self, ped_lines):
-        individuals = get_individuals(case_lines=ped_lines)
+    def test_get_individuals_case_lines(self, vcf_file, ped_lines):
+        individuals = get_individuals(vcf=vcf_file, case_lines=ped_lines)
         assert len(individuals) == 3
         ind_ids = set(['ADM1059A1','ADM1059A2','ADM1059A3'])
         assert ind_ids == set([ind.ind_id for ind in individuals])

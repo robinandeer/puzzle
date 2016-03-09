@@ -11,7 +11,7 @@ class VariantMixin(BaseVariantMixin):
     def variants(self, case_id, skip=0, count=30, filters=None):
         """Fetch variants for a case."""
         filters = filters or {}
-        logger.debug("Fetching case with case_id:{0}".format(case_id))
+        logger.debug("Fetching case with case_id: {0}".format(case_id))
         case_obj = self.case(case_id)
         plugin, case_id = self.select_plugin(case_obj)
         self.filters = plugin.filters
