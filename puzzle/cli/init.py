@@ -26,14 +26,6 @@ def init(ctx, reset, root, phenomizer):
         Check if "root" dir exists, otherwise create the directory and
         build the database. If a database already exists, do nothing.
 
-        The behaviour will be different with different plugins. A config file
-        in YAML format will be created in puzzle/configs with information about
-        the database.
-
-        VCF:
-            A sqlite database will be built in the home directory of the user
-        GEMINI:
-            A sqlite database will be built in the home directory of the user
     """
     configs = {}
     if root is None:
