@@ -62,6 +62,18 @@ def vcf_file(request):
     return hapmap
 
 @pytest.fixture(scope='function')
+def compressed_vcf_file(request):
+    "Return the path to the compressed hapmap vcf"
+    hapmap = "tests/fixtures/hapmap.vcf.gz"
+    return hapmap
+
+@pytest.fixture(scope='function')
+def indexed_vcf_file(request):
+    "Return the path to a hapmap vcf with tabix index"
+    hapmap = "tests/fixtures/hapmap_pos.vcf.gz"
+    return hapmap
+
+@pytest.fixture(scope='function')
 def root_path(request):
     "Return the path to the test root dir"
     root = "tests/fixtures/"
