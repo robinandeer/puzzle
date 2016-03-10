@@ -130,6 +130,7 @@ class Store(Plugin, CaseMixin, VariantMixin, ActionsMixin):
 
     def select_plugin(self, case_obj):
         """Select and initialize the correct plugin for the case."""
+        print(case_obj)
         if case_obj.variant_mode == 'vcf':
             logger.debug("Using vcf plugin")
             plugin = VcfPlugin(vtype=case_obj.variant_type)

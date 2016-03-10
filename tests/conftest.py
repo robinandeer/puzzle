@@ -11,7 +11,7 @@ from sqlalchemy.orm import sessionmaker
 from puzzle.models import Variant, DotDict
 from puzzle.models.sql import BASE
 from puzzle.plugins import VcfPlugin, SqlStore
-from puzzle.utils import (get_case, get_header)
+from puzzle.utils import (get_cases, get_header)
 # from puzzle.settings import TestConfig
 
 from puzzle.log import configure_stream
@@ -182,7 +182,7 @@ def ped_lines():
 @pytest.yield_fixture(scope='session')
 def case_obj(ped_lines):
     """Return a test case object with individuals."""
-    _case = get_case('tests/fixtures/hapmap.vcf', case_lines=ped_lines)
+    _case = get_cases('tests/fixtures/hapmap.vcf', case_lines=ped_lines)[0]
     yield _case
 
 

@@ -12,6 +12,9 @@
             <span class="label label-info">
               {{ case.variant_mode }}
             </span>
+            <span class="label label-warning">
+              {{ case.variant_type }}
+            </span>
             
             <a class="pull-right" href="{{ url_for('variants.variants', case_id=case.case_id) }}">
               Variants

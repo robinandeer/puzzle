@@ -6,7 +6,7 @@ from path import path
 
 from puzzle.plugins import Plugin
 from puzzle.models import DotDict
-from puzzle.utils import get_case
+from puzzle.utils import get_cases
 from .mixins import VariantMixin, CaseMixin
 
 logger = logging.getLogger(__name__)
