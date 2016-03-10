@@ -42,11 +42,11 @@ def get_cases(variant_source, case_lines=None, case_type='ped',
         tabix_index = False
         #If no individuals we still need to have a case id
         if variant_source.endswith('.gz'):
-            logger.info("Found compressed variant source")
+            logger.debug("Found compressed variant source")
             compressed = True
             tabix_file = '.'.join([variant_source, 'tbi'])
             if os.path.exists(tabix_file):
-                logger.info("Found index file")
+                logger.debug("Found index file")
                 tabix_index = True
         
         for individual in individuals:
@@ -102,14 +102,14 @@ def get_individuals(variant_source, case_lines=None, case_type='ped', variant_mo
                 # read individuals from ped file
                 family_parser = FamilyParser(case_lines, family_type=case_type)
                 families = family_parser.families
-                logger.info("Found families {0}".format(
+                logger.debug("Found families {0}".format(
                             ','.join(list(families.keys()))))
                 if len(families) != 1:
                     logger.error("Only one family can be used with vcf adapter")
                     raise IOError
 
                 case_id = list(families.keys())[0]
-                logger.info("Family used in analysis: {0}".format(case_id))
+                logger.debug("Family used in analysis: {0}".format(case_id))
 
                 for ind_id in family_parser.individuals:
                     ind = family_parser.individuals[ind_id]
@@ -156,7 +156,7 @@ def get_individuals(variant_source, case_lines=None, case_type='ped', variant_mo
             query = "SELECT * from samples"
             gq.run(query)
             for individual in gq:
-                logger.info("Found individual {0} with family id {1}".format(
+                logger.debug("Found individual {0} with family id {1}".format(
                     individual['name'], individual['family_id']))
                 individuals.append(
                     Individual(

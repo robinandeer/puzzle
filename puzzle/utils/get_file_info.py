@@ -20,15 +20,15 @@ def get_file_type(variant_source):
     file_type = 'unknown'
     valid_vcf_suffixes = ('.vcf', '.vcf.gz')
     if variant_source:
-        logger.info("Check file type with file: {0}".format(variant_source))
+        logger.debug("Check file type with file: {0}".format(variant_source))
         if variant_source.endswith('.db'):
             file_type = 'gemini'
-            logger.info("File {0} is a gemini database".format(variant_source))
+            logger.debug("File {0} is a gemini database".format(variant_source))
         elif variant_source.endswith(valid_vcf_suffixes):
             file_type = 'vcf'
-            logger.info("File {0} is a vcf".format(variant_source))
+            logger.debug("File {0} is a vcf".format(variant_source))
         else:
-            logger.info("File is in a unknown format")
+            logger.debug("File is in a unknown format")
     
     return file_type
 

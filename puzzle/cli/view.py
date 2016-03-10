@@ -13,8 +13,9 @@ from . import (base, family_file, family_type, version, root, mode,
 from puzzle.plugins import SqlStore, VcfPlugin
 try:
     from puzzle.plugins import GeminiPlugin
+    GEMINI = True
 except ImportError:
-    pass
+    GEMINI = False
 
 from sqlite3 import DatabaseError
 
@@ -52,21 +53,25 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
     BaseConfig.STORE_ENABLED = True
 
     if variant_source is None:
+        logger.info("Root directory is: {}".format(root))
+
+        db_path = os.path.join(root, 'puzzle_db.sqlite3')
+        logger.info("db path is: {}".format(db_path))
         if not os.path.exists(db_path):
             logger.warn("database not initialized, run 'puzzle init'")
             ctx.abort()
-
 
         if os.path.isfile(root):
             logger.error("'root' can't be a file")
             ctx.abort()
 
-        logger.info("Root directory is: {}".format(root))
-
-        db_path = os.path.join(root, 'puzzle_db.sqlite3')
-        logger.info("db path is: {}".format(db_path))
-
         store = SqlStore(db_path, phenomizer_auth=phenomizer_auth)
+        for case_obj in store.cases():
+            if case_obj.variant_mode == 'gemini':
+                if not GEMINI:
+                    logger.error("Need to have gemini instaled to view gemini database")
+                    ctx.abort()
+                    
     
     else:
         logger.info("Using in memory database")
@@ -75,9 +80,14 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
         cases = []
         if os.path.isfile(variant_source):        
             file_type = get_file_type(variant_source)
+            #Test if gemini is installed
             if file_type == 'unknown':
                 logger.error("File has to be vcf or gemini db")
                 ctx.abort()
+            elif mode == 'gemini':
+                if not gemini:
+                    logger.error("Need to have gemini installed to use gemini plugin")
+                    ctx.abort()
             variant_type = get_variant_type(variant_source)
             cases = get_cases(
                 variant_source=variant_source,
@@ -91,7 +101,12 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
                 file_type = get_file_type(file)
                 if file_type != 'unknown':
                     variant_type = get_variant_type(file)
-                    print(variant_type)
+                #Test if gemini is installed
+                    if mode == 'gemini':
+                        if not gemini:
+                            logger.error("Need to have gemini installed to use gemini plugin")
+                            ctx.abort()
+                    
                     for case in get_cases(
                         variant_source=file,
                         case_type=family_type, 
@@ -111,40 +126,14 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
             logger.debug("adding case: {}".format(case_obj.case_id))
             store.add_case(case_obj, vtype=case_obj.variant_type, mode=case_obj.variant_mode)
 
-    # elif mode == 'vcf':
-    #     logger.info("Initialzing VCF plugin")
-    #     try:
-    #         plugin = VcfPlugin(
-    #             root_path=variant_source,
-    #             case_lines=family_file,
-    #             case_type=family_type,
-    #             pattern=pattern,
-    #             vtype=variant_type
-    #         )
-    #     except SyntaxError as e:
-    #         logger.error(e.message)
-    #         ctx.abort()
-    #
-    # elif mode == 'gemini':
-    #     logger.info("Initialzing GEMINI plugin")
-    #     try:
-    #         plugin = GeminiPlugin(db=variant_source, vtype=variant_type)
-    #     except NameError:
-    #         logger.error("Need to have gemini installed to use gemini plugin")
-    #         ctx.abort()
-    #     except DatabaseError as e:
-    #         logger.error("{0} is not a valid gemini db".format(variant_source))
-    #         logger.info("variant-source has to point to a gemini databse")
-    #         ctx.abort()
-
     logger.debug("Plugin setup was succesfull")
 
     BaseConfig.PUZZLE_BACKEND = store
     BaseConfig.UPLOAD_DIR = os.path.join(root, 'resources')
 
     app = create_app(config_obj=BaseConfig)
-
+    
     if not (no_browser or debug):
         webbrowser.open_new_tab("http://{}:{}".format(host, port))
-
+    
     app.run(host=host, port=port, debug=debug)
