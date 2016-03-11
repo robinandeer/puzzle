@@ -3,7 +3,7 @@ import os
 import logging
 import click
 
-from . import (base, root, family_file, family_type, variant_type, mode)
+from . import (base, root, family_file, family_type)
 
 from puzzle.plugins import SqlStore
 
