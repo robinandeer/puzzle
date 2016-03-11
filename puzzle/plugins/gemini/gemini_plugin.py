@@ -25,6 +25,7 @@ class GeminiPlugin(CaseMixin, VariantMixin, Plugin):
         self.variant_type = vtype
         self.case_objs = []
         self.individual_objs = []
+        self.db = None
 
         self.filters.can_filter_gene = True
         self.filters.can_filter_frequency = True
@@ -33,6 +34,13 @@ class GeminiPlugin(CaseMixin, VariantMixin, Plugin):
         self.filters.can_filter_impact_severity = True
         self.filters.can_query_gemini = True
         self.filters.can_filter_range = False
+    
+    def test_gemini_db(self):
+            """Check if self.db is a valid gemini database
+                Raises sqlite3.DatabaseError if not a valid databse
+            """
+            gq = GeminiQuery(self.db)
+            return True
 
     def init_app(self, app):
         """Initialize plugin via Flask."""
