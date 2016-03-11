@@ -170,7 +170,7 @@ def delete_resource(resource_id):
 @blueprint.route('/individuals')
 def individuals():
     """Show an overview of all individuals."""
-    individual_objs = app.db.get_individuals()
+    individual_objs = app.db.individuals()
     return render_template('individuals.html', individuals=individual_objs)
 
 
