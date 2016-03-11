@@ -45,6 +45,7 @@
             <td align="right">{{ '{0:,}'.format(variant.sv_len) }}</td>
 	    <td> 
 	      {% if(variant.max_freq) %}
+	      (# Is this a counts (int) freq or fraction (float) freq? #}
 	        {% if(variant.max_freq >= 1) %}
 	          {{ variant.max_freq }}
 	        {% else %}
