@@ -108,9 +108,6 @@ Options:
   --family_type [ped|alt]     If the analysis use one of the known setups,
                               please specify which one.  [default: ped]
   -r, --root PATH             Path to where to find variant source(s)
-  -m, --mode [vcf|gemini]     [default: vcf]
-  --variant-type [snv|sv]     If Structural Variantion or Single Nucleotide
-                              variant mode should be used  [default: snv]
   --help                      Show this message and exit.
 ```
 
@@ -136,9 +133,6 @@ Options:
                               please specify which one.  [default: ped]
   --version                   Show the version and exit.
   -r, --root PATH             Path to where to find variant source(s)
-  -m, --mode [vcf|gemini]     [default: vcf]
-  --variant-type [snv|sv]     If Structural Variantion or Single Nucleotide
-                              variant mode should be used  [default: snv]
   --help                      Show this message and exit.
 ```
 

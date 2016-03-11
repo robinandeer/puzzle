@@ -27,7 +27,7 @@ Puzzle will work best if the variants are annotated with [VEP][vep] or [SnpEff][
 If the python package gemini is installed, the user can visualize a gemini database by running
 
 ```
-puzzle view -m gemini path/to/geminidatabase.db
+puzzle view path/to/geminidatabase.db
 ```
 
 ### Persist information
@@ -47,14 +47,13 @@ When one or more databases are created they can be loaded with vcf files and or 
 
 
 ```
-puzzle load /path/to/your/vcfs
+puzzle load /path/to/your/file.vcf
 ```
 
 ##### GEMINI databases #####
 
-
 ```
-puzzle load -m gemini path/to/geminidatabase.db
+puzzle load path/to/geminidatabase.db
 ```
 
 ## Developing Puzzle
