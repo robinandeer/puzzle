@@ -8,7 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 # from puzzle.factory import create_app
-from puzzle.models import Variant, DotDict
+from puzzle.models import (Variant, DotDict, Individual)
 from puzzle.models.sql import BASE
 from puzzle.plugins import VcfPlugin, SqlStore
 from puzzle.utils import (get_cases, get_header)
@@ -166,6 +166,12 @@ def session(request):
     request.addfinalizer(teardown)
 
     return s
+
+@pytest.fixture(scope='function')
+def individual():
+    """Return a individual object"""
+    ind_obj = (Individual('1'))
+    return ind_obj
 
 
 @pytest.yield_fixture(scope='session')

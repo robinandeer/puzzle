@@ -86,4 +86,5 @@ class CaseMixin(BaseCaseMixin):
                     if ind.ind_id == ind_id:
                         yield ind
         else:
-            yield self.individual_objs
+            for ind in self.individual_objs:
+                yield ind
