@@ -29,6 +29,7 @@
           <th>Start Loc</th>
           <th>Stop Loc</th>
           <th>Length</th>
+	  <th>Freq</th>
           <th>Nr Genes</th>
           <th>Gene</th>
         </tr>
@@ -42,10 +43,22 @@
             <td>{{ variant.cytoband_start or '-' }}</td>
             <td>{{ variant.cytoband_stop or '-' }}</td>
             <td align="right">{{ '{0:,}'.format(variant.sv_len) }}</td>
+	    <td> 
+	      {% if(variant.max_freq) %}
+	      (# Is this a counts (int) freq or fraction (float) freq? #}
+	        {% if(variant.max_freq >= 1) %}
+	          {{ variant.max_freq }}
+	        {% else %}
+         	  {{ variant.max_freq|round(3) }}
+	        {% endif %}
+	      {% else %}
+                  <small class="text-muted">-</small>
+              {% endif %}
+	      </td> 
             <td>{{ variant.nr_genes }}</td>
             <td>
               {% if variant.genes|length >= 5 %}
-                {{ omim_links(variant.genes[:2]) }} [...] {{ omim_links(variant.genes[-2:]) }}
+                {{ omim_links(variant.genes[:2]) }} <a href="{{ url_for('variants.variant', case_id=case_id, variant_id=variant.variant_id) }}">[...]</a> {{ omim_links(variant.genes[-2:]) }}
               {% else %}
                 {{ omim_links(variant.genes) }}
               {% endif %}
