@@ -84,7 +84,7 @@ class CaseMixin(BaseCaseMixin):
         """Fetch all cases from the database."""
         return self.query(Case)
 
-    def get_individuals(self, ind_ids=None):
+    def individuals(self, ind_ids=None):
         """Fetch all individuals from the database."""
         query = self.query(Individual)
         if ind_ids:

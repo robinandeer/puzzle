@@ -132,13 +132,13 @@ class Store(Plugin, CaseMixin, VariantMixin, ActionsMixin):
         """Select and initialize the correct plugin for the case."""
         if case_obj.variant_mode == 'vcf':
             logger.debug("Using vcf plugin")
-            plugin = VcfPlugin(vtype=case_obj.variant_type)
+            plugin = VcfPlugin(case_obj.variant_type)
         elif case_obj.variant_mode == 'gemini':
             logger.debug("Using gemini plugin")
-            plugin = GeminiPlugin(vtype=case_obj.variant_type)
-            plugin.db = case_obj.variant_source
-
-        plugin.case_objs = [case_obj]
+            plugin = GeminiPlugin(case_obj.variant_type)
+        
+        #Add case to plugin
+        plugin.add_case(case_obj)
 
         self.variant_type = case_obj.variant_type
 

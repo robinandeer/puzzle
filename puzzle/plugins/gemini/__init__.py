@@ -1,3 +1,2 @@
-from .case_mixin import CaseMixin
-from .variant_mixin import VariantMixin
-from .gemini_plugin import GeminiPlugin
+from .mixins import (CaseMixin, VariantMixin)
+from .plugin import GeminiPlugin

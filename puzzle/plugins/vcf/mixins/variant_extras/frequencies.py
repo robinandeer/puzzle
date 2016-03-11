@@ -46,9 +46,13 @@ class FrequenciesExtras(object):
             info_dict (dict): A info dictionary
         
         """
-        if info_dict.get("ExAC"):
-            exac = float(info_dict['ExAC'])
-        else:
+        exac = None
+        exac_keys = ['ExAC', 'EXAC', 'ExACAF', 'EXACAF']
+        for key in exac_keys:
+            if info_dict.get(key):
+                exac = float(info_dict[key])
+        #If not found in vcf search transcripts
+        if not exac:
             for transcript in variant_obj.transcripts:
                 exac_raw = transcript.ExAC_MAF
                 if exac_raw:

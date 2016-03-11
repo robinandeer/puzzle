@@ -18,7 +18,6 @@ def variants(case_id):
     filters = parse_filters()
     values = [value for key, value in iteritems(filters)
               if not isinstance(value, dict) and key != 'skip']
-    print(values)
     is_active = any(values)
     variants = app.db.variants(
         case_id,

@@ -8,10 +8,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 # from puzzle.factory import create_app
-from puzzle.models import Variant, DotDict
+from puzzle.models import (Variant, DotDict, Individual)
 from puzzle.models.sql import BASE
 from puzzle.plugins import VcfPlugin, SqlStore
-from puzzle.utils import (get_case, get_header)
+from puzzle.utils import (get_cases, get_header)
 # from puzzle.settings import TestConfig
 
 from puzzle.log import configure_stream
@@ -58,6 +58,12 @@ def gemini_path(request):
 def vcf_file(request):
     "Return the path to the hapmap vcf"
     hapmap = "tests/fixtures/hapmap.vcf"
+    return hapmap
+
+@pytest.fixture(scope='function')
+def vcf_file_sv(request):
+    "Return the path to the hapmap vcf with sv variants"
+    hapmap = "tests/fixtures/hapmap.sv.vep.vcf.gz"
     return hapmap
 
 @pytest.fixture(scope='function')
@@ -161,6 +167,12 @@ def session(request):
 
     return s
 
+@pytest.fixture(scope='function')
+def individual():
+    """Return a individual object"""
+    ind_obj = (Individual('1'))
+    return ind_obj
+
 
 @pytest.yield_fixture(scope='session')
 def ped_lines():
@@ -173,10 +185,16 @@ def ped_lines():
     yield _ped_lines
 
 
-@pytest.yield_fixture(scope='session')
+@pytest.yield_fixture(scope='function')
 def case_obj(ped_lines):
     """Return a test case object with individuals."""
-    _case = get_case('tests/fixtures/hapmap.vcf', case_lines=ped_lines)
+    _case = get_cases('tests/fixtures/hapmap.vcf', case_lines=ped_lines)[0]
+    yield _case
+
+@pytest.yield_fixture(scope='function')
+def gemini_case_obj(gemini_db_path):
+    """Return a case object extracted from gemini database"""
+    _case = get_cases(gemini_db_path, variant_mode='gemini')[0]
     yield _case
 
 

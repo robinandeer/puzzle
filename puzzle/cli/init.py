@@ -31,7 +31,6 @@ def init(ctx, reset, root, phenomizer):
     if root is None:
         root = ctx.obj.get('root') or os.path.expanduser("~/.puzzle")
     configs['root'] = root
-    print(phenomizer)
     
     if os.path.isfile(root):
         logger.error("'root' can't be a file")

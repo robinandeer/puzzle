@@ -57,14 +57,14 @@ def test_cases(test_db):
 
 def test_get_individuals(test_db):
     # GIVEN: a case with three individuals in the database
-    individuals = test_db.get_individuals()
+    individuals = test_db.individuals()
 
     # THEN: fetching individuals returns three records
     assert individuals.count() == 3
 
     # WHEN: passing in two ind ids
     ind_ids = [ind.ind_id for ind in individuals]
-    sub_inds = test_db.get_individuals(ind_ids=ind_ids[:2])
+    sub_inds = test_db.individuals(ind_ids=ind_ids[:2])
 
     # THEN: ... it returns two records matching the ids
     assert sub_inds.count() == 2

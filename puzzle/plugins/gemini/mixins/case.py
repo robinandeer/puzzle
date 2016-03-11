@@ -1,14 +1,16 @@
-# -*- coding: utf-8 -*-
+import os
 import logging
 
-from puzzle.models import Case
+from gemini import GeminiQuery
+
+from puzzle.models import (Case, Individual)
 
 from puzzle.plugins import BaseCaseMixin
 
 logger = logging.getLogger(__name__)
 
 class CaseMixin(BaseCaseMixin):
-    """Class to store methods that deal with Cases in vcf plugin"""
+    """Class to store methods that deal with Cases in geimni plugin"""
     
     def _add_individual(self, ind_obj):
         """Add a individual to the adapter
@@ -30,9 +32,16 @@ class CaseMixin(BaseCaseMixin):
             self._add_individual(ind_obj)
         logger.debug("Adding case {0} to plugin".format(case_obj.case_id))
         self.case_objs.append(case_obj)
-    
+
     def cases(self, pattern=None):
-        """Cases found for the adapter."""
+        """Return all cases.
+        
+            Args:
+                pattern: Allways None in gemini adapter
+            
+            Returns:
+                case_objs(An iterator with Cases)
+        """
 
         return self.case_objs
 
@@ -45,18 +54,19 @@ class CaseMixin(BaseCaseMixin):
                 case_id (str): A case id
 
             Returns:
-                A Case object
+                case(Case): A Case object
         """
+        cases = self.cases()
         if case_id:
-            for case in self.case_objs:
+            for case in cases:
                 if case.case_id == case_id:
                     return case
         else:
-            if self.cases:
-                return list(self.case_objs)[0]
+            if cases:
+                return cases[0]
 
-        return Case(case_id='unknown')
-    
+        return None
+
     def individual(self, ind_id=None):
         """Return a individual object
         
@@ -66,12 +76,12 @@ class CaseMixin(BaseCaseMixin):
             Returns:
                 individual (puzzle.models.individual)
         """
-        for ind_obj in self.individual_objs:
+        for ind_obj in self.individuals:
             if ind_obj.ind_id == ind_id:
                 return ind_obj
         return None
-    
-    def individuals(self, ind_ids=None):
+
+    def individuals(self, *ind_ids):
         """Return information about individuals
         
             Args:

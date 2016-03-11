@@ -15,12 +15,9 @@ def test_setup_no_db():
     assert adapter.filters.can_filter_gene == True
     assert adapter.filters.can_filter_inheritance == False
 
-def test_setup_with_db(gemini_path):
-    """Test to initialize a gemini database without any file"""
-
-    adapter = GeminiPlugin(db=gemini_path)
-    assert adapter.db == gemini_path
-
+def test_setup_with_variant_type(gemini_path):
+    adapter = GeminiPlugin('sv')
+    assert adapter.variant_type == 'sv'
 
 def test_check_gemini_db(gemini_path, vcf_file):
     adapter = GeminiPlugin()

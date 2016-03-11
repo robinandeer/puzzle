@@ -76,8 +76,7 @@ class TestLoadCommand:
         logger = logging.getLogger("test_load_command_gemini")
         runner = CliRunner()
         logger.debug("Test load a gemini db")
-        result = runner.invoke(cli, ['load','--root', puzzle_dir,
-                                     '-m', 'gemini', gemini_db_path])
+        result = runner.invoke(cli, ['load','--root', puzzle_dir, gemini_db_path])
 
         assert result.exit_code == 0
 
@@ -88,20 +87,10 @@ class TestLoadCommand:
         runner = CliRunner()
         logger.debug("Test load a vcf when no database")
         result = runner.invoke(cli, ['load','--root', dir_path, vcf_file])
-
+        
+        db_path = os.path.join(dir_path, 'puzzle_db.sqlite3')
+        
         #Should exit since db does not exist
-        assert result.exit_code == 1
-
-    def test_load_command_false_gemini_db(self, puzzle_dir, vcf_file):
-        """Test to load a gemini db"""
-
-        logger = logging.getLogger("test_load_command_false_gemini_db")
-        runner = CliRunner()
-        logger.debug("Test load a gemini db but not a valid gemini db")
-        result = runner.invoke(cli, ['load','--root', puzzle_dir,
-                                     '-m', 'gemini', vcf_file])
-
-        #Should exit since db is not a gemini db
         assert result.exit_code == 1
 
 class TestCasesCommand:
