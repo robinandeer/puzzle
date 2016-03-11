@@ -7,8 +7,7 @@ import logging
 
 from path import path
 
-from . import (base, family_file, family_type, version, root, mode,
-               variant_type, phenomizer)
+from . import (base, family_file, family_type, version, root, phenomizer)
 
 from puzzle.plugins import SqlStore, VcfPlugin
 try:
@@ -38,11 +37,9 @@ logger = logging.getLogger(__name__)
 @family_type
 @version
 @root
-@mode
-@variant_type
 @click.pass_context
 def view(ctx, host, port, debug, pattern, family_file, family_type,
-         variant_source, variant_type, root, mode, no_browser, phenomizer):
+         variant_source, root, no_browser, phenomizer):
     """Visualize DNA variant resources.
 
     1. Look for variant source(s) to visualize and inst. the right plugin
@@ -84,7 +81,8 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
             if file_type == 'unknown':
                 logger.error("File has to be vcf or gemini db")
                 ctx.abort()
-            elif mode == 'gemini':
+            elif file_type == 'gemini':
+                #Check if gemini is installed
                 if not gemini:
                     logger.error("Need to have gemini installed to use gemini plugin")
                     ctx.abort()
@@ -101,8 +99,8 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
                 file_type = get_file_type(file)
                 if file_type != 'unknown':
                     variant_type = get_variant_type(file)
-                #Test if gemini is installed
-                    if mode == 'gemini':
+                    #Test if gemini is installed
+                    if file_type == 'gemini':
                         if not gemini:
                             logger.error("Need to have gemini installed to use gemini plugin")
                             ctx.abort()

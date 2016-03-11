@@ -26,11 +26,8 @@ logger = logging.getLogger(__name__)
 @family_file
 @family_type
 @root
-@mode
-@variant_type
 @click.pass_context
-def load(ctx, variant_source, family_file, family_type, root, mode,
-        variant_type):
+def load(ctx, variant_source, family_file, family_type, root):
     """
     Load a variant source into the database.
 
@@ -49,7 +46,7 @@ def load(ctx, variant_source, family_file, family_type, root, mode,
 
     db_path = os.path.join(root, 'puzzle_db.sqlite3')
     logger.info("db path is: {}".format(db_path))
-
+    
     if not os.path.exists(db_path):
         logger.warn("database not initialized, run 'puzzle init'")
         ctx.abort()
@@ -72,8 +69,7 @@ def load(ctx, variant_source, family_file, family_type, root, mode,
 
     logger.debug('Set puzzle backend to {0}'.format(mode))
     
-    if not variant_type:
-        variant_type = get_variant_type(variant_source)
+    variant_type = get_variant_type(variant_source)
     logger.debug('Set variant type to {0}'.format(variant_type))
     
     cases = get_cases(
