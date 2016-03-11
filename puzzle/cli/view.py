@@ -83,7 +83,7 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
                 ctx.abort()
             elif file_type == 'gemini':
                 #Check if gemini is installed
-                if not gemini:
+                if not GEMINI:
                     logger.error("Need to have gemini installed to use gemini plugin")
                     ctx.abort()
             variant_type = get_variant_type(variant_source)
@@ -101,7 +101,7 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
                     variant_type = get_variant_type(file)
                     #Test if gemini is installed
                     if file_type == 'gemini':
-                        if not gemini:
+                        if not GEMINI:
                             logger.error("Need to have gemini installed to use gemini plugin")
                             ctx.abort()
                     

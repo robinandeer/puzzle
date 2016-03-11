@@ -314,6 +314,30 @@ class VariantMixin(BaseVariantMixin):
 
                 yield variant
 
+    def _add_frequencies(self, variant_obj, gemini_variant):
+        """Add some frequencies from gemini database
+        
+            Args:
+                variant_obj (puzzle.models.Variant)
+                gemini_variant (GeminiQueryRow)
+        """
+        if gemini_variant['aaf_esp_all']:
+            variant_obj.add_frequency('ESP', float(gemini_variant['aaf_esp_all']))
+
+        if gemini_variant['aaf_1kg_all']:
+            thousand_g = float(gemini_variant['aaf_1kg_all'])
+            variant_obj.add_frequency('1000G', thousand_g)
+            variant_obj.thousand_g = thousand_g
+
+        if gemini_variant['aaf_exac_all']:
+            exac = float(gemini_variant['aaf_exac_all'])
+            variant_obj.add_frequency('ExAC', exac)
+
+        if gemini_variant['max_aaf_all']:
+            max_af = float(gemini_variant['max_aaf_all'])
+            if max_af != -1.0:
+                variant_obj.set_max_freq(max_af)
+
     def _get_puzzle_variant(self, gemini_variant, index):
         """Take a gemini variant and return a basic puzzle variant
 
@@ -339,10 +363,8 @@ class VariantMixin(BaseVariantMixin):
 
         #Add the impact severity
         variant['impact_severity'] = gemini_variant['impact_severity']
-
-        max_freq = gemini_variant['max_aaf_all']
-        if max_freq:
-            variant.set_max_freq(max_freq)
+        
+        self._add_frequencies(variant, gemini_variant)
 
         #### Check the impact annotations ####
         if gemini_variant['cadd_scaled']:
@@ -384,7 +406,6 @@ class VariantMixin(BaseVariantMixin):
 
         for gene in self._get_genes(variant):
             variant.add_gene(gene)
-
 
         return variant
 
@@ -472,21 +493,6 @@ class VariantMixin(BaseVariantMixin):
         sift = gemini_variant['sift_pred']
         if sift:
             variant.add_severity('SIFT', sift)
-
-
-        #### Frequencies ####
-        thousand_g = gemini_variant['aaf_1kg_all']
-        if thousand_g:
-            variant['thousand_g'] = float(thousand_g)
-            variant.add_frequency(name='1000GAF', value=float(thousand_g))
-
-        exac = gemini_variant['aaf_exac_all']
-        if exac:
-            variant.add_frequency(name='EXaC', value=float(exac))
-
-        esp = gemini_variant['aaf_esp_all']
-        if esp:
-            variant.add_frequency(name='ESP', value=float(esp))
 
         return variant
 
