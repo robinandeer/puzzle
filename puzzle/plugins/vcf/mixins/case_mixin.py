@@ -9,7 +9,28 @@ logger = logging.getLogger(__name__)
 
 class CaseMixin(BaseCaseMixin):
     """Class to store methods that deal with Cases in vcf plugin"""
+    
+    def _add_individual(self, ind_obj):
+        """Add a individual to the adapter
+        
+            Args:
+                ind_obj (puzzle.models.Individual)
+        """
+        logger.debug("Adding individual {0} to plugin".format(ind_obj.ind_id))
+        self.individual_objs.append(ind_obj)
 
+    def add_case(self, case_obj):
+        """Add a case obj with individuals to adapter
+        
+            Args:
+                case_obj (puzzle.models.Case)
+                
+        """
+        for ind_obj in case_obj.individuals:
+            self._add_individual(ind_obj)
+        logger.debug("Adding case {0} to plugin".format(case_obj.case_name))
+        self.case_objs.append(case_obj)
+    
     def cases(self, pattern=None):
         """Cases found for the adapter."""
 
@@ -45,7 +66,7 @@ class CaseMixin(BaseCaseMixin):
             Returns:
                 individual (puzzle.models.individual)
         """
-        for ind_obj in self.individuals:
+        for ind_obj in self.individual_objs:
             if ind_obj.ind_id == ind_id:
                 return ind_obj
         return None
@@ -61,8 +82,8 @@ class CaseMixin(BaseCaseMixin):
         """
         if ind_ids:
             for ind_id in ind_ids:
-                for ind in self.individuals:
+                for ind in self.individual_objs:
                     if ind.ind_id == ind_id:
                         yield ind
         else:
-            yield self.individuals
+            yield self.individual_objs

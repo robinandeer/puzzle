@@ -25,7 +25,7 @@ class VcfPlugin(VariantMixin, CaseMixin, Plugin):
         """
         super(VcfPlugin, self).__init__()
 
-        self.individuals = []
+        self.individual_objs = []
         self.case_objs = []
 
         self.variant_type = variant_type
