@@ -179,10 +179,16 @@ def ped_lines():
     yield _ped_lines
 
 
-@pytest.yield_fixture(scope='session')
+@pytest.yield_fixture(scope='function')
 def case_obj(ped_lines):
     """Return a test case object with individuals."""
     _case = get_cases('tests/fixtures/hapmap.vcf', case_lines=ped_lines)[0]
+    yield _case
+
+@pytest.yield_fixture(scope='function')
+def gemini_case_obj(gemini_db_path):
+    """Return a case object extracted from gemini database"""
+    _case = get_cases(gemini_db_path, variant_mode='gemini')[0]
     yield _case
 
 

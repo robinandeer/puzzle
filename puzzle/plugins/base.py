@@ -13,7 +13,7 @@ class Plugin(object):
         super(Plugin, self).__init__()
         self.db = None
         self.puzzle_db = None
-        self.individuals = None
+        self.individual_objs = None
         self.case_objs = None
         self.variant_type = 'snv'
         self.filters = DotDict(

@@ -153,7 +153,9 @@ class VariantMixin(BaseVariantMixin):
         case_obj = self.case(case_id)
         for individual in case_obj.individuals:
             individuals.append(individual)
-
+        
+        self.db = case_obj.variant_source
+        
         gq = GeminiQuery(self.db)
         gq.run(gemini_query)
 
@@ -273,16 +275,18 @@ class VariantMixin(BaseVariantMixin):
             Yields:
                 variant_obj (dict): A Variant formatted dictionary
         """
+        individuals = []
+        # Get the individuals for the case
+        case_obj = self.case(case_id)
+        for individual in case_obj.individuals:
+            individuals.append(individual)
+
+        self.db = case_obj.variant_source
 
         gq = GeminiQuery(self.db)
 
         gq.run(gemini_query)
 
-        individuals = []
-        # Get the individuals for the case
-        case = self.case(case_id)
-        for individual in case.individuals:
-            individuals.append(individual)
 
         index = 0
         for gemini_variant in gq:
