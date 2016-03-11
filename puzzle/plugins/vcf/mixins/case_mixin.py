@@ -28,7 +28,7 @@ class CaseMixin(BaseCaseMixin):
         """
         for ind_obj in case_obj.individuals:
             self._add_individual(ind_obj)
-        logger.debug("Adding case {0} to plugin".format(case_obj.case_name))
+        logger.debug("Adding case {0} to plugin".format(case_obj.case_id))
         self.case_objs.append(case_obj)
     
     def cases(self, pattern=None):

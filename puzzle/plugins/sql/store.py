@@ -138,7 +138,7 @@ class Store(Plugin, CaseMixin, VariantMixin, ActionsMixin):
             plugin = GeminiPlugin(case_obj.variant_type)
         
         #Add case to plugin
-        plugin.add_case = case_obj
+        plugin.add_case(case_obj)
 
         self.variant_type = case_obj.variant_type
 

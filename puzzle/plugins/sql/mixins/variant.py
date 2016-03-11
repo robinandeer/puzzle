@@ -14,6 +14,8 @@ class VariantMixin(BaseVariantMixin):
         logger.debug("Fetching case with case_id: {0}".format(case_id))
         case_obj = self.case(case_id)
         plugin, case_id = self.select_plugin(case_obj)
+        for case in plugin.cases():
+            print(case)
         self.filters = plugin.filters
 
         gene_lists = (self.gene_list(list_id) for list_id
