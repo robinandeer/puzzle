@@ -128,7 +128,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
                         variant_obj = None
                 
                 if frequency and variant_obj:
-                    if variant_obj['max_freq'] > frequency:
+                    if variant_obj.max_freq > frequency:
                         variant_obj = None
                 
                 if cadd and variant_obj:
