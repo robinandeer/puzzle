@@ -8,10 +8,11 @@ from puzzle.models import (Compound, Variant, Gene, Genotype, Transcript,)
 from puzzle.utils import (get_most_severe_consequence, get_omim_number,
                           get_cytoband_coord)
 
+from . import VariantExtras
 
 logger = logging.getLogger(__name__)
 
-class VariantMixin(BaseVariantMixin):
+class VariantMixin(BaseVariantMixin, VariantExtras):
     """Class to store variant specific functions for gemini plugin"""
 
 
@@ -431,10 +432,7 @@ class VariantMixin(BaseVariantMixin):
 
         ### GENOTYPE ANNOATTIONS ###
         #Get the genotype info
-        individual_genotypes = self._get_genotypes(
-            gemini_variant=gemini_variant,
-            individual_objs=individual_objs
-            )
+        self._add_genotypes(variant, gemini_variant, individual_objs)
 
         #Add the genotype info to the variant
         for individual in individual_genotypes:
