@@ -80,49 +80,6 @@ def test_build_gemini_query():
     new_query = adapter.build_gemini_query(new_query, extra_info)
     assert new_query == "SELECT * from variants WHERE max_aaf_all < 0.01 AND cadd_score > 10"
 
-def test_get_genotypes(gemini_variant):
-    adapter = GeminiPlugin()
-    ind = DotDict()
-    ind.ind_index = 0
-    ind.ind_id = '1'
-    ind.case_id = 'Case_1'
-    ind.phenotype = 2
-    ind_objs = [ind]
-
-    individual = adapter._get_genotypes(gemini_variant, ind_objs)[0]
-
-    assert individual.sample_id == ind.ind_id
-    assert individual.sample_id == ind.ind_id
-    assert individual.genotype == 'G/A'
-    assert individual.case_id == ind.case_id
-    assert individual.phenotype == ind.phenotype
-    assert individual.ref_depth == 10
-    assert individual.alt_depth == 7
-    assert individual.depth == 17
-    assert individual.genotype_quality == 99
-
-def test_get_transcripts(gemini_case_obj):
-    adapter = GeminiPlugin()
-    adapter.add_case(gemini_case_obj)
-    adapter.db = gemini_case_obj.variant_source
-    
-    gemini_variant = {'variant_id': 1}
-    transcripts = []
-    for transcript in adapter._get_transcripts(gemini_variant):
-        transcripts.append(transcript)
-
-    assert len(transcripts) == 2
-
-    first_transcript = transcripts[0]
-
-    assert first_transcript.transcript_id == 'ENST00000370383'
-    assert first_transcript.hgnc_symbol == 'EPHX4'
-    assert first_transcript.consequence == 'missense_variant'
-    assert first_transcript.ensembl_id == None
-    assert first_transcript.biotype == 'protein_coding'
-    assert first_transcript.sift == 'deleterious'
-    assert first_transcript.polyphen == 'probably_damaging'
-
 class TestFilters:
 
     def test_filters_frequency(self, gemini_case_obj):

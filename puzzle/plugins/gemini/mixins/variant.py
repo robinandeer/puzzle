@@ -233,38 +233,6 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
 
         return hgnc_symbols
 
-    def _get_transcripts(self, gemini_variant):
-        """Return a Transcript object
-
-        Go through all transcripts found for the variant
-
-            Args:
-                gemini_variant (GeminiQueryRow): The gemini variant
-
-            Yields:
-                transcript (puzzle.models.Transcript)
-
-        """
-        query = "SELECT * from variant_impacts WHERE variant_id = {0}".format(
-            gemini_variant['variant_id']
-        )
-
-        gq = GeminiQuery(self.db)
-        gq.run(query)
-
-        for genimi_transcript in gq:
-            transcript = Transcript(
-                hgnc_symbol=genimi_transcript['gene'],
-                transcript_id=genimi_transcript['transcript'],
-                consequence=genimi_transcript['impact_so'],
-                biotype=genimi_transcript['biotype'],
-                polyphen=genimi_transcript['polyphen_pred'],
-                sift=genimi_transcript['sift_pred'],
-                HGVSc=genimi_transcript['codon_change'],
-                HGVSp=genimi_transcript['aa_change']
-                )
-            yield transcript
-
     def _variants(self, case_id, gemini_query, filters=None):
         """Return variants found in the gemini database
 
@@ -369,10 +337,8 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         if filters.get('consequence'):
             #If filter for consequence we need to parse the transcript
             #information
+            self._add_transcripts(variant, gemini_variant)
             if len(filters['consequence']) > 0:
-                for transcript in self._get_transcripts(gemini_variant):
-                    variant.add_transcript(transcript)
-
                 self._add_consequences(variant)
         else:
             for hgnc_symbol in self._get_hgnc_symbols(gemini_variant):
@@ -445,14 +411,12 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
 
         ### Consequence and region annotations
         #Add the transcript information
-        for transcript in self._get_transcripts(gemini_variant):
-            variant.add_transcript(transcript)
+        self._add_transcripts(variant, gemini_variant)
 
         #Add the genes based on the hgnc symbols
         hgnc_symbols = (transcript.hgnc_symbol for transcript in variant.transcripts)
         for gene in self._get_genes(variant):
             variant.add_gene(gene)
-
 
         # We use the prediction in text
         polyphen = gemini_variant['polyphen_pred']
