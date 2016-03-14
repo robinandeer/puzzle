@@ -56,13 +56,8 @@ def variant(case_id, variant_id):
     if variant is None:
         return abort(404, "variant not found")
 
-    # sort compounds by score
-    sorted_compounds = sorted(variant['compounds'],
-                              key=lambda compound: compound['combined_score'])
-
     template = 'sv_variant.html' if app.db.variant_type == 'sv' else 'variant.html'
-    return render_template(template, variant=variant,
-                           compounds=sorted_compounds, case_id=case_id)
+    return render_template(template, variant=variant, case_id=case_id)
 
 
 def parse_filters():
