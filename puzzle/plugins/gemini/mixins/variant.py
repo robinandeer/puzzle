@@ -173,7 +173,7 @@ class VariantMixin(BaseVariantMixin):
         """Add the consequences found in all transcripts
 
         Args:
-            variant (puzzle.models.variant)
+            variant (puzzle.models.Variant)
         """
 
         consequences = set()
@@ -287,7 +287,6 @@ class VariantMixin(BaseVariantMixin):
 
         gq.run(gemini_query)
 
-
         index = 0
         for gemini_variant in gq:
             # Check if variant is non ref in the individuals
@@ -313,30 +312,6 @@ class VariantMixin(BaseVariantMixin):
             if variant:
 
                 yield variant
-
-    def _add_frequencies(self, variant_obj, gemini_variant):
-        """Add some frequencies from gemini database
-        
-            Args:
-                variant_obj (puzzle.models.Variant)
-                gemini_variant (GeminiQueryRow)
-        """
-        if gemini_variant['aaf_esp_all']:
-            variant_obj.add_frequency('ESP', float(gemini_variant['aaf_esp_all']))
-
-        if gemini_variant['aaf_1kg_all']:
-            thousand_g = float(gemini_variant['aaf_1kg_all'])
-            variant_obj.add_frequency('1000G', thousand_g)
-            variant_obj.thousand_g = thousand_g
-
-        if gemini_variant['aaf_exac_all']:
-            exac = float(gemini_variant['aaf_exac_all'])
-            variant_obj.add_frequency('ExAC', exac)
-
-        if gemini_variant['max_aaf_all']:
-            max_af = float(gemini_variant['max_aaf_all'])
-            if max_af != -1.0:
-                variant_obj.set_max_freq(max_af)
 
     def _get_puzzle_variant(self, gemini_variant, index):
         """Take a gemini variant and return a basic puzzle variant
@@ -364,7 +339,9 @@ class VariantMixin(BaseVariantMixin):
         #Add the impact severity
         variant['impact_severity'] = gemini_variant['impact_severity']
         
-        self._add_frequencies(variant, gemini_variant)
+        self._add_thousand_g(variant, gemini_variant)
+        self._add_exac(variant, gemini_variant)
+        self._add_gmaf(variant, gemini_variant)
 
         #### Check the impact annotations ####
         if gemini_variant['cadd_scaled']:
