@@ -294,6 +294,5 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         self._add_impact_severity(variant_obj)
         self._add_rank_score(variant_obj, info_dict)
         variant_obj.set_max_freq()
-
         return variant_obj
 
