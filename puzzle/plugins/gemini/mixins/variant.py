@@ -119,7 +119,8 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
 
         if filters.get('sv_len'):
             sv_len = int(filters['sv_len'])
-            filters = (variant for variant in filtered_variants if
+            print("SV len:{0}".format(sv_len), type(sv_len))
+            filtered_variants = (variant for variant in filtered_variants if
                 variant.sv_len >= sv_len)
 
         for index, variant_obj in enumerate(filtered_variants):
