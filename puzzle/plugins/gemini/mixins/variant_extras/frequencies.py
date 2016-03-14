@@ -20,12 +20,12 @@ class FrequenciesExtras(object):
             variant_obj.thousand_g = float(thousand_g)
             variant_obj.add_frequency('1000GAF', variant_obj.get('thousand_g'))
     
-    def _add_gmaf(self, variant_obj, info_dict):
+    def _add_gmaf(self, variant_obj, gemini_variant):
         """Add the gmaf frequency
         
         Args:
             variant_obj (puzzle.models.Variant)
-            info_dict (dict): A info dictionary
+            gemini_variant (GeminiQueryRow)
         
         """
         max_af = gemini_variant['max_aaf_all']

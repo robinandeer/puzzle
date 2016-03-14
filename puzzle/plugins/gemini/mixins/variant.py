@@ -434,11 +434,6 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         #Get the genotype info
         self._add_genotypes(variant, gemini_variant, individual_objs)
 
-        #Add the genotype info to the variant
-        for individual in individual_genotypes:
-            # Add the genotype calls to the variant
-            variant.add_individual(individual)
-
         ### POSITON ANNOATTIONS ###
         variant.start = int(variant.POS)
 

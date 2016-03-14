@@ -1,13 +1,13 @@
 import logging
 
-from puzzle.models import Genotype as puzzle_genotype
+from puzzle.models import Genotype
 
 logger = logging.getLogger(__name__)
 
 class GenotypeExtras(object):
     """Class to store methods that deals with genotyping"""
     
-    def _add_genotype_calls(self, variant_obj, gemini_variant, individual_objs):
+    def _add_genotypes(self, variant_obj, gemini_variant, individual_objs):
         """Add the genotypes for a variant for all individuals
 
                 Args:
