@@ -169,46 +169,6 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             return variant
 
         return None
-    
-    def _add_consequences(self, variant):
-        """Add the consequences found in all transcripts
-
-        Args:
-            variant (puzzle.models.Variant)
-        """
-
-        consequences = set()
-        for transcript in variant.transcripts:
-            for consequence in transcript.consequence.split('&'):
-                consequences.add(consequence)
-
-        variant.consequences = list(consequences)
-    
-    def _get_genotypes(self, gemini_variant, individual_objs):
-        """Add the genotypes for a variant for all individuals
-
-            Args:
-                gemini_variant (GeminiQueryRow): The gemini variant
-                individual_objs (list(dict)): A list of Individuals
-
-            Returns:
-                individuals (list) A list of Genotypes
-        """
-        individuals = []
-        for ind in individual_objs:
-            index = ind.ind_index
-            individuals.append(Genotype(
-                sample_id=ind.ind_id,
-                genotype=gemini_variant['gts'][index],
-                case_id=ind.case_id,
-                phenotype=ind.phenotype,
-                ref_depth=gemini_variant['gt_ref_depths'][index],
-                alt_depth=gemini_variant['gt_alt_depths'][index],
-                depth=gemini_variant['gt_depths'][index],
-                genotype_quality=gemini_variant['gt_quals'][index]
-            ))
-
-        return individuals
 
     def _get_hgnc_symbols(self, gemini_variant):
         """Get the hgnc symbols for all transcripts in a variant
@@ -303,10 +263,10 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         variant.update_variant_id(gemini_variant['variant_id'])
 
         #Add the most severe consequence
-        variant['most_severe_consequence'] = gemini_variant['impact_so']
+        self._add_most_severe_consequence(variant, gemini_variant)
 
         #Add the impact severity
-        variant['impact_severity'] = gemini_variant['impact_severity']
+        self._add_impact_severity(variant, gemini_variant)
         
         self._add_thousand_g(variant, gemini_variant)
         self._add_exac(variant, gemini_variant)

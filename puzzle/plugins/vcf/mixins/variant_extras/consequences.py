@@ -59,5 +59,3 @@ class ConsequenceExtras(object):
             variant_obj.impact_severity = IMPACT_SEVERITIES.get(
                 variant_obj.most_severe_consequence
             )
-    
-        
