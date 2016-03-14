@@ -109,7 +109,6 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         filtered_variants = self._variants(
             case_id=case_id,
             gemini_query=gemini_query,
-            filters=filters,
         )
 
         if filters.get('consequence'):
@@ -164,36 +163,14 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             variant = self._format_variant(
                 gemini_variant=gemini_variant,
                 individual_objs=individuals,
-                index=gemini_variant['variant_id']
+                index=gemini_variant['variant_id'],
+                add_all_info = True
             )
             return variant
 
         return None
 
-    def _get_hgnc_symbols(self, gemini_variant):
-        """Get the hgnc symbols for all transcripts in a variant
-
-        Right now this function only use the
-            Args:
-                gemini_variant (GeminiQueryRow): The gemini variant
-
-            Returns:
-                hgnc_symbols(list(str)): List hgnc symbols
-
-        """
-
-        # query = "SELECT * from variant_impacts WHERE variant_id = {0}".format(
-        #     gemini_variant['variant_id']
-        # )
-        # gq = GeminiQuery(self.db)
-        # gq.run(query)
-
-        # hgnc_symbols = set([transcript['gene']])
-        hgnc_symbols = [gemini_variant['gene']]
-
-        return hgnc_symbols
-
-    def _variants(self, case_id, gemini_query, filters=None):
+    def _variants(self, case_id, gemini_query):
         """Return variants found in the gemini database
 
             Args:
@@ -218,132 +195,29 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
 
         index = 0
         for gemini_variant in gq:
-            # Check if variant is non ref in the individuals
             variant = None
-            if self.variant_type == 'sv':
-                index += 1
-                variant = self._format_sv_variants(
-                        gemini_variant=gemini_variant,
-                        index=index,
-                        filters=filters
-                        )
+            
+            # Check if variant is non ref in the individuals
+            is_variant = self._is_variant(gemini_variant, individuals)
+            
+            if self.variant_type == 'snv' and not is_variant:
+                variant = None
+            
             else:
-                if self._is_variant(gemini_variant, individuals):
-                    index += 1
-                    logger.debug("Updating index to: {0}".format(index))
-
-                    variant = self._format_variants(
+                index += 1
+                logger.debug("Updating index to: {0}".format(index))
+                variant = self._format_variant(
                         gemini_variant=gemini_variant,
-                        index=index,
-                        filters=filters
+                        individual_objs=individuals,
+                        index=index
                         )
 
             if variant:
 
                 yield variant
 
-    def _get_puzzle_variant(self, gemini_variant, index):
-        """Take a gemini variant and return a basic puzzle variant
-
-            For the overview we only need limited variant information
-        """
-        variant_dict = {
-            'CHROM':gemini_variant['chrom'].lstrip('chrCHR'),
-            'POS':str(gemini_variant['start']),
-            'ID':gemini_variant['rs_ids'],
-            'REF':gemini_variant['ref'],
-            'ALT':gemini_variant['alt'],
-            'QUAL':gemini_variant['qual'],
-            'FILTER':gemini_variant['filter']
-        }
-
-        variant = Variant(**variant_dict)
-        variant['index'] = index
-        # Use the gemini id for fast search
-        variant.update_variant_id(gemini_variant['variant_id'])
-
-        #Add the most severe consequence
-        self._add_most_severe_consequence(variant, gemini_variant)
-
-        #Add the impact severity
-        self._add_impact_severity(variant, gemini_variant)
-        
-        self._add_thousand_g(variant, gemini_variant)
-        self._add_exac(variant, gemini_variant)
-        self._add_gmaf(variant, gemini_variant)
-
-        #### Check the impact annotations ####
-        if gemini_variant['cadd_scaled']:
-            variant['cadd_score'] = gemini_variant['cadd_scaled']
-
-        return variant
-
-    def _format_variants(self, gemini_variant, index=0, filters=None):
-        """Format the variant for the variants view
-
-            We want to have it's own function for doing this since it includes
-            much less information than in the variant view
-
-            Args:
-                gemini_variant (GeminiQueryRow): The gemini variant
-                ind_objs (list(puzzle.models.individual))
-                index(int): The index of the variant
-
-            Returns:
-                variant (dict): A Variant object
-        """
-        variant = self._get_puzzle_variant(gemini_variant, index)
-
-        if filters.get('consequence'):
-            #If filter for consequence we need to parse the transcript
-            #information
-            self._add_transcripts(variant, gemini_variant)
-            if len(filters['consequence']) > 0:
-                self._add_consequences(variant)
-        else:
-            for hgnc_symbol in self._get_hgnc_symbols(gemini_variant):
-                variant.add_transcript(Transcript(
-                                hgnc_symbol=hgnc_symbol,
-                                transcript_id='dummy',
-                                consequence='dummy')
-                                )
-
-        for gene in self._get_genes(variant):
-            variant.add_gene(gene)
-
-        return variant
-
-    def _format_sv_variants(self, gemini_variant, index=0, filters=None):
-        """Format the variant for the sv variants view
-
-            We want to have it's own function for doing this since it includes
-            much less information than in the variant view
-
-            Args:
-                gemini_variant (GeminiQueryRow): The gemini variant
-                ind_objs (list(puzzle.models.individual))
-                index(int): The index of the variant
-
-            Returns:
-                variant (dict): A Variant object
-        """
-        variant = self._get_puzzle_variant(gemini_variant, index)
-
-        variant.sv_type = gemini_variant['sub_type']
-        variant.stop = int(gemini_variant['end'])
-
-        ##TODO this whould be replaced with a faster lookup via phizz
-        for transcript in self._get_transcripts(gemini_variant):
-            variant.add_transcript(transcript)
-        ##TODO same as above
-        for gene in self._get_genes(variant):
-            variant.add_gene(gene)
-
-        self._add_sv_coordinates(variant)
-
-        return variant
-
-    def _format_variant(self, gemini_variant, individual_objs, index=0):
+    def _format_variant(self, gemini_variant, individual_objs, index=0, 
+                        add_all_info=False):
         """Make a puzzle variant from a gemini variant
 
             Args:
@@ -354,40 +228,78 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             Returns:
                 variant (dict): A Variant object
         """
-        variant = self._get_puzzle_variant(gemini_variant, index)
+        chrom = gemini_variant['chrom']
+        if chrom.startswith('chr') or chrom.startswith('CHR'):
+            chrom = chrom[3:]
+        
+        variant_dict = {
+            'CHROM':chrom,
+            'POS':str(gemini_variant['start']),
+            'ID':gemini_variant['rs_ids'],
+            'REF':gemini_variant['ref'],
+            'ALT':gemini_variant['alt'],
+            'QUAL':gemini_variant['qual'],
+            'FILTER':gemini_variant['filter']
+        }
 
-        ### GENOTYPE ANNOATTIONS ###
-        #Get the genotype info
-        self._add_genotypes(variant, gemini_variant, individual_objs)
+        variant = Variant(**variant_dict)
+        
+        # Use the gemini id for fast search
+        variant.update_variant_id(gemini_variant['variant_id'])
+        logger.debug("Creating a variant object of variant {0}".format(
+            variant.variant_id))
+        
+        variant['index'] = index
+        
+        #Add the most severe consequence
+        self._add_most_severe_consequence(variant, gemini_variant)
 
+        #Add the impact severity
+        self._add_impact_severity(variant, gemini_variant)
+        
         ### POSITON ANNOATTIONS ###
-        variant.start = int(variant.POS)
+        variant.start = int(gemini_variant['start'])
+        variant.stop = int(gemini_variant['end'])
 
         #Add the sv specific coordinates
         if self.variant_type == 'sv':
             variant.sv_type = gemini_variant['sub_type']
             variant.stop = int(gemini_variant['end'])
             self._add_sv_coordinates(variant)
+        
+        else:
+            ### Consequence and region annotations
+            #Add the transcript information
+            self._add_transcripts(variant, gemini_variant)
+            self._add_thousand_g(variant, gemini_variant)
+            self._add_exac(variant, gemini_variant)
+            self._add_gmaf(variant, gemini_variant)
+            #### Check the impact annotations ####
+            if gemini_variant['cadd_scaled']:
+                variant.cadd_score = gemini_variant['cadd_scaled']
+            
+            # We use the prediction in text
+            polyphen = gemini_variant['polyphen_pred']
+            if polyphen:
+                variant.add_severity('Polyphen', polyphen)
 
-        ### Consequence and region annotations
-        #Add the transcript information
-        self._add_transcripts(variant, gemini_variant)
-
+            # We use the prediction in text
+            sift = gemini_variant['sift_pred']
+            if sift:
+                variant.add_severity('SIFT', sift)
+            
         #Add the genes based on the hgnc symbols
-        hgnc_symbols = (transcript.hgnc_symbol for transcript in variant.transcripts)
-        for gene in self._get_genes(variant):
-            variant.add_gene(gene)
+        self._add_hgnc_symbols(variant)
+        
+        self._add_genes(variant)
+        
+        self._add_consequences(variant)
 
-        # We use the prediction in text
-        polyphen = gemini_variant['polyphen_pred']
-        if polyphen:
-            variant.add_severity('Polyphen', polyphen)
-
-        # We use the prediction in text
-        sift = gemini_variant['sift_pred']
-        if sift:
-            variant.add_severity('SIFT', sift)
-
+        ### GENOTYPE ANNOATTIONS ###
+        #Get the genotype info
+        if add_all_info:
+            self._add_genotypes(variant, gemini_variant, individual_objs)
+        
         return variant
 
     def _is_variant(self, gemini_variant, ind_objs):

@@ -1,8 +1,8 @@
 from . import (FrequenciesExtras, GenotypeExtras, TranscriptExtras, 
-               ConsequenceExtras)
+               ConsequenceExtras, GeneExtras)
 
 #GeneExtras, AnnotationExtras
 class VariantExtras(FrequenciesExtras, GenotypeExtras, TranscriptExtras, 
-ConsequenceExtras):
+ConsequenceExtras, GeneExtras):
     """docstring for VariantExtras"""
     pass
