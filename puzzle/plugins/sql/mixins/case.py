@@ -23,7 +23,9 @@ class CaseMixin(BaseCaseMixin):
                         variant_source=case_obj.variant_source,
                         variant_type=vtype,
                         variant_mode=mode,
-                        pedigree=ped_svg)
+                        pedigree=ped_svg,
+                        compressed=case_obj.compressed,
+                        tabix_index=case_obj.tabix_index)
 
         # build individuals
         inds = [Individual(

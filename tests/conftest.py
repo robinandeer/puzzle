@@ -46,7 +46,6 @@ def puzzle_dir(request, dir_path):
 
     return dir_path
 
-
 @pytest.fixture(scope='function')
 def gemini_path(request):
     """Return the path of a gemini database"""

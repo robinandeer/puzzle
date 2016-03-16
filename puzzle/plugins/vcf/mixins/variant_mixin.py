@@ -74,6 +74,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         """
         filters = filters or {}
         case_obj = self.case(case_id=case_id)
+        
         limit = count + skip
 
         genes = None
@@ -180,8 +181,17 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             sv_types = set(filters['sv_types'])
 
         logger.info("Get variants from {0}".format(vcf_file_path))
-
-        handle = VCF(vcf_file_path)
+        
+        if filters.get('range'):
+            range_str = "{0}:{1}-{2}".format(
+                filters['range']['chromosome'],
+                filters['range']['start'],
+                filters['range']['end'])
+            
+            vcf = VCF(vcf_file_path)
+            handle = vcf(range_str)
+        else:
+            handle = VCF(vcf_file_path)
         
         for variant in handle:
             variant_line = str(variant)

@@ -30,6 +30,9 @@ class CaseMixin(BaseCaseMixin):
             self._add_individual(ind_obj)
         logger.debug("Adding case {0} to plugin".format(case_obj.case_id))
         self.case_objs.append(case_obj)
+        if case_obj.tabix_index:
+            logger.debug("Setting filters.can_filter_range to True")
+            self.filters.can_filter_range = True
     
     def cases(self, pattern=None):
         """Cases found for the adapter."""

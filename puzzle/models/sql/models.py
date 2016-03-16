@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import (Column, DateTime, ForeignKey, Integer, String, Boolean)
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -25,6 +25,9 @@ class Case(BASE):
     variant_type = Column(String) # snv or sv
     variant_mode = Column(String) # vcf or gemini
     pedigree = Column(String) # For storing madeline info
+    compressed=Column(Boolean, default=False)
+    tabix_index=Column(Boolean, default=False)
+    
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
@@ -49,7 +52,9 @@ class Case(BASE):
     def __repr__(self):
         return("<Case(id:{self.id}, case_id:{self.case_id}, name:{self.name},"\
                 " variant_source:{self.variant_source}, variant_type:"\
-                "{self.variant_type}, variant_mode:{self.variant_mode})>".format(self=self))
+                "{self.variant_type}, variant_mode:{self.variant_mode}"\
+                ", compressed:{self.compressed}, tabix_index:{self.tabix_index})"\
+                ">".format(self=self))
 
 
 class Individual(BASE, PedigreeHumanMixin):

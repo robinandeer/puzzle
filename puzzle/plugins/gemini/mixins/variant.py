@@ -62,27 +62,27 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
 
         limit = count + skip
 
-        gemini_query = filters.get('gemini_query') or "SELECT * from variants"
+        gemini_query = filters.get('gemini_query') or "SELECT * from variants v"
 
         any_filter = False
 
         if filters.get('frequency'):
             frequency = filters['frequency']
 
-            extra_info = "(max_aaf_all < {0} or max_aaf_all is"\
+            extra_info = "(v.max_aaf_all < {0} or v.max_aaf_all is"\
                          " Null)".format(frequency)
             gemini_query = self.build_gemini_query(gemini_query, extra_info)
 
         if filters.get('cadd'):
             cadd_score = filters['cadd']
 
-            extra_info = "(cadd_scaled > {0})".format(cadd_score)
+            extra_info = "(v.cadd_scaled > {0})".format(cadd_score)
             gemini_query = self.build_gemini_query(gemini_query, extra_info)
 
         if filters.get('gene_ids'):
             gene_list = [gene_id.strip() for gene_id in filters['gene_ids']]
 
-            gene_string = "gene in ("
+            gene_string = "v.gene in ("
             for index, gene_id in enumerate(gene_list):
                 if index == 0:
                     gene_string += "'{0}'".format(gene_id)
@@ -91,20 +91,20 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             gene_string += ")"
 
             gemini_query = self.build_gemini_query(gemini_query, gene_string)
-
-
-        # if filters.get('impact_severities'):
-        #     severities_list = [severity.strip()
-        #             for severity in filters['impact_severities']]
-        #     severity_string = "impact_severity in ("
-        #     for index, severity in enumerate(severities_list):
-        #         if index == 0:
-        #             severity_string += "'{0}'".format(severity)
-        #         else:
-        #             severity_string += ", '{0}'".format(severity)
-        #     severity_string += ")"
-        #
-        #     gemini_query = self.build_gemini_query(gemini_query, severity_string)
+        
+        if filters.get('range'):
+            chrom = filters['range']['chromosome']
+            if not chrom.startswith('chr'):
+                chrom = "chr{0}".format(chrom)
+            
+            range_string = "v.chrom = '{0}' AND "\
+                           "((v.start BETWEEN {1} AND {2}) OR "\
+                           "(v.end BETWEEN {1} AND {2}))".format(
+                               chrom,
+                               filters['range']['start'],
+                               filters['range']['end']
+                           )
+            gemini_query = self.build_gemini_query(gemini_query, range_string)
 
         filtered_variants = self._variants(
             case_id=case_id,
