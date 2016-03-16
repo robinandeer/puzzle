@@ -108,3 +108,22 @@ class TestFilters:
         for variant in plugin.variants(case_id, filters=filters, count=1000):
             variants.append(variant)
         assert len(variants) == 4
+
+    def test_filters_range(self, case_obj, indexed_vcf_file):
+        plugin = VcfPlugin()
+        case_obj.variant_source = indexed_vcf_file
+        case_obj.compressed = True
+        case_obj.tabix_index = True
+        
+        plugin.add_case(case_obj)
+        case_id = case_obj.case_id
+        start = 1771120
+        end = 1771130
+
+        filters = {'range':{'chromosome':'1', 'start':start, 'end':end}}
+        variants = []
+        for variant in plugin.variants(case_id, filters=filters, count=1000):
+            assert variant.start >= start
+            assert variant.stop <= end
+            variants.append(variant)
+        assert len(variants) == 1
