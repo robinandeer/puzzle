@@ -10,6 +10,7 @@ from sqlalchemy.orm import sessionmaker
 # from puzzle.factory import create_app
 from puzzle.models import (Variant, DotDict, Individual)
 from puzzle.models.sql import BASE
+from puzzle.models.sql import Case as SqlCase
 from puzzle.plugins import VcfPlugin, SqlStore
 from puzzle.utils import (get_cases, get_header)
 # from puzzle.settings import TestConfig
@@ -196,6 +197,19 @@ def case_obj(ped_lines):
     _case = get_cases('tests/fixtures/hapmap.vcf', case_lines=ped_lines)[0]
     yield _case
 
+# @pytest.yield_fixture(scope='function')
+# def sql_case_obj(case_obj):
+#     """Return a test case for the sql model."""
+#     _sql_case = SqlCase(case_id=case_obj.case_id,
+#                     name=case_obj.name,
+#                     variant_source=case_obj.variant_source,
+#                     variant_type=case_obj.variant_type,
+#                     variant_mode=case_obj.variant_type,
+#                     compressed=case_obj.compressed,
+#                     tabix_index=case_obj.tabix_index)
+#
+#     yield _sql_case
+
 @pytest.yield_fixture(scope='function')
 def gemini_case_obj(gemini_db_path):
     """Return a case object extracted from gemini database"""
@@ -208,7 +222,6 @@ def gemini_sv_case_obj(gemini_sv_db_path):
     _case = get_cases(gemini_sv_db_path, variant_mode='gemini')[0]
     _case['variant_type'] = 'sv'
     yield _case
-
 
 @pytest.yield_fixture(scope='function')
 def sql_store():
@@ -229,7 +242,6 @@ def test_db(sql_store, case_obj):
     yield sql_store
     sql_store.tear_down()
     sql_store.set_up()
-
 
 @pytest.yield_fixture(scope='session')
 def phenomizer_auth():

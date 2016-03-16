@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import hashlib
 
 def test_variant(variant):
     """docstring for test_variant"""
@@ -83,3 +83,8 @@ def test_update_variant_id(variant):
     variant.update_variant_id(variant_id)
 
     assert variant['variant_id'] == variant_id
+
+def test_md5(variant):
+    id_string = '_'.join([variant.CHROM, variant.POS, variant.REF, variant.ALT])
+    md5_string = hashlib.md5(id_string).digest()
+    assert variant.md5 == md5_string

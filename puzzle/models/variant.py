@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
-
+import hashlib
 from . import (DotDict, Transcript, Gene, Compound, Genotype)
 
 logger = logging.getLogger(__name__)
@@ -48,6 +48,11 @@ class Variant(DotDict):
         else:
             nr_genes = len(self['gene_symbols'])
         return nr_genes
+
+    @property
+    def md5(self):
+        """Return a md5 key string based on position, ref and alt"""
+        return hashlib.md5('_'.join([self.CHROM, self.POS, self.REF, self.ALT])).digest()
 
     @property
     def is_intrachromosomal(self):

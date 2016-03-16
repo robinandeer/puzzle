@@ -6,8 +6,8 @@ from puzzle.models.sql import Comment
 logger = logging.getLogger(__name__)
 
 
-class GeminiActions(object):
-    def comments(self, case_id, variant_id=None):
+class CommentActions(object):
+    def comments(self, case_id, variant_id=None, username=None):
         """Return comments for a case or variant.
 
         Args:
@@ -19,35 +19,32 @@ class GeminiActions(object):
 
         if variant_id:
             comment_objs = comment_objs.filter_by(variant_id=variant_id)
-        elif:
+        else:
             comment_objs = comment_objs.filter_by(variant_id == None)
 
-        return self.query(GeminiQuery).filter_by(name=name).first()
+        return comment_objs
 
-    def gemini_queries(self):
-        """Return all gemini queries"""
-        return self.query(GeminiQuery)
-
-    def add_gemini_query(self, name, query):
-        """Add a user defined gemini query
-
-        Args:
-            name (str)
-            query (str)
-        """
-        logger.info("Adding query {0} with text {1}".format(name, query))
-        new_query = GeminiQuery(name=name, query=query)
-        self.session.add(new_query)
+    def add_comment(self, case_obj, text, variant_id=None, username=None):
+        """Add a comment to a variant or a case"""
+        
+        comment = Comment(
+            text=text,
+            username=username,
+            case=case_obj,
+            # md5 sum of chrom, pos, ref, alt
+            variant_id=variant_id
+        )
+        self.session.add(comment)
         self.save()
-        return new_query
+        return comment
 
-    def delete_gemini_query(self, name):
-        """Delete a gemini query
+    def delete_comment(self, comment_id):
+        """Delete a comment"""
 
-        Args:
-            name (str)
-        """
-        query_obj = self.gemini_query(name)
-        logger.debug("Delete query with name {0}".format(name))
-        self.session.delete(query_obj)
+        comment_obj = self.query(Comment).get(comment_id)
+        logger.debug("Deleting resource {0}".format(resource_obj.name))
+
+        self.session.delete(comment_obj)
         self.save()
+        
+        return comment_obj

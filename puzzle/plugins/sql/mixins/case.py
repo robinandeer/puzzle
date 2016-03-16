@@ -39,10 +39,13 @@ class CaseMixin(BaseCaseMixin):
             variant_source=ind.variant_source,
             bam_path=ind.bam_path,
         ) for ind in case_obj.individuals]
-
         new_case.individuals = inds
-        self.session.add(new_case)
-        self.save()
+        
+        if self.case(new_case.case_id):
+            logger.warning("Case already exists in database!")
+        else:
+            self.session.add(new_case)
+            self.save()
         return new_case
 
     def delete_case(self, case_obj):
