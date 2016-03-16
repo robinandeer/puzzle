@@ -31,8 +31,9 @@ install:
     # install your own package + executables
     - pip install --editable .
 
-    # pull HapMap database
+    # pull HapMap and HapMapSV database
     - wget https://s3-us-west-2.amazonaws.com/robinandeer/HapMapFew.db -O tests/fixtures/HapMapFew.db
+    - wget https://s3-us-west-2.amazonaws.com/robinandeer/HapMapSv.db -O tests/fixtures/HapMapSv.db
 
 script:
     # command to run tests and collect test coverage
