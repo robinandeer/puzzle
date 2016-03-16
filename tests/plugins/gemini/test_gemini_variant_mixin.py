@@ -7,7 +7,7 @@ def test_get_all_variants(gemini_case_obj):
     """Test to get some variants from the gemini adapter"""
     adapter = GeminiPlugin()
     adapter.add_case(gemini_case_obj)
-    
+
     variants = []
     for variant in adapter.variants('643594'):
         variants.append(variant)
@@ -18,7 +18,7 @@ def test_get_variants(gemini_case_obj):
     """Test to get some variants from the gemini adapter"""
     adapter = GeminiPlugin()
     adapter.add_case(gemini_case_obj)
-    
+
     variants = []
     for variant in adapter.variants('643594', count=5):
         variants.append(variant)
@@ -29,7 +29,7 @@ def test_variant(gemini_case_obj):
     """Test to get one variant"""
     adapter = GeminiPlugin()
     adapter.add_case(gemini_case_obj)
-    
+
     variant = adapter.variant(
         case_id='643594',
         variant_id=4
@@ -87,29 +87,26 @@ class TestFilters:
         adapter.add_case(gemini_case_obj)
 
         filters = {'frequency':'0.01'}
-        variants = []
         for variant in adapter.variants('643594', filters=filters):
-            variants.append(variant)
-        assert len(variants) == 13
+            assert variant.max_freq < 0.01
 
     def test_filters_cadd(self, gemini_case_obj):
         adapter = GeminiPlugin()
         adapter.add_case(gemini_case_obj)
 
         filters = {'cadd':'20'}
-        variants = []
         for variant in adapter.variants('643594', filters=filters):
-            variants.append(variant)
-        assert len(variants) == 4
+            assert variant.cadd_score > 20
 
     def test_filters_impact_severities(self, gemini_case_obj):
         adapter = GeminiPlugin()
         adapter.add_case(gemini_case_obj)
 
-        filters = {'impact_severities':['HIGH']}
         variants = []
+        filters = {'impact_severities':['HIGH']}
         for variant in adapter.variants('643594', filters=filters):
             variants.append(variant)
+            assert variant.impact_severity == 'HIGH'
         assert len(variants) == 2
 
     def test_filters_gene_ids(self, gemini_case_obj):
@@ -120,6 +117,7 @@ class TestFilters:
         variants = []
         for variant in adapter.variants('643594', filters=filters):
             variants.append(variant)
+            assert 'HLA-DRB5' in variant.gene_symbols
         assert len(variants) == 5
 
     def test_filters_consequence(self, gemini_case_obj):
@@ -129,5 +127,27 @@ class TestFilters:
         filters = {'consequence':['stop_gained']}
         variants = []
         for variant in adapter.variants('643594', filters=filters):
+            assert 'stop_gained' in variant.consequences
             variants.append(variant)
         assert len(variants) == 2
+
+    def test_no_filters_sv(self, gemini_sv_case_obj):
+        adapter = GeminiPlugin()
+        adapter.add_case(gemini_sv_case_obj)
+
+        filters = {}
+        variants = []
+        for variant in adapter.variants('hapmap', filters=filters, count=1000):
+            variants.append(variant)
+        assert len(variants) == 513
+
+    def test_filters_sv_len(self, gemini_sv_case_obj):
+        adapter = GeminiPlugin()
+        adapter.add_case(gemini_sv_case_obj)
+
+        filters = {'sv_len':'800'}
+        variants = []
+        for variant in adapter.variants('hapmap', filters=filters, count=1000):
+            assert variant.sv_len >= 800
+            variants.append(variant)
+        assert len(variants) == 176

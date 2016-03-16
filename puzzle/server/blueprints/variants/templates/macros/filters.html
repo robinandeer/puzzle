@@ -19,7 +19,7 @@
       {% if db.filters.can_filter_sv_len and db.variant_type == 'sv' %}
         <div class="col-xs-3">
           <label class="control-label">SV Len</label>
-          <input type="text" class="form-control" name="sv_len" type="number" placeholder="23.4" step="0.1" value="{{ filters.sv_len if filters.sv_len }}">
+          <input type="text" class="form-control" name="sv_len" type="number" placeholder="500" step="0.1" value="{{ filters.sv_len if filters.sv_len }}">
         </div>
       {% endif %}
       {% if db.filters.can_filter_range %}

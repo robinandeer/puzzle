@@ -93,18 +93,18 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             gemini_query = self.build_gemini_query(gemini_query, gene_string)
 
 
-        if filters.get('impact_severities'):
-            severities_list = [severity.strip()
-                    for severity in filters['impact_severities']]
-            severity_string = "impact_severity in ("
-            for index, severity in enumerate(severities_list):
-                if index == 0:
-                    severity_string += "'{0}'".format(severity)
-                else:
-                    severity_string += ", '{0}'".format(severity)
-            severity_string += ")"
-
-            gemini_query = self.build_gemini_query(gemini_query, severity_string)
+        # if filters.get('impact_severities'):
+        #     severities_list = [severity.strip()
+        #             for severity in filters['impact_severities']]
+        #     severity_string = "impact_severity in ("
+        #     for index, severity in enumerate(severities_list):
+        #         if index == 0:
+        #             severity_string += "'{0}'".format(severity)
+        #         else:
+        #             severity_string += ", '{0}'".format(severity)
+        #     severity_string += ")"
+        #
+        #     gemini_query = self.build_gemini_query(gemini_query, severity_string)
 
         filtered_variants = self._variants(
             case_id=case_id,
@@ -116,10 +116,15 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
 
             filtered_variants = (variant for variant in filtered_variants if
                 set(variant.consequences).intersection(consequences))
+        
+        if filters.get('impact_severities'):
+            severities = set([severity.strip()
+                    for severity in filters['impact_severities']])
+            filtered_variants = (variant for variant in filtered_variants if
+                set([variant.impact_severity]).intersection(severities))
 
         if filters.get('sv_len'):
             sv_len = int(filters['sv_len'])
-            print("SV len:{0}".format(sv_len), type(sv_len))
             filtered_variants = (variant for variant in filtered_variants if
                 variant.sv_len >= sv_len)
 
@@ -156,6 +161,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             individuals.append(individual)
         
         self.db = case_obj.variant_source
+        self.variant_type = case_obj.variant_type
         
         gq = GeminiQuery(self.db)
         gq.run(gemini_query)
@@ -189,6 +195,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             individuals.append(individual)
 
         self.db = case_obj.variant_source
+        self.variant_type = case_obj.variant_type
 
         gq = GeminiQuery(self.db)
 
@@ -252,12 +259,12 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         
         variant['index'] = index
         
-        #Add the most severe consequence
+        # Add the most severe consequence
         self._add_most_severe_consequence(variant, gemini_variant)
 
         #Add the impact severity
         self._add_impact_severity(variant, gemini_variant)
-        
+
         ### POSITON ANNOATTIONS ###
         variant.start = int(gemini_variant['start'])
         variant.stop = int(gemini_variant['end'])
@@ -267,7 +274,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             variant.sv_type = gemini_variant['sub_type']
             variant.stop = int(gemini_variant['end'])
             self._add_sv_coordinates(variant)
-        
+
         else:
             ### Consequence and region annotations
             #Add the transcript information
@@ -278,7 +285,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             #### Check the impact annotations ####
             if gemini_variant['cadd_scaled']:
                 variant.cadd_score = gemini_variant['cadd_scaled']
-            
+
             # We use the prediction in text
             polyphen = gemini_variant['polyphen_pred']
             if polyphen:
@@ -288,18 +295,20 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             sift = gemini_variant['sift_pred']
             if sift:
                 variant.add_severity('SIFT', sift)
-            
+
         #Add the genes based on the hgnc symbols
         self._add_hgnc_symbols(variant)
-        
-        self._add_genes(variant)
-        
+        if self.variant_type == 'snv':
+            self._add_genes(variant)
+
         self._add_consequences(variant)
 
         ### GENOTYPE ANNOATTIONS ###
         #Get the genotype info
         if add_all_info:
             self._add_genotypes(variant, gemini_variant, individual_objs)
+            if self.variant_type == 'sv':
+                self._add_genes(variant)
         
         return variant
 

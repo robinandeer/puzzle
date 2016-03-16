@@ -43,7 +43,11 @@ class Variant(DotDict):
     @property
     def nr_genes(self):
         """Return the number of genes"""
-        return len(self['genes'])
+        if self['genes']:
+            nr_genes = len(self['genes'])
+        else:
+            nr_genes = len(self['gene_symbols'])
+        return nr_genes
 
     @property
     def is_intrachromosomal(self):
