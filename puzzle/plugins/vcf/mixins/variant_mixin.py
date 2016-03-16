@@ -76,9 +76,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         case_obj = self.case(case_id=case_id)
         
         limit = count + skip
-        
-        print(filters)
-        
+
         genes = None
         if filters.get('genes'):
             genes = set(filters['genes'])
