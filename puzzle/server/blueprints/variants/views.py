@@ -33,6 +33,7 @@ def variants(case_id):
             'gene_lists': filters['gene_lists'],
             'impact_severities': filters['impact_severities'],
             'gemini_query': filters['gemini_query'],
+            'range': filters['range'],
         }
     )
     gene_lists = ([gene_list.list_id for gene_list in app.db.gene_lists()]
@@ -78,7 +79,8 @@ def parse_filters():
     filters['gene_lists'] = request.args.getlist('gene_lists')
     filters['gemini_query'] = request.args.get('gemini_query')
     filters['impact_severities'] = request.args.getlist('impact_severities')
-
+    filters['range'] = None
+    
     if request.args.get('range'):
         chromosome, raw_pos = request.args.get('range').split(':')
         start, end = map(int, raw_pos.split('-'))
