@@ -151,3 +151,18 @@ class TestFilters:
             assert variant.sv_len >= 800
             variants.append(variant)
         assert len(variants) == 176
+
+    def test_filters_range(self, gemini_case_obj):
+        adapter = GeminiPlugin()
+        adapter.add_case(gemini_case_obj)
+        
+        start = 92498060
+        end = 92498100
+        
+        filters = {'range': {'chromosome': 'chr1', 'start': start, 'end':end}}
+        variants = []
+        for variant in adapter.variants('643594', filters=filters, count=1000):
+            assert variant.start >= start
+            assert variant.stop <= end
+            variants.append(variant)
+        assert len(variants) == 1
