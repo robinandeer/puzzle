@@ -57,10 +57,10 @@
 	      </td> 
             <td>{{ variant.nr_genes }}</td>
             <td>
-              {% if variant.genes|length >= 5 %}
-                {{ omim_links(variant.genes[:2]) }} <a href="{{ url_for('variants.variant', case_id=case_id, variant_id=variant.variant_id) }}">[...]</a> {{ omim_links(variant.genes[-2:]) }}
+              {% if variant.nr_genes >= 5 %}
+                {{ variant.gene_symbols[:2]|join(', ') }} [...] {{ variant.gene_symbols[-2:]|join(', ') }}
               {% else %}
-                {{ omim_links(variant.genes) }}
+                {{ variant.gene_symbols|join(', ') }}
               {% endif %}
           </td>
           </tr>

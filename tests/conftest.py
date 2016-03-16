@@ -99,6 +99,12 @@ def gemini_db_path(request):
     return hapmap
 
 @pytest.fixture(scope='function')
+def gemini_sv_db_path(request):
+    "Return the path to the hapmap gemini db"
+    hapmap = "tests/fixtures/HapMapSv.db"
+    return hapmap
+
+@pytest.fixture(scope='function')
 def populated_puzzle_db(request, dir_path, case_obj):
     """Return a puzzle dir with a populated database"""
     db_path = os.path.join(dir_path, 'puzzle_db.sqlite3')
@@ -195,6 +201,13 @@ def case_obj(ped_lines):
 def gemini_case_obj(gemini_db_path):
     """Return a case object extracted from gemini database"""
     _case = get_cases(gemini_db_path, variant_mode='gemini')[0]
+    yield _case
+
+@pytest.yield_fixture(scope='function')
+def gemini_sv_case_obj(gemini_sv_db_path):
+    """Return a case object extracted from gemini database"""
+    _case = get_cases(gemini_sv_db_path, variant_mode='gemini')[0]
+    _case['variant_type'] = 'sv'
     yield _case
 
 
