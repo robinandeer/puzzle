@@ -34,6 +34,11 @@ class Case(BASE):
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     @property
+    def suspect_dict(self):
+        """Return all variant ids for pinned suspects."""
+        return {suspect.variant_id: suspect for suspect in self.suspects}
+
+    @property
     def case_comments(self):
         """Return only comments made on the case."""
         comments = (comment for comment in self.comments if
