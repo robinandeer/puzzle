@@ -42,7 +42,7 @@ def variants(case_id):
                   filters=filters, consequences=SO_TERMS,
                   inheritance_models=INHERITANCE_MODELS_SHORT,
                   gene_lists=gene_lists, impact_severities=IMPACT_LEVELS,
-                  is_active=is_active)
+                  is_active=is_active, nr_of_variants=nr_of_variants)
 
     if app.db.variant_type == 'sv':
         return render_template('sv_variants.html', sv_types=SV_TYPES, **kwargs)

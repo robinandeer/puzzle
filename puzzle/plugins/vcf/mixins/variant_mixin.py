@@ -160,7 +160,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             else:
                 skip_index += 1
         
-        return Results(iter(result), len(result))
+        return Results(result, len(result))
 
     def _get_filtered_variants(self, vcf_file_path, filters={}):
         """Check if variants follows the filters

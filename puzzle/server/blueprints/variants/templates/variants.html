@@ -19,6 +19,14 @@
     </div>
   </div>
 
+  <div class="well well-sm text-center">
+    {% if nr_of_variants >= 1000 %}
+      Showing {{variants|length}} of 1000+ variants
+    {% else %}
+      Showing {{variants|length}} of {{ nr_of_variants }} matching variants
+    {% endif %}
+  </div>
+
   <div class="table-responsive">
     <table class="table table-bordered table-hover" id="variants_list">
       <thead>

@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class VariantMixin(BaseVariantMixin):
-    def variants(self, case_id, skip=0, count=30, filters=None):
+    def variants(self, case_id, skip=0, count=1000, filters=None):
         """Fetch variants for a case."""
         filters = filters or {}
         logger.debug("Fetching case with case_id: {0}".format(case_id))

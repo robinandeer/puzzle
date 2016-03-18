@@ -9,7 +9,7 @@ def test_variants(test_db):
     variant_objs = result.variants
     nr_of_variants = result.nr_of_variants
     assert nr_of_variants > 0
-    assert variant_objs.next().start == 84563217
+    assert variant_objs[0].start == 84563217
 
 def test_variants_skip(test_db):
 
@@ -19,7 +19,7 @@ def test_variants_skip(test_db):
     nr_of_variants = result.nr_of_variants
 
     # THEN: the first variant is the 11 overall
-    assert variant_objs.next().start == 89185462
+    assert variant_objs[0].start == 89185462
 
 def test_variants_count(test_db):
 

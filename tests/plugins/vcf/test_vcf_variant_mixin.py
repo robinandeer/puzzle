@@ -8,12 +8,12 @@ def test_variants_case(case_obj):
     #case_id is 'hapmap.vcf' since no ped file is given
     result = vcf_plugin.variants(case_id=case_obj.case_id)
     variants = result.variants
-    variant = next(variants)
+    variant = variants[0]
     assert variant['CHROM'] == 'X'
     assert int(variant['POS']) == 84563218
     assert variant['index'] == 1
 
-    variant = next(variants)
+    variant = variants[1]
     assert variant['CHROM'] == '2'
     assert int(variant['POS']) == 233349186
     assert variant['index'] == 2
