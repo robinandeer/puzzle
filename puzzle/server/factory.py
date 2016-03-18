@@ -3,7 +3,7 @@ import logging
 
 from flask import Flask
 
-from .ext import bootstrap
+from .ext import bootstrap, markdown
 from .settings import BaseConfig
 
 logger = logging.getLogger(__name__)
@@ -61,3 +61,4 @@ def bind_extensions(app):
 
     # bind bootstrap blueprints
     bootstrap.init_app(app)
+    markdown(app)

@@ -197,3 +197,12 @@ def individual(ind_id):
     """Show details for a specific individual."""
     individual_obj = app.db.individual(ind_id)
     return render_template('individual.html', individual=individual_obj)
+
+
+@blueprint.route('/<case_id>/synopsis', methods=['POST'])
+def synopsis(case_id):
+    """Update the case synopsis."""
+    text = request.form['text']
+    case_obj = app.db.case(case_id)
+    app.db.update_synopsis(case_obj, text)
+    return redirect(request.referrer)
