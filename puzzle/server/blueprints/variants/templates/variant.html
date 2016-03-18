@@ -4,6 +4,7 @@
 {% from "macros/compounds.html" import compounds_table %}
 {% from "macros/transcripts.html" import vep_transcripts %}
 {% from "macros/genes.html" import gene_table %}
+{% import "macros/comments.html" as comments_mod %}
 
 
 {% block nav_left %}
@@ -116,7 +117,7 @@
 
   {# External links #}
   <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-6">
       <div class="panel panel-default">
         <div class="panel-heading">External links</div>
         <div class="panel-body">
@@ -135,6 +136,10 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="col-md-6">
+      {{ comments_mod.comments(case_id, comments, variant_id=variant.md5) }}
     </div>
   </div>
 

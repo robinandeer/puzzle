@@ -167,6 +167,24 @@ def delete_resource(resource_id):
     return redirect(request.referrer)
 
 
+@blueprint.route('/<case_id>/comments', methods=['POST'])
+def comments(case_id):
+    """Upload a new comment."""
+    text = request.form['text']
+    variant_id = request.form.get('variant_id')
+    username = request.form.get('username')
+    case_obj = app.db.case(case_id)
+    app.db.add_comment(case_obj, text, variant_id=variant_id, username=username)
+    return redirect(request.referrer)
+
+
+@blueprint.route('/comments/<comment_id>', methods=['POST'])
+def delete_comment(comment_id):
+    """Delete a comment."""
+    app.db.delete_comment(comment_id)
+    return redirect(request.referrer)
+
+
 @blueprint.route('/individuals')
 def individuals():
     """Show an overview of all individuals."""

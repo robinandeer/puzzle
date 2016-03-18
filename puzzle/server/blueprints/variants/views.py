@@ -57,8 +57,10 @@ def variant(case_id, variant_id):
     if variant is None:
         return abort(404, "variant not found")
 
+    comments = app.db.comments(variant_id=variant.md5)
     template = 'sv_variant.html' if app.db.variant_type == 'sv' else 'variant.html'
-    return render_template(template, variant=variant, case_id=case_id)
+    return render_template(template, variant=variant, case_id=case_id,
+                           comments=comments)
 
 
 def parse_filters():
@@ -80,7 +82,7 @@ def parse_filters():
     filters['gemini_query'] = request.args.get('gemini_query')
     filters['impact_severities'] = request.args.getlist('impact_severities')
     filters['range'] = None
-    
+
     if request.args.get('range'):
         chromosome, raw_pos = request.args.get('range').split(':')
         start, end = map(int, raw_pos.split('-'))

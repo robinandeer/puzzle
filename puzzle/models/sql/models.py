@@ -27,9 +27,16 @@ class Case(BASE):
     pedigree = Column(String) # For storing madeline info
     compressed=Column(Boolean, default=False)
     tabix_index=Column(Boolean, default=False)
-    
+
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+    @property
+    def case_comments(self):
+        """Return only comments made on the case."""
+        comments = (comment for comment in self.comments if
+                    comment.variant_id is None)
+        return comments
 
     @property
     def resources(self):

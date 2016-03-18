@@ -1,0 +1,43 @@
+{% macro comments(case_id, comments, variant_id=None) %}
+  <div class="panel panel-default">
+    <div class="panel-heading">Comments</div>
+    <ul class="list-group">
+      {% for comment in comments %}
+        <li class="list-group-item">
+          <div class="row">
+            <div class="col-xs-10">
+              {{ comment.text }} by <strong>{{ comment.username }}</strong>
+            </div>
+            <div class="col-xs-2 text-center">
+              <form class="badge" action="{{ url_for('public.delete_comment', comment_id=comment.id) }}" method="POST" accept-charset="utf-8">
+                <button class="no-style" type="submit">
+                  <span class="glyphicon glyphicon-remove"></span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </li>
+      {% else %}
+        <li class="list-group-item">No comments added.</li>
+      {% endfor %}
+    </ul>
+    <div class="panel-footer">
+      <form action="{{ url_for('public.comments', case_id=case_id) }}" method="POST">
+        {% if variant_id %}
+          <input name="variant_id" value="{{ variant_id }}" type="text" hidden>
+        {% endif %}
+        <div class="form-group">
+          <textarea class="form-control" name="text" cols="30" rows="3"></textarea>
+        </div>
+        <div class="row">
+          <div class="col-xs-8">
+            <input type="text" class="form-control" name="username" placeholder="username (optional)">
+          </div>
+          <div class="col-xs-4">
+            <button type="submit" class="btn btn-default form-control">Comment</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endmacro %}

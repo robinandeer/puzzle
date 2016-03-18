@@ -1,6 +1,7 @@
 {% extends "layouts/base.html" %}
 {% import "macros/form_utils.html" as utils %}
 {% import "public_utils.html" as public_utils %}
+{% import "macros/comments.html" as comments %}
 
 {% block container %}
 
@@ -60,7 +61,7 @@
           {{ public_utils.phenotype_form(individuals=case.individuals) }}
         </div>
       </div>
-      
+
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
           {% for category, message in messages %}
@@ -78,7 +79,7 @@
   </div>
 
   <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-4">
       <div class="panel panel-default">
         <div class="panel-heading">Gene lists</div>
         <ul class="list-group">
@@ -94,7 +95,11 @@
       </div>
     </div>
 
-    <div class="col-md-6">
+    <div class="col-md-4">
+      {{ comments.comments(case.case_id, case.case_comments) }}
+    </div>
+
+    <div class="col-md-4">
       <div class="panel panel-default">
         <div class="panel-heading">Resources</div>
 

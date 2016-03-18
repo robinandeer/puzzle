@@ -15,7 +15,7 @@ class Comment(BASE):
 
     id = Column(types.Integer, primary_key=True)
     text = Column(types.Text, nullable=False)
-    username = Column(types.String(32))
+    username = Column(types.String(32), default='Anonymous')
     created_at = Column(types.DateTime, default=datetime.now)
 
     case_id = Column(types.Integer, ForeignKey('case.id'), nullable=False)

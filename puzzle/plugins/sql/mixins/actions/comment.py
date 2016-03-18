@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 class CommentActions(object):
-    def comments(self, case_id, variant_id=None, username=None):
+    def comments(self, case_id=None, variant_id=None, username=None):
         """Return comments for a case or variant.
 
         Args:
@@ -15,11 +15,14 @@ class CommentActions(object):
             variant_id (Optional[str]): id for a related variant
         """
         logger.debug("Looking for comments")
-        comment_objs = self.query(Comment).filter_by(case_id=case_id)
-        
+        comment_objs = self.query(Comment)
+
+        if case_id:
+            comment_objs = comment_objs.filter_by(case_id=case_id)
+
         if variant_id:
             comment_objs = comment_objs.filter_by(variant_id=variant_id)
-        else:
+        elif case_id:
             comment_objs = comment_objs.filter_by(variant_id=None)
 
         return comment_objs
@@ -30,10 +33,10 @@ class CommentActions(object):
 
     def add_comment(self, case_obj, text, variant_id=None, username=None):
         """Add a comment to a variant or a case"""
-        
+
         comment = Comment(
             text=text,
-            username=username,
+            username=username or 'Anonymous',
             case=case_obj,
             # md5 sum of chrom, pos, ref, alt
             variant_id=variant_id
@@ -51,5 +54,5 @@ class CommentActions(object):
 
         self.session.delete(comment_obj)
         self.save()
-        
+
         return comment_obj
