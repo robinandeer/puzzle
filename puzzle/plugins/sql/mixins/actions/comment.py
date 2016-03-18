@@ -60,3 +60,8 @@ class CommentActions(object):
         self.save()
 
         return comment_obj
+
+    def update_synopsis(self, case_obj, text):
+        """Update the synopsis for a case."""
+        case_obj.synopsis = text
+        self.save()

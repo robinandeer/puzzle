@@ -64,3 +64,12 @@ def test_delete_comment(test_db):
     for comment in test_db.comments(case_obj.id):
         comments.append(comment)
     assert len(comments) == 0
+
+
+def test_update_synopsis(test_db):
+    text = '# header'
+    case_obj = test_db.cases().first()
+    test_db.update_synopsis(case_obj, text)
+
+    updated_case_obj = test_db.cases().first()
+    assert updated_case_obj.synopsis == text
