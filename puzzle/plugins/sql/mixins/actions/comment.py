@@ -28,7 +28,11 @@ class CommentActions(object):
         return comment_objs
 
     def comment(self, comment_id):
-        """Fetch a comment."""
+        """Fetch a comment.
+
+        Args:
+            comment_id (int): record id from the database
+        """
         return self.query(Comment).get(comment_id)
 
     def add_comment(self, case_obj, text, variant_id=None, username=None):
