@@ -8,7 +8,7 @@ class Case(DotDict):
                  variant_type='snv', variant_mode='vcf', compressed=False,
                  tabix_index=False):
         super(Case, self).__init__(
-            case_id=case_id, 
+            case_id=case_id,
             name=name or case_id,
             variant_source=variant_source,
             variant_type=variant_type,

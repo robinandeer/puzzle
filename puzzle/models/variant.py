@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
-
+import hashlib
 from . import (DotDict, Transcript, Gene, Compound, Genotype)
 
 logger = logging.getLogger(__name__)
@@ -39,7 +39,7 @@ class Variant(DotDict):
         self['cytoband_start'] = None
         self['cytoband_stop'] = None
         self['consequences'] = []
-    
+
     @property
     def nr_genes(self):
         """Return the number of genes"""
@@ -50,9 +50,15 @@ class Variant(DotDict):
         return nr_genes
 
     @property
+    def md5(self):
+        """Return a md5 key string based on position, ref and alt"""
+        return hashlib.md5('_'.join([self.CHROM, str(self.POS), self.REF,
+                                     self.ALT])).hexdigest()
+
+    @property
     def is_intrachromosomal(self):
         """Check if variant is intrachromosomal
-            
+
             If stop_chrom == CHROM return True
             else return False
         """
@@ -172,7 +178,7 @@ class Variant(DotDict):
             variant_id))
 
         self['variant_id'] = variant_id
-    
+
     def __repr__(self):
         return ("Variant(CHROM={this.CHROM},POS={this.POS},REF={this.REF},ALT={this.ALT})"
                         .format(this=self))
