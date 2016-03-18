@@ -20,7 +20,7 @@ class Variant(DotDict):
         self['cadd_score'] = None  # float
         self['consequences'] = []
         self['most_severe_consequence'] = None  # str
-        self['impact_severity'] = None  # str
+        self['impact_severities'] = []  # List of severities
         self['rank_score'] = None  # float
 
         self['frequencies'] = []

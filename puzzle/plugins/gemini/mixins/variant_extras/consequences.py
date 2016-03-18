@@ -35,4 +35,7 @@ class ConsequenceExtras(object):
                 variant_obj (puzzle.models.Variant)
                 gemini_variant (GeminiQueryRow)
         """
-        variant_obj.impact_severity = gemini_variant['impact_severity']
+        gemini_impact = gemini_variant['impact_severity']
+        if gemini_impact == 'MED':
+            gemini_impact = 'MEDIUM'
+        variant_obj.impact_severity = gemini_impact

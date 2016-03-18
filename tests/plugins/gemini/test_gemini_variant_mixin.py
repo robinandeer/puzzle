@@ -82,6 +82,16 @@ def test_build_gemini_query():
 
 class TestFilters:
 
+    def test_filters_no_filters(self, gemini_case_obj):
+        adapter = GeminiPlugin()
+        adapter.add_case(gemini_case_obj)
+
+        filters = {}
+        for i,variant in enumerate(adapter.variants('643594', filters=filters)):
+            pass
+        #This is 14 variants:
+        assert i == 13
+
     def test_filters_frequency(self, gemini_case_obj):
         adapter = GeminiPlugin()
         adapter.add_case(gemini_case_obj)
@@ -98,7 +108,7 @@ class TestFilters:
         for variant in adapter.variants('643594', filters=filters):
             assert variant.cadd_score > 20
 
-    def test_filters_impact_severities(self, gemini_case_obj):
+    def test_filters_impact_severities_high(self, gemini_case_obj):
         adapter = GeminiPlugin()
         adapter.add_case(gemini_case_obj)
 
@@ -108,6 +118,39 @@ class TestFilters:
             variants.append(variant)
             assert variant.impact_severity == 'HIGH'
         assert len(variants) == 2
+
+    def test_filters_impact_severities_medium(self, gemini_case_obj):
+        adapter = GeminiPlugin()
+        adapter.add_case(gemini_case_obj)
+
+        variants = []
+        filters = {'impact_severities':['MEDIUM']}
+        for variant in adapter.variants('643594', filters=filters):
+            variants.append(variant)
+            assert variant.impact_severity == 'MEDIUM'
+        assert len(variants) == 10
+
+    def test_filters_impact_severities_low(self, gemini_case_obj):
+        adapter = GeminiPlugin()
+        adapter.add_case(gemini_case_obj)
+
+        variants = []
+        filters = {'impact_severities':['LOW']}
+        for variant in adapter.variants('643594', filters=filters):
+            variants.append(variant)
+            assert variant.impact_severity == 'LOW'
+        assert len(variants) == 2
+
+    def test_filters_impact_severities_high_and_med(self, gemini_case_obj):
+        adapter = GeminiPlugin()
+        adapter.add_case(gemini_case_obj)
+
+        variants = []
+        filters = {'impact_severities':['HIGH', 'MEDIUM']}
+        for variant in adapter.variants('643594', filters=filters):
+            variants.append(variant)
+            assert variant.impact_severity in ['HIGH', 'MEDIUM']
+        assert len(variants) == 12
 
     def test_filters_gene_ids(self, gemini_case_obj):
         adapter = GeminiPlugin()

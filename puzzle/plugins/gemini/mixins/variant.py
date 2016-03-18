@@ -120,6 +120,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         if filters.get('impact_severities'):
             severities = set([severity.strip()
                     for severity in filters['impact_severities']])
+            new_filtered_variants = []
             filtered_variants = (variant for variant in filtered_variants if
                 set([variant.impact_severity]).intersection(severities))
 
@@ -264,7 +265,6 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
 
         #Add the impact severity
         self._add_impact_severity(variant, gemini_variant)
-
         ### POSITON ANNOATTIONS ###
         variant.start = int(gemini_variant['start'])
         variant.stop = int(gemini_variant['end'])
