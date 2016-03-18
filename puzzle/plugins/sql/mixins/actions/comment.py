@@ -16,13 +16,17 @@ class CommentActions(object):
         """
         logger.debug("Looking for comments")
         comment_objs = self.query(Comment).filter_by(case_id=case_id)
-
+        
         if variant_id:
             comment_objs = comment_objs.filter_by(variant_id=variant_id)
         else:
-            comment_objs = comment_objs.filter_by(variant_id == None)
+            comment_objs = comment_objs.filter_by(variant_id=None)
 
         return comment_objs
+
+    def comment(self, comment_id):
+        """Fetch a comment."""
+        return self.query(Comment).get(comment_id)
 
     def add_comment(self, case_obj, text, variant_id=None, username=None):
         """Add a comment to a variant or a case"""
@@ -42,7 +46,8 @@ class CommentActions(object):
         """Delete a comment"""
 
         comment_obj = self.query(Comment).get(comment_id)
-        logger.debug("Deleting resource {0}".format(resource_obj.name))
+        if comment_obj:
+            logger.debug("Deleting comment {0}".format(comment_obj.id))
 
         self.session.delete(comment_obj)
         self.save()

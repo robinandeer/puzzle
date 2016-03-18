@@ -52,7 +52,7 @@ class Variant(DotDict):
     @property
     def md5(self):
         """Return a md5 key string based on position, ref and alt"""
-        return hashlib.md5('_'.join([self.CHROM, self.POS, self.REF, self.ALT])).digest()
+        return hashlib.md5('_'.join([self.CHROM, self.POS, self.REF, self.ALT])).hexdigest()
 
     @property
     def is_intrachromosomal(self):

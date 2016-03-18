@@ -1,0 +1,66 @@
+# -*- coding: utf-8 -*-
+from puzzle.models.sql import Comment
+
+def test_add_comment_case(test_db):
+    text = 'test-comment'
+    case_obj = test_db.cases().first()
+    comment_obj = test_db.add_comment(case_obj, text)
+    assert isinstance(comment_obj, Comment)
+    assert comment_obj.text == text
+
+def test_add_comment_variant(test_db, variant):
+    text = 'variant-comment'
+    case_obj = test_db.cases().first()
+    comment_obj = test_db.add_comment(case_obj, text, variant.md5)
+    
+    assert isinstance(comment_obj, Comment)
+    assert comment_obj.text == text
+    assert comment_obj.variant_id == variant.md5
+
+def test_get_comments_variant(test_db, variant):
+    text = 'variant-comment'
+    case_obj = test_db.cases().first()
+    test_db.add_comment(case_obj, text, variant.md5)
+    
+    comments = []
+    for comment in test_db.comments(case_obj.id, variant_id=variant.md5):
+        assert comment.case_id == case_obj.id
+        assert comment.variant_id == variant.md5
+        comments.append(comment)
+
+    assert len(comments) == 1
+    comment_obj = comments[0]
+    
+    assert isinstance(comment_obj, Comment)
+    assert comment_obj.text == text
+
+def test_get_comments(test_db):
+    text = 'test-comment'
+    case_obj = test_db.cases().first()
+    test_db.add_comment(case_obj, text)
+    comments = []
+    for comment in test_db.comments(case_obj.id):
+        assert comment.case_id == case_obj.id
+        comments.append(comment)
+    assert len(comments) == 1
+    comment_obj = comments[0]
+    assert comment_obj.text == text
+
+def test_get_comment(test_db):
+    text = 'test-comment'
+    case_obj = test_db.cases().first()
+    comment_obj = test_db.add_comment(case_obj, text)
+    new_comment_obj = test_db.comment(comment_obj.id)
+    assert new_comment_obj.text == text
+
+def test_delete_comment(test_db):
+    text = 'test-comment'
+    case_obj = test_db.cases().first()
+    comment_obj = test_db.add_comment(case_obj, text)
+    
+    test_db.delete_comment(comment_obj.id)
+    
+    comments = []
+    for comment in test_db.comments(case_obj.id):
+        comments.append(comment)
+    assert len(comments) == 0
