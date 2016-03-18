@@ -50,6 +50,20 @@ class Variant(DotDict):
         return nr_genes
 
     @property
+    def is_snv(self):
+        """Check if variant is SNV or SV."""
+        return self.get('cytoband_start') is None
+
+    @property
+    def display_name(self):
+        """Readable name for the variant."""
+        if self.is_snv:
+            gene_ids = self.gene_symbols[:2]
+            return ', '.join(gene_ids)
+        else:
+            return "{this.cytoband_start} ({this.sv_len})".format(this=self)
+
+    @property
     def md5(self):
         """Return a md5 key string based on position, ref and alt"""
         return hashlib.md5('_'.join([self.CHROM, str(self.POS), self.REF,

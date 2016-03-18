@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import (abort, current_app as app, Blueprint, render_template,
-                   request)
+                   request, redirect)
 
 from puzzle._compat import iteritems
 from puzzle.constants import (INHERITANCE_MODELS_SHORT, SO_TERMS, SV_TYPES,
@@ -53,6 +53,7 @@ def variants(case_id):
 @blueprint.route('/<case_id>/<variant_id>')
 def variant(case_id, variant_id):
     """Show a single variant."""
+    case_obj = app.db.case(case_id)
     variant = app.db.variant(case_id, variant_id)
     if variant is None:
         return abort(404, "variant not found")
@@ -60,7 +61,7 @@ def variant(case_id, variant_id):
     comments = app.db.comments(variant_id=variant.md5)
     template = 'sv_variant.html' if app.db.variant_type == 'sv' else 'variant.html'
     return render_template(template, variant=variant, case_id=case_id,
-                           comments=comments)
+                           comments=comments, case=case_obj)
 
 
 def parse_filters():
@@ -94,3 +95,19 @@ def parse_filters():
     filters['query_dict'].update({'skip': (filters['skip'] + 30)})
 
     return filters
+
+
+@blueprint.route('/<case_id>/suspects/<variant_id>', methods=['POST'])
+def suspects(case_id, variant_id):
+    """Pin a variant as a suspect for a given case."""
+    case_obj = app.db.case(case_id)
+    variant_obj = app.db.variant(case_id, variant_id)
+    app.db.add_suspect(case_obj, variant_obj)
+    return redirect(request.referrer)
+
+
+@blueprint.route('/suspects/<suspect_id>', methods=['POST'])
+def delete_suspect(suspect_id):
+    """Delete a suspect."""
+    app.db.delete_suspect(suspect_id)
+    return redirect(request.referrer)
