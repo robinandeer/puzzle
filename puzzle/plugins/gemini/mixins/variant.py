@@ -135,6 +135,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         
         variants = []
         for index, variant_obj in enumerate(filtered_variants):
+            print('index:{0}, count:{1}, skip:{2}'.format(index, count, skip))
             if index >= skip:
                 if index < limit:
                     variants.append(variant_obj)
