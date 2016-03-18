@@ -76,7 +76,7 @@ class TestFilters:
             variants.append(variant)
         assert len(variants) == 50
 
-    def test_filters_impact_severities(self, case_obj):
+    def test_filters_impact_severities_high(self, case_obj):
         plugin = VcfPlugin()
         plugin.add_case(case_obj)
         case_id = case_obj.case_id
@@ -84,8 +84,45 @@ class TestFilters:
         filters = {'impact_severities':['HIGH']}
         variants = []
         for variant in plugin.variants(case_id, filters=filters, count=1000):
+            assert variant.impact_severity == 'HIGH'
             variants.append(variant)
         assert len(variants) == 7
+
+    def test_filters_impact_severities_medium(self, case_obj):
+        plugin = VcfPlugin()
+        plugin.add_case(case_obj)
+        case_id = case_obj.case_id
+
+        filters = {'impact_severities':['MEDIUM']}
+        variants = []
+        for variant in plugin.variants(case_id, filters=filters, count=1000):
+            assert variant.impact_severity == 'MEDIUM'
+            variants.append(variant)
+        assert len(variants) == 82
+
+    def test_filters_impact_severities_low(self, case_obj):
+        plugin = VcfPlugin()
+        plugin.add_case(case_obj)
+        case_id = case_obj.case_id
+
+        filters = {'impact_severities':['LOW']}
+        variants = []
+        for variant in plugin.variants(case_id, filters=filters, count=1000):
+            assert variant.impact_severity == 'LOW'
+            variants.append(variant)
+        assert len(variants) == 19
+
+    def test_filters_impact_severities_high_and_med(self, case_obj):
+        plugin = VcfPlugin()
+        plugin.add_case(case_obj)
+        case_id = case_obj.case_id
+
+        filters = {'impact_severities':['HIGH', 'MEDIUM']}
+        variants = []
+        for variant in plugin.variants(case_id, filters=filters, count=1000):
+            assert variant.impact_severity in ['HIGH', 'MEDIUM']
+            variants.append(variant)
+        assert len(variants) == 89
 
     def test_filters_gene_ids(self, case_obj):
         plugin = VcfPlugin()
