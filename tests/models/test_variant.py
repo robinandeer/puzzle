@@ -86,5 +86,5 @@ def test_update_variant_id(variant):
 
 def test_md5(variant):
     id_string = '_'.join([variant.CHROM, variant.POS, variant.REF, variant.ALT])
-    md5_string = hashlib.md5(id_string).digest()
+    md5_string = hashlib.md5(id_string).hexdigest()
     assert variant.md5 == md5_string
