@@ -143,7 +143,8 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
                         variant_obj = None
 
                 if genetic_models and variant_obj:
-                    if not set(variant_obj.genetic_models).intersection(genetic_models):
+                    models = set(variant_obj.genetic_models)
+                    if not models.intersection(genetic_models):
                         variant_obj = None
 
                 if sv_len and variant_obj:
@@ -298,12 +299,13 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             self._add_transcripts(variant_obj, info_dict)
         
         self._add_hgnc_symbols(variant_obj)
-        self._add_genes(variant_obj)
         
         if add_all_info:
+            print('hej')
             self._add_genotype_calls(variant_obj, str(variant), case_obj)
             self._add_compounds(variant_obj, info_dict)
             self._add_gmaf(variant_obj, info_dict)
+            self._add_genes(variant_obj)
                 
         
         ##### Add consequences ####
