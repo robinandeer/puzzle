@@ -19,7 +19,7 @@ def variants(case_id):
     values = [value for key, value in iteritems(filters)
               if not isinstance(value, dict) and key != 'skip']
     is_active = any(values)
-    variants = app.db.variants(
+    variants, nr_of_variants = app.db.variants(
         case_id,
         skip=filters['skip'],
         filters={

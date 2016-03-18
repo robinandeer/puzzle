@@ -5,6 +5,7 @@ from vcftoolbox import (get_vcf_handle,get_variant_id)
 from cyvcf2 import VCF
 
 from puzzle.plugins import BaseVariantMixin
+from puzzle.plugins.constants import Results
 
 from puzzle.models import (Variant)
 
@@ -50,7 +51,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
 
         return None
 
-    def variants(self, case_id, skip=0, count=30, filters=None):
+    def variants(self, case_id, skip=0, count=1000, filters=None):
         """Return all variants in the VCF.
         
         This function will apply the given filter and return the 'count' first 
@@ -71,6 +72,10 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
                     genetic_models [] (list of genetic models)
                     sv_type: List (list of sv types),
                 }
+            Returns:
+                puzzle.constants.Results : Named tuple with variants and 
+                                           nr_of_variants
+            
         """
         filters = filters or {}
         case_obj = self.case(case_id=case_id)
@@ -110,6 +115,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
 
         variants = self._get_filtered_variants(vcf_file_path, filters)
         
+        result = []
         skip_index = 0
         for index, variant in enumerate(variants):
             index += 1
@@ -148,11 +154,13 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
                     skip_index += 1
 
                     if skip_index <= limit:
-                        yield variant_obj
+                        result.append(variant_obj)
                     else:
                         break
             else:
                 skip_index += 1
+        
+        return Results(iter(result), len(result))
 
     def _get_filtered_variants(self, vcf_file_path, filters={}):
         """Check if variants follows the filters

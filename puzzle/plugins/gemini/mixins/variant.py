@@ -141,7 +141,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
                 else:
                     break
         
-        return Results(variants, len(variants))
+        return Results(iter(variants), len(variants))
 
     def variant(self, case_id, variant_id):
         """Return a specific variant.

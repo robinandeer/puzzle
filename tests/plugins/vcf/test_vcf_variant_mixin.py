@@ -6,7 +6,8 @@ def test_variants_case(case_obj):
     vcf_plugin = VcfPlugin()
     vcf_plugin.add_case(case_obj)
     #case_id is 'hapmap.vcf' since no ped file is given
-    variants = vcf_plugin.variants(case_id=case_obj.case_id)
+    result = vcf_plugin.variants(case_id=case_obj.case_id)
+    variants = result.variants
     variant = next(variants)
     assert variant['CHROM'] == 'X'
     assert int(variant['POS']) == 84563218
@@ -49,10 +50,9 @@ class TestFilters:
         case_id = case_obj.case_id
 
         filters = {}
-        variants = []
-        for variant in plugin.variants(case_id, filters=filters, count=1000):
-            variants.append(variant)
-        assert len(variants) == 108
+        result = plugin.variants(case_id, filters=filters, count=1000)
+        
+        assert result.nr_of_variants == 108
 
     def test_filters_frequency(self, case_obj):
         plugin = VcfPlugin()
@@ -60,10 +60,13 @@ class TestFilters:
         case_id = case_obj.case_id
 
         filters = {'frequency':'0.001'}
-        variants = []
-        for variant in plugin.variants(case_id, filters=filters, count=1000):
-            variants.append(variant)
-        assert len(variants) == 88
+        result = plugin.variants(case_id, filters=filters, count=1000)
+        variants = result.variants
+        nr_of_variants = result.nr_of_variants
+        for variant_obj in variants:
+            assert variant_obj.max_freq <= 0.001
+        
+        assert nr_of_variants == 88
 
     def test_filters_cadd(self, case_obj):
         plugin = VcfPlugin()
@@ -71,10 +74,14 @@ class TestFilters:
         case_id = case_obj.case_id
 
         filters = {'cadd':'20'}
-        variants = []
-        for variant in plugin.variants(case_id, filters=filters, count=1000):
-            variants.append(variant)
-        assert len(variants) == 50
+        result = plugin.variants(case_id, filters=filters, count=1000)
+        variants = result.variants
+        nr_of_variants = result.nr_of_variants
+        
+        for variant_obj in variants:
+            variant_obj.cadd_score >= 20
+        
+        assert nr_of_variants == 50
 
     def test_filters_impact_severities_high(self, case_obj):
         plugin = VcfPlugin()
@@ -82,11 +89,14 @@ class TestFilters:
         case_id = case_obj.case_id
 
         filters = {'impact_severities':['HIGH']}
-        variants = []
-        for variant in plugin.variants(case_id, filters=filters, count=1000):
-            assert variant.impact_severity == 'HIGH'
-            variants.append(variant)
-        assert len(variants) == 7
+        result = plugin.variants(case_id, filters=filters, count=1000)
+        variants = result.variants
+        nr_of_variants = result.nr_of_variants
+        
+        for variant_obj in variants:
+            assert variant_obj.impact_severity == 'HIGH'
+        
+        assert nr_of_variants == 7
 
     def test_filters_impact_severities_medium(self, case_obj):
         plugin = VcfPlugin()
@@ -94,11 +104,14 @@ class TestFilters:
         case_id = case_obj.case_id
 
         filters = {'impact_severities':['MEDIUM']}
-        variants = []
-        for variant in plugin.variants(case_id, filters=filters, count=1000):
-            assert variant.impact_severity == 'MEDIUM'
-            variants.append(variant)
-        assert len(variants) == 82
+        result = plugin.variants(case_id, filters=filters, count=1000)
+        variants = result.variants
+        nr_of_variants = result.nr_of_variants
+        
+        for variant_obj in variants:
+            assert variant_obj.impact_severity == 'MEDIUM'
+        
+        assert nr_of_variants == 82
 
     def test_filters_impact_severities_low(self, case_obj):
         plugin = VcfPlugin()
@@ -106,11 +119,14 @@ class TestFilters:
         case_id = case_obj.case_id
 
         filters = {'impact_severities':['LOW']}
-        variants = []
-        for variant in plugin.variants(case_id, filters=filters, count=1000):
-            assert variant.impact_severity == 'LOW'
-            variants.append(variant)
-        assert len(variants) == 19
+        result = plugin.variants(case_id, filters=filters, count=1000)
+        variants = result.variants
+        nr_of_variants = result.nr_of_variants
+        
+        for variant_obj in variants:
+            assert variant_obj.impact_severity == 'LOW'
+        
+        assert nr_of_variants == 19
 
     def test_filters_impact_severities_high_and_med(self, case_obj):
         plugin = VcfPlugin()
@@ -118,11 +134,14 @@ class TestFilters:
         case_id = case_obj.case_id
 
         filters = {'impact_severities':['HIGH', 'MEDIUM']}
-        variants = []
-        for variant in plugin.variants(case_id, filters=filters, count=1000):
-            assert variant.impact_severity in ['HIGH', 'MEDIUM']
-            variants.append(variant)
-        assert len(variants) == 89
+        result = plugin.variants(case_id, filters=filters, count=1000)
+        variants = result.variants
+        nr_of_variants = result.nr_of_variants
+        
+        for variant_obj in variants:
+            assert variant_obj.impact_severity in ['HIGH', 'MEDIUM']
+        
+        assert nr_of_variants == 89
 
     def test_filters_gene_ids(self, case_obj):
         plugin = VcfPlugin()
@@ -130,10 +149,14 @@ class TestFilters:
         case_id = case_obj.case_id
 
         filters = {'gene_ids':['POF1B']}
-        variants = []
-        for variant in plugin.variants(case_id, filters=filters, count=1000):
-            variants.append(variant)
-        assert len(variants) == 1
+        result = plugin.variants(case_id, filters=filters, count=1000)
+        variants = result.variants
+        nr_of_variants = result.nr_of_variants
+        
+        for variant_obj in variants:
+            assert 'POF1B' in variant_obj.gene_symbols
+        
+        assert nr_of_variants == 1
 
     def test_filters_consequence(self, case_obj):
         plugin = VcfPlugin()
@@ -141,10 +164,14 @@ class TestFilters:
         case_id = case_obj.case_id
 
         filters = {'consequence':['frameshift_variant']}
-        variants = []
-        for variant in plugin.variants(case_id, filters=filters, count=1000):
-            variants.append(variant)
-        assert len(variants) == 4
+        result = plugin.variants(case_id, filters=filters, count=1000)
+        variants = result.variants
+        nr_of_variants = result.nr_of_variants
+        
+        for variant_obj in variants:
+            assert 'frameshift_variant' in variant_obj.consequences
+        
+        assert nr_of_variants == 4
 
     def test_filters_range(self, case_obj, indexed_vcf_file):
         plugin = VcfPlugin()
@@ -158,9 +185,12 @@ class TestFilters:
         end = 1771130
 
         filters = {'range':{'chromosome':'1', 'start':start, 'end':end}}
-        variants = []
-        for variant in plugin.variants(case_id, filters=filters, count=1000):
-            assert variant.start >= start
-            assert variant.stop <= end
-            variants.append(variant)
-        assert len(variants) == 1
+        result = plugin.variants(case_id, filters=filters, count=1000)
+        variants = result.variants
+        nr_of_variants = result.nr_of_variants
+        
+        for variant_obj in variants:
+            assert variant_obj.start >= start
+            assert variant_obj.stop <= end
+        
+        assert nr_of_variants == 1
