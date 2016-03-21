@@ -3,6 +3,7 @@ import logging
 from gemini import GeminiQuery
 
 from puzzle.plugins import BaseVariantMixin
+from puzzle.plugins.constants import Results
 
 from puzzle.models import (Compound, Variant, Gene, Genotype, Transcript,)
 from puzzle.utils import (get_most_severe_consequence, get_omim_number,
@@ -31,7 +32,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         else:
             return "{0} WHERE {1}".format(query, extra_info)
 
-    def variants(self, case_id, skip=0, count=30, filters=None):
+    def variants(self, case_id, skip=0, count=1000, filters=None):
         """Return count variants for a case.
 
         This function needs to have different behaviours based on what is asked
@@ -55,7 +56,10 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
                     impact_severities: [] (list of consequences),
                     genetic_models [] (list of genetic models)
                 }
-
+            Returns:
+                puzzle.constants.Results : Named tuple with variants and 
+                                           nr_of_variants
+            
         """
         filters = filters or {}
         logger.debug("Looking for variants in {0}".format(case_id))
@@ -128,13 +132,16 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             sv_len = int(filters['sv_len'])
             filtered_variants = (variant for variant in filtered_variants if
                 variant.sv_len >= sv_len)
-
+        
+        variants = []
         for index, variant_obj in enumerate(filtered_variants):
             if index >= skip:
                 if index < limit:
-                    yield variant_obj
+                    variants.append(variant_obj)
                 else:
                     break
+        
+        return Results(variants, len(variants))
 
     def variant(self, case_id, variant_id):
         """Return a specific variant.

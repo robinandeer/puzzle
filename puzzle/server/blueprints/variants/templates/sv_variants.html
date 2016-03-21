@@ -19,6 +19,14 @@
     </div>
   </div>
 
+  <div class="well well-sm text-center">
+    {% if nr_of_variants >= 1000 %}
+      Showing {{variants|length}} of 1000+ variants
+    {% else %}
+      Showing {{variants|length}} of {{ nr_of_variants }} matching variants
+    {% endif %}
+  </div>
+
   <div class="table-responsive">
     <table class="table table-bordered table-hover" id="variants_list">
       <thead>
@@ -43,7 +51,7 @@
             <td>{{ variant.cytoband_start or '-' }}</td>
             <td>{{ variant.cytoband_stop or '-' }}</td>
             <td align="right">{{ '{0:,}'.format(variant.sv_len) }}</td>
-	    <td> 
+	    <td>
 	      {% if(variant.max_freq) %}
         {# Is this a counts (int) freq or fraction (float) freq? #}
 	        {% if(variant.max_freq >= 1) %}
@@ -54,7 +62,7 @@
 	      {% else %}
                   <small class="text-muted">-</small>
               {% endif %}
-	      </td> 
+	      </td>
             <td>{{ variant.nr_genes }}</td>
             <td>
               {% if variant.nr_genes >= 5 %}
@@ -80,7 +88,8 @@
   $('.selectpicker').selectpicker();
   $(document).ready(function(){
     $('#variants_list').DataTable({
-      "paging":   false,
+      "paging":   true,
+      "pageLength": 30,
       "searching": false,
       "info": false
     });

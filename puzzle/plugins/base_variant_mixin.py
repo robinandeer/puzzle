@@ -5,7 +5,7 @@ class BaseVariantMixin(object):
     """Base class for variant mixins"""
     
     def variants(self, case_id, skip=0, count=30, filters=None):
-        """Return count variants for a case.
+        """Return a results tuple with variants and nr_of_variants.
 
         """
         raise NotImplementedError
