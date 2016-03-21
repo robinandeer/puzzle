@@ -75,10 +75,12 @@
     $(document).ready(function() {
       $('#variants_list').DataTable({
         dom: 'Bfrtip',
-        "paging":   false,
+        "paging":   true,
+        "pageLength": 30,
         "searching": false,
         "info": false,
         "colReorder": true,
+        "paging": true,
         buttons: ['colvis']
       });
     });
