@@ -18,3 +18,4 @@ sqlalchemy
 query-phenomizer>=0.5
 pyyaml
 cyvcf2
+cython
