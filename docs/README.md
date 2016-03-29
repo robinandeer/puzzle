@@ -12,8 +12,8 @@ We set out to make `Puzzle` both very simple to install as well as intuitive to 
 
 When puzzle is installed, in its simplest form it will try to visualize the VCF files in the directory you point to with
 
-```
-puzzle view tests/fixtures
+```bash
+$ puzzle view tests/fixtures
 ```
 
 Try it!
@@ -24,36 +24,34 @@ Puzzle will work best if the variants are annotated with [VEP][vep] or [SnpEff][
 
 ### Gemini support ###
 
-If the python package gemini is installed, the user can visualize a gemini database by running
+If the python package GEMINI is installed, the user can visualize a GEMINI database by running
 
-```
-puzzle view path/to/geminidatabase.db
+```bash
+$ puzzle view path/to/geminidatabase.db
 ```
 
 ### Persist information
 Even though puzzle is not meant to be persistent, you can still save information in puzzle's database
 for future querying running. First you need to initialize a puzzle database to store metainformation.
-```
-puzzle init --root path/to/dir
-```
 
-Default for root is $USER/.puzzle.
-When one or more databases are created they can be loaded with vcf files and or gemini databases.
-
-### Loading ###
-
-
-##### VCFs #####
-
-
-```
-puzzle load /path/to/your/file.vcf
+```bash
+$ puzzle init --root path/to/dir
 ```
 
-##### GEMINI databases #####
+Default for root is `$USER/.puzzle`. When one or more databases are created they can be loaded with vcf files and or GEMINI databases.
 
+### Loading
+
+**VCFs**
+
+```bash
+$ puzzle load /path/to/your/file.vcf
 ```
-puzzle load path/to/geminidatabase.db
+
+**GEMINI databases**
+
+```bash
+$ puzzle load path/to/geminidatabase.db
 ```
 
 ## Developing Puzzle

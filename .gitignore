@@ -74,3 +74,6 @@ site/
 *.sqlite3
 *.zip
 TODO
+
+# gitbook
+_book/
