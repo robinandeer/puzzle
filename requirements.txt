@@ -17,4 +17,6 @@ phizz>=0.2.3
 sqlalchemy
 query-phenomizer>=0.5
 pyyaml
+cython
+numpy
 cyvcf2
