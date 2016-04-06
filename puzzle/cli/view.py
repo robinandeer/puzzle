@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import tempfile
 import webbrowser
 
 import click
@@ -44,6 +45,7 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
 
     1. Look for variant source(s) to visualize and inst. the right plugin
     """
+    main_loop = (not debug) or (os.environ.get('WERKZEUG_RUN_MAIN') == 'true')
     root = root or ctx.obj.get('root') or os.path.expanduser("~/.puzzle")
     phenomizer_auth = phenomizer or ctx.obj.get('phenomizer_auth')
     BaseConfig.PHENOMIZER_AUTH = True if ctx.obj.get('phenomizer_auth') else False
@@ -68,70 +70,72 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
                 if not GEMINI:
                     logger.error("Need to have gemini instaled to view gemini database")
                     ctx.abort()
-                    
-    
+
+
     else:
         logger.info("Using in memory database")
-        store = SqlStore('sqlite:///:memory:', phenomizer_auth=phenomizer_auth)
-        store.set_up()
-        cases = []
-        if os.path.isfile(variant_source):        
-            file_type = get_file_type(variant_source)
-            #Test if gemini is installed
-            if file_type == 'unknown':
-                logger.error("File has to be vcf or gemini db")
-                ctx.abort()
-            elif file_type == 'gemini':
-                #Check if gemini is installed
-                if not GEMINI:
-                    logger.error("Need to have gemini installed to use gemini plugin")
+        tmpdir = tempfile.mkdtemp()
+        tmpdb = os.path.join(tmpdir, 'puzzle.sqlite3')
+        store = SqlStore("sqlite:///{}".format(tmpdb),
+                         phenomizer_auth=phenomizer_auth)
+        if main_loop:
+            store.set_up()
+            cases = []
+            if os.path.isfile(variant_source):
+                file_type = get_file_type(variant_source)
+                #Test if gemini is installed
+                if file_type == 'unknown':
+                    logger.error("File has to be vcf or gemini db")
                     ctx.abort()
-            variant_type = get_variant_type(variant_source)
-            cases = get_cases(
-                variant_source=variant_source,
-                case_lines=family_file, 
-                case_type=family_type, 
-                variant_type=variant_type, 
-                variant_mode=file_type
-            )
-        else: 
-            for file in path(variant_source).walkfiles(pattern):
-                file_type = get_file_type(file)
-                if file_type != 'unknown':
-                    variant_type = get_variant_type(file)
-                    #Test if gemini is installed
-                    if file_type == 'gemini':
-                        if not GEMINI:
-                            logger.error("Need to have gemini installed to use gemini plugin")
-                            ctx.abort()
-                    
-                    for case in get_cases(
-                        variant_source=file,
-                        case_type=family_type, 
-                        variant_type=variant_type, 
-                        variant_mode=file_type):
-                        
-                        cases.append(case)
-                
-        
-        for case_obj in cases:
-            if store.case(case_obj.case_id) is not None:
-                logger.warn("{} already exists in the database"
-                            .format(case_obj.case_id))
-                continue
+                elif file_type == 'gemini':
+                    #Check if gemini is installed
+                    if not GEMINI:
+                        logger.error("Need to have gemini installed to use gemini plugin")
+                        ctx.abort()
+                variant_type = get_variant_type(variant_source)
+                cases = get_cases(
+                    variant_source=variant_source,
+                    case_lines=family_file,
+                    case_type=family_type,
+                    variant_type=variant_type,
+                    variant_mode=file_type
+                )
+            else:
+                for file in path(variant_source).walkfiles(pattern):
+                    file_type = get_file_type(file)
+                    if file_type != 'unknown':
+                        variant_type = get_variant_type(file)
+                        #Test if gemini is installed
+                        if file_type == 'gemini':
+                            if not GEMINI:
+                                logger.error("Need to have gemini installed to use gemini plugin")
+                                ctx.abort()
 
-            # extract case information
-            logger.debug("adding case: {}".format(case_obj.case_id))
-            store.add_case(case_obj, vtype=case_obj.variant_type, mode=case_obj.variant_mode)
+                        for case in get_cases(
+                            variant_source=file,
+                            case_type=family_type,
+                            variant_type=variant_type,
+                            variant_mode=file_type):
+
+                            cases.append(case)
+
+            for case_obj in cases:
+                if store.case(case_obj.case_id) is not None:
+                    logger.warn("{} already exists in the database"
+                                .format(case_obj.case_id))
+                    continue
+
+                # extract case information
+                logger.debug("adding case: {}".format(case_obj.case_id))
+                store.add_case(case_obj, vtype=case_obj.variant_type, mode=case_obj.variant_mode)
 
     logger.debug("Plugin setup was succesfull")
-
     BaseConfig.PUZZLE_BACKEND = store
     BaseConfig.UPLOAD_DIR = os.path.join(root, 'resources')
 
     app = create_app(config_obj=BaseConfig)
-    
-    if not (no_browser or debug):
+
+    if not debug or ((not no_browser) and (not main_loop)):
         webbrowser.open_new_tab("http://{}:{}".format(host, port))
-    
+
     app.run(host=host, port=port, debug=debug)
