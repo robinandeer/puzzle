@@ -71,11 +71,11 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
                     logger.error("Need to have gemini instaled to view gemini database")
                     ctx.abort()
 
-
     else:
         logger.info("Using in memory database")
         tmpdir = tempfile.mkdtemp()
         tmpdb = os.path.join(tmpdir, 'puzzle.sqlite3')
+        logger.info("building database: {}".format(tmpdb))
         store = SqlStore("sqlite:///{}".format(tmpdb),
                          phenomizer_auth=phenomizer_auth)
         if main_loop:
