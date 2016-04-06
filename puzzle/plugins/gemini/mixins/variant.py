@@ -320,10 +320,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         return variant
 
     def _is_variant(self, gemini_variant, ind_objs):
-        """Check if the variants is a variation in any of the individuals
-
-        This means that at least one of the individuals should have the
-        alternative symbol.
+        """Check if the variant is a variation in any of the individuals
 
         Args:
             gemini_variant (GeminiQueryRow): The gemini variant
@@ -333,12 +330,11 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             bool : If any of the individuals has the variant
         """
 
-        alt = gemini_variant['alt']
         indexes = (ind.ind_index for ind in ind_objs)
-        #Merge all genotypes into one string
-        genotypes = "".join([gemini_variant['gts'][index] for index in indexes])
-        #Check if the alternative allele is found within the genotypes
-        if alt in genotypes:
-            return True
+        #Check if any individual have a heterozygous or homozygous variant call
+        for index in indexes:
+            gt_call = gemini_variant['gt_types'][index]
+            if (gt_call == 1 or gt_call == 3):
+                return True
 
         return False
