@@ -44,6 +44,7 @@ def test_variant(gemini_case_obj):
 def test_is_variant(gemini_case_obj):
     plugin = GeminiPlugin()
     genotypes = ['G/A', 'G/A', 'G/G', 'G/G', './.']
+    gt_types = [1, 1, 0, 0, 2]
     ind_objs = [
         Individual(ind_id=0, ind_index=0),
         Individual(ind_id=1, ind_index=1),
@@ -51,6 +52,7 @@ def test_is_variant(gemini_case_obj):
     #Mock a gemini variant
     gemini_variant = {
         'gts':genotypes,
+        'gt_types':gt_types,
         'alt':'A'
     }
 
