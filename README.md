@@ -93,10 +93,27 @@ Puzzle enables visualisation also of structural variants with the use of '--vari
 Enjoy a list view of SVs as stored in gemini or vcf format. Key fields such as chromosomal band and size are enabled by default.
 
 If gemini database with sv:s is downloaded, as described above, do:
-```puzzle view tests/fixtures/HapMapSv.db```
+
+```
+puzzle view tests/fixtures/HapMapSv.db
+```
 
 To view a example file with sv:s:
-```puzzle view tests/fixtures/hapmap.sv.vep.vcf.gz```
+
+```
+puzzle view tests/fixtures/hapmap.sv.vep.vcf.gz
+```
+
+## Build documentation
+Documentation is generated using [Gitbook][gitbook]. Building the docs locally requires the GitBook CLI.
+
+```bash
+$ cd puzzle/
+$ npm install -g gitbook-cli
+$ gitbook serve ./docs
+```
+
+The documentation can now be viewed on `http://localhost:4000/`.
 
 
 ## Credits
@@ -113,3 +130,4 @@ MIT. See the [LICENSE](LICENSE) file for more details.
 [otto]: https://ottoproject.io/
 [gemini]: https://github.com/arq5x/gemini
 [pytest]: http://pytest.org/latest/
+[gitbook]: https://www.gitbook.com/
