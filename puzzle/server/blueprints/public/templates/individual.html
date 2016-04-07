@@ -8,7 +8,10 @@
         <div class="panel-heading"><strong>{{ individual.name }}</strong></div>
         <ul class="list-group">
           <li class="list-group-item">
-            Case: <a href="{{ url_for('public.case', case_id=individual.case_name) }}">{{ individual.case_name }}</a>
+            Cases:
+            {% for case in individual.cases %}
+              <a href="{{ url_for('public.case', case_id=case.name) }}">{{ case.name }}</a>
+            {% endfor %}
           </li>
           <li class="list-group-item">Sex: {{ individual.sex_human }}</li>
         </ul>

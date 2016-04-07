@@ -57,9 +57,9 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
                     genetic_models [] (list of genetic models)
                 }
             Returns:
-                puzzle.constants.Results : Named tuple with variants and 
+                puzzle.constants.Results : Named tuple with variants and
                                            nr_of_variants
-            
+
         """
         filters = filters or {}
         logger.debug("Looking for variants in {0}".format(case_id))
@@ -95,12 +95,12 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             gene_string += ")"
 
             gemini_query = self.build_gemini_query(gemini_query, gene_string)
-        
+
         if filters.get('range'):
             chrom = filters['range']['chromosome']
             if not chrom.startswith('chr'):
                 chrom = "chr{0}".format(chrom)
-            
+
             range_string = "v.chrom = '{0}' AND "\
                            "((v.start BETWEEN {1} AND {2}) OR "\
                            "(v.end BETWEEN {1} AND {2}))".format(
@@ -120,7 +120,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
 
             filtered_variants = (variant for variant in filtered_variants if
                 set(variant.consequences).intersection(consequences))
-        
+
         if filters.get('impact_severities'):
             severities = set([severity.strip()
                     for severity in filters['impact_severities']])
@@ -132,7 +132,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             sv_len = int(filters['sv_len'])
             filtered_variants = (variant for variant in filtered_variants if
                 variant.sv_len >= sv_len)
-        
+
         variants = []
         for index, variant_obj in enumerate(filtered_variants):
             if index >= skip:
@@ -140,7 +140,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
                     variants.append(variant_obj)
                 else:
                     break
-        
+
         return Results(variants, len(variants))
 
     def variant(self, case_id, variant_id):
@@ -167,15 +167,16 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         case_obj = self.case(case_id)
         for individual in case_obj.individuals:
             individuals.append(individual)
-        
+
         self.db = case_obj.variant_source
         self.variant_type = case_obj.variant_type
-        
+
         gq = GeminiQuery(self.db)
         gq.run(gemini_query)
 
         for gemini_variant in gq:
             variant = self._format_variant(
+                case_id=case_id,
                 gemini_variant=gemini_variant,
                 individual_objs=individuals,
                 index=gemini_variant['variant_id'],
@@ -212,17 +213,18 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         index = 0
         for gemini_variant in gq:
             variant = None
-            
+
             # Check if variant is non ref in the individuals
             is_variant = self._is_variant(gemini_variant, individuals)
-            
+
             if self.variant_type == 'snv' and not is_variant:
                 variant = None
-            
+
             else:
                 index += 1
                 logger.debug("Updating index to: {0}".format(index))
                 variant = self._format_variant(
+                        case_id=case_id,
                         gemini_variant=gemini_variant,
                         individual_objs=individuals,
                         index=index
@@ -232,11 +234,12 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
 
                 yield variant
 
-    def _format_variant(self, gemini_variant, individual_objs, index=0, 
-                        add_all_info=False):
+    def _format_variant(self, case_id, gemini_variant, individual_objs,
+                        index=0, add_all_info=False):
         """Make a puzzle variant from a gemini variant
 
             Args:
+                case_id (str): related case id
                 gemini_variant (GeminiQueryRow): The gemini variant
                 individual_objs (list(dict)): A list of Individuals
                 index(int): The index of the variant
@@ -247,7 +250,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         chrom = gemini_variant['chrom']
         if chrom.startswith('chr') or chrom.startswith('CHR'):
             chrom = chrom[3:]
-        
+
         variant_dict = {
             'CHROM':chrom,
             'POS':str(gemini_variant['start']),
@@ -259,14 +262,14 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         }
 
         variant = Variant(**variant_dict)
-        
+
         # Use the gemini id for fast search
         variant.update_variant_id(gemini_variant['variant_id'])
         logger.debug("Creating a variant object of variant {0}".format(
             variant.variant_id))
-        
+
         variant['index'] = index
-        
+
         # Add the most severe consequence
         self._add_most_severe_consequence(variant, gemini_variant)
 
@@ -313,10 +316,10 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         ### GENOTYPE ANNOATTIONS ###
         #Get the genotype info
         if add_all_info:
-            self._add_genotypes(variant, gemini_variant, individual_objs)
+            self._add_genotypes(variant, gemini_variant, case_id, individual_objs)
             if self.variant_type == 'sv':
                 self._add_genes(variant)
-        
+
         return variant
 
     def _is_variant(self, gemini_variant, ind_objs):

@@ -6,6 +6,10 @@
 
 {% block nav_left %}
   <li>
+    <a href="{{ url_for('public.case', case_id=case_id) }}">{{ case_id }}</a>
+  </li>
+
+  <li>
     <a href="{{ url_for('variants.variants', case_id=case_id) }}">Variants</a>
   </li>
 {% endblock %}
@@ -111,7 +115,7 @@
       </div>
     </div>
 
-    <div class="col-md-6">{{ sv_gt_call(variant.individuals) }}</div>
+    <div class="col-md-6">{{ sv_gt_call(case_id, variant.individuals) }}</div>
   </div>
 
   {# External links #}

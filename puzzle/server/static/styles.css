@@ -12,3 +12,7 @@ button.no-style {
 .overflow-auto {
   overflow: auto;
 }
+
+.label {
+  display: inline-block;
+}

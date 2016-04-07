@@ -8,15 +8,15 @@ logger = logging.getLogger(__name__)
 
 class GenotypeExtras(object):
     """Class to store methods that deals with genotyping"""
-    
+
     def _add_genotype_calls(self, variant_obj, variant_line, case_obj):
         """Add the genotype calls for the variant
-        
+
         Args:
             variant_obj (puzzle.models.Variant)
             variant_dict (dict): A variant dictionary
             case_obj (puzzle.models.Case)
-            
+
         """
         variant_line = variant_line.split('\t')
         #if there is gt calls we have no individuals to add
@@ -25,7 +25,7 @@ class GenotypeExtras(object):
             for individual in case_obj.individuals:
                 sample_id = individual.ind_id
                 index = individual.ind_index
-                
+
                 gt_call = variant_line[9+index].split(':')
 
                 raw_call = dict(zip(gt_format, gt_call))
@@ -35,7 +35,7 @@ class GenotypeExtras(object):
                 variant_obj.add_individual(puzzle_genotype(
                     sample_id = sample_id,
                     genotype = genotype.genotype,
-                    case_id = individual.case_name,
+                    case_id = case_obj.name,
                     phenotype = individual.phenotype,
                     ref_depth = genotype.ref_depth,
                     alt_depth = genotype.alt_depth,

@@ -17,8 +17,8 @@ from . import get_header
 logger = logging.getLogger(__name__)
 
 
-def get_cases(variant_source, case_lines=None, case_type='ped', 
-            variant_type='snv', variant_mode='vcf'):
+def get_cases(variant_source, case_lines=None, case_type='ped',
+              variant_type='snv', variant_mode='vcf'):
         """Create a cases and populate it with individuals
 
             Args:
@@ -37,7 +37,7 @@ def get_cases(variant_source, case_lines=None, case_type='ped',
         )
         case_objs = []
         case_ids = set()
-        
+
         compressed = False
         tabix_index = False
         #If no individuals we still need to have a case id
@@ -48,13 +48,13 @@ def get_cases(variant_source, case_lines=None, case_type='ped',
             if os.path.exists(tabix_file):
                 logger.debug("Found index file")
                 tabix_index = True
+
         if len(individuals) > 0:
             for individual in individuals:
                 case_ids.add(individual.case_id)
         else:
             case_ids = [os.path.basename(variant_source)]
-            
-        
+
         for case_id in case_ids:
             logger.info("Found case {0}".format(case_id))
             case = Case(
@@ -66,7 +66,7 @@ def get_cases(variant_source, case_lines=None, case_type='ped',
                 compressed=compressed,
                 tabix_index=tabix_index
                 )
-            
+
             # Add the individuals to the correct case
             for individual in individuals:
                 if individual.case_id == case_id:
@@ -93,11 +93,11 @@ def get_individuals(variant_source, case_lines=None, case_type='ped', variant_mo
         """
         individuals = []
         ind_dict ={}
-        
+
         if variant_mode == 'vcf':
             head = get_header(variant_source)
             #Dictionary with ind_id:index where index show where in vcf ind info is
-        
+
             for index, ind in enumerate(head.individuals):
                 ind_dict[ind] = index
 
@@ -130,17 +130,17 @@ def get_individuals(variant_source, case_lines=None, case_type='ped', variant_mo
                             )
                         individuals.append(individual)
                     except KeyError as err:
-                        #This is the case when individuals in ped does not exist 
+                        #This is the case when individuals in ped does not exist
                         #in vcf
                         raise PedigreeError(
-                            family_id=case_id, 
-                            individual_id=ind_id, 
+                            family_id=case_id,
+                            individual_id=ind_id,
                             message="Individual {0} exists in ped file but not in vcf".format(ind_id)
                             )
 
             else:
                 case_id = os.path.basename(variant_source)
-            
+
                 for ind in ind_dict:
                     individual = Individual(
                         ind_id=ind,

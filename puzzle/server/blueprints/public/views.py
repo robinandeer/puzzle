@@ -6,6 +6,8 @@ from flask import (abort, Blueprint, current_app as app, render_template,
                    send_from_directory, flash)
 from werkzeug import secure_filename
 
+from puzzle.models.sql import Case
+
 BP_NAME = __name__.split('.')[-2]
 blueprint = Blueprint(BP_NAME, __name__, template_folder='templates',
                       static_folder='static',
@@ -16,15 +18,23 @@ blueprint = Blueprint(BP_NAME, __name__, template_folder='templates',
 def index():
     """Show the landing page."""
     gene_lists = app.db.gene_lists() if app.config['STORE_ENABLED'] else []
-    return render_template('index.html', cases=app.db.cases(),
+
+    case_groups = {}
+    for case in app.db.cases():
+        key = (case.variant_source, case.variant_type, case.variant_mode)
+        if key not in case_groups:
+            case_groups[key] = []
+        case_groups[key].append(case)
+
+    return render_template('index.html', case_groups=case_groups,
                            gene_lists=gene_lists)
 
 
 @blueprint.route('/cases/<case_id>')
 def case(case_id):
     """Show the overview for a case."""
-    return render_template('case.html', case=app.db.case(case_id),
-                           case_id=case_id)
+    case_obj = app.db.case(case_id)
+    return render_template('case.html', case=case_obj, case_id=case_id)
 
 
 @blueprint.route('/phenotypes', methods=['POST'])
@@ -206,3 +216,29 @@ def synopsis(case_id):
     case_obj = app.db.case(case_id)
     app.db.update_synopsis(case_obj, text)
     return redirect(request.referrer)
+
+
+@blueprint.route('/cases', methods=['POST'])
+def add_case():
+    """Make a new case out of a list of individuals."""
+    ind_ids = request.form.getlist('ind_id')
+    case_id = request.form['case_id']
+    source = request.form['source']
+    variant_type = request.form['type']
+
+    if len(ind_ids) == 0:
+        return abort(400, "must add at least one member of case")
+
+    # only GEMINI supported
+    new_case = Case(case_id=case_id, name=case_id, variant_source=source,
+                    variant_type=variant_type, variant_mode='gemini')
+
+    # Add individuals to the correct case
+    for ind_id in ind_ids:
+        ind_obj = app.db.individual(ind_id)
+        new_case.individuals.append(ind_obj)
+
+    app.db.session.add(new_case)
+    app.db.save()
+
+    return redirect(url_for('.case', case_id=new_case.name))

@@ -2,6 +2,12 @@
 {% from "macros/links.html" import omim_links %}
 {% from "macros/filters.html" import filters_form %}
 
+{% block nav_left %}
+  <li>
+    <a href="{{ url_for('public.case', case_id=case_id) }}">{{ case_id }}</a>
+  </li>
+{% endblock %}
+
 {% block container %}
   <div class="panel-group" id="filter-accordion">
     <div class="panel panel-default">

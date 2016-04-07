@@ -2,6 +2,12 @@
 {% from "macros/links.html" import omim_links %}
 {% from "macros/filters.html" import filters_form %}
 
+{% block nav_left %}
+  <li>
+    <a href="{{ url_for('public.case', case_id=case_id) }}">{{ case_id }}</a>
+  </li>
+{% endblock %}
+
 {% block container %}
   <div class="panel-group" id="filter-accordion">
     <div class="panel panel-default">
@@ -21,9 +27,9 @@
 
   <div class="well well-sm text-center">
     {% if nr_of_variants >= 1000 %}
-      Showing {{variants|length}} of 1000+ variants
+      Showing {{ variants|length }} of 1000+ variants
     {% else %}
-      Showing {{variants|length}} of {{ nr_of_variants }} matching variants
+      Showing {{ variants|length }} of {{ nr_of_variants }} matching variants
     {% endif %}
   </div>
 
