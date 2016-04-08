@@ -50,9 +50,11 @@ def phenotypes():
     try:
         added_terms = app.db.add_phenotype(ind_obj, phenotype_id)
         if added_terms is None:
-            flash("Term with id {} was not found".format(phenotype_id), 'danger')
+            flash("Term with id {} was not found".format(phenotype_id),
+                  'danger')
         elif added_terms == []:
-            flash("Term with id {} was already added".format(phenotype_id), 'warning')
+            flash("Term with id {} was already added".format(phenotype_id),
+                  'warning')
     except RuntimeError as error:
         return abort(500, error.message)
 

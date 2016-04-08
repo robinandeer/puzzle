@@ -33,16 +33,15 @@ class PhenotypeActions(object):
         self.save()
 
         if added_terms is not None and len(added_terms) > 0:
-            self.update_hpolist(ind_obj.ind_id)
+            for case_obj in ind_obj.cases:
+                self.update_hpolist(case_obj)
 
         return added_terms
 
-    def update_hpolist(self, ind_id):
+    def update_hpolist(self, case_obj):
         """Update the HPO gene list for a case based on current terms."""
-        ind_obj = self.individual(ind_id)
-        # update the HPO gene list for the case
-        hpo_list = self.case_genelist(ind_obj.case)
-        hpo_results = hpo_genes(ind_obj.case.phenotype_ids(),
+        hpo_list = self.case_genelist(case_obj)
+        hpo_results = hpo_genes(case_obj.phenotype_ids(),
                                 *self.phenomizer_auth)
 
         if hpo_results is None:
@@ -68,4 +67,5 @@ class PhenotypeActions(object):
                     self.session.delete(term)
         logger.debug('persist removals')
         self.save()
-        self.update_hpolist(ind_obj.ind_id)
+        for case_obj in ind_obj.cases:
+            self.update_hpolist(case_obj)
