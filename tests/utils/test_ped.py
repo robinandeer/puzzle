@@ -27,6 +27,10 @@ class TestGetIndividuals:
         ind_ids = set(['NA12878', 'NA12882','NA12877'])
         assert ind_ids == set([ind.ind_id for ind in individuals])
 
+    def test_get_individuals_from_vcf_no_ind(self, vcf_file_no_ind):
+        individuals = get_individuals(variant_source=vcf_file_no_ind)
+        assert len(individuals) == 0
+
 
 class TestGetCase:
     
