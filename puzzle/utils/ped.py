@@ -48,9 +48,12 @@ def get_cases(variant_source, case_lines=None, case_type='ped',
             if os.path.exists(tabix_file):
                 logger.debug("Found index file")
                 tabix_index = True
-        
-        for individual in individuals:
-            case_ids.add(individual.case_id)
+        if len(individuals) > 0:
+            for individual in individuals:
+                case_ids.add(individual.case_id)
+        else:
+            case_ids = [os.path.basename(variant_source)]
+            
         
         for case_id in case_ids:
             logger.info("Found case {0}".format(case_id))
