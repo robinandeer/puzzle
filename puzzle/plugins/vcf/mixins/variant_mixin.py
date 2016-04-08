@@ -297,7 +297,8 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             self._add_cadd_score(variant_obj, info_dict)
             self._add_genetic_models(variant_obj, info_dict)
             self._add_transcripts(variant_obj, info_dict)
-
+            self._add_exac(variant_obj, info_dict)
+            
         self._add_hgnc_symbols(variant_obj)
 
         if add_all_info:
