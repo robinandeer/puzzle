@@ -33,7 +33,7 @@ def variants(case_id):
             'gene_lists': filters['gene_lists'],
             'impact_severities': filters['impact_severities'],
             'gemini_query': filters['gemini_query'],
-            'range': filters['range'],
+            'ranges': [filters['range']] if filters['range'] else None,
         }
     )
     gene_lists = ([gene_list.list_id for gene_list in app.db.gene_lists()]

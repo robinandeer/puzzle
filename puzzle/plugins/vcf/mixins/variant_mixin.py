@@ -191,44 +191,47 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
 
         logger.info("Get variants from {0}".format(vcf_file_path))
         
-        if filters.get('range'):
-            range_str = "{0}:{1}-{2}".format(
-                filters['range']['chromosome'],
-                filters['range']['start'],
-                filters['range']['end'])
+        handles = []
+        if filters.get('ranges'):
+            for region in filters['ranges']:
+                range_str = "{0}:{1}-{2}".format(
+                    region['chromosome'],
+                    region['start'],
+                    region['end'])
             
-            vcf = VCF(vcf_file_path)
-            handle = vcf(range_str)
+                vcf = VCF(vcf_file_path)
+                handles.append(vcf(range_str))
         else:
-            handle = VCF(vcf_file_path)
+            handles.append(VCF(vcf_file_path))
         
-        for variant in handle:
-            variant_line = str(variant)
-            keep_variant = True
-
-            if genes and keep_variant:
-                keep_variant = False
-                for gene in genes:
-                    if "{0}".format(gene) in variant_line:
-                        keep_variant = True
-                        break
-
-            if consequences and keep_variant:
-                keep_variant = False
-                for consequence in consequences:
-                    if consequence in variant_line:
-                        keep_variant = True
-                        break
-
-            if sv_types and keep_variant:
-                keep_variant = False
-                for sv_type in sv_types:
-                    if sv_type in variant_line:
-                        keep_variant = True
-                        break
-
-            if keep_variant:
-                yield variant
+        for handle in handles:
+            for variant in handle:
+                variant_line = str(variant)
+                keep_variant = True
+            
+                if genes and keep_variant:
+                    keep_variant = False
+                    for gene in genes:
+                        if "{0}".format(gene) in variant_line:
+                            keep_variant = True
+                            break
+            
+                if consequences and keep_variant:
+                    keep_variant = False
+                    for consequence in consequences:
+                        if consequence in variant_line:
+                            keep_variant = True
+                            break
+            
+                if sv_types and keep_variant:
+                    keep_variant = False
+                    for sv_type in sv_types:
+                        if sv_type in variant_line:
+                            keep_variant = True
+                            break
+            
+                if keep_variant:
+                    yield variant
 
     def _format_variants(self, variant, index, case_obj, add_all_info=False):
         """Return a Variant object
