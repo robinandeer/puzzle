@@ -27,6 +27,10 @@ class TestGetIndividuals:
         ind_ids = set(['NA12878', 'NA12882','NA12877'])
         assert ind_ids == set([ind.ind_id for ind in individuals])
 
+    def test_get_individuals_from_vcf_no_ind(self, vcf_file_no_ind):
+        individuals = get_individuals(variant_source=vcf_file_no_ind)
+        assert len(individuals) == 0
+
 
 class TestGetCase:
     
@@ -41,6 +45,16 @@ class TestGetCase:
         assert len(individuals) == 3
         ind_ids = set(['ADM1059A1','ADM1059A2','ADM1059A3'])
         assert ind_ids == set([ind.ind_id for ind in individuals])
+
+    def test_get_case_no_ind(self, vcf_file_no_ind):
+        case_id = os.path.basename(vcf_file_no_ind)
+        case_obj = get_cases(vcf_file_no_ind)[0]
+        assert case_obj.case_id == case_id
+        assert case_obj.compressed == False
+        assert case_obj.tabix_index == False
+        
+        individuals = case_obj.individuals
+        assert len(individuals) == 0
 
     def test_get_case_from_compressed_vcf(self, compressed_vcf_file):
         case_id = os.path.basename(compressed_vcf_file)

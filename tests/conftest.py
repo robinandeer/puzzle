@@ -61,6 +61,12 @@ def vcf_file(request):
     return hapmap
 
 @pytest.fixture(scope='function')
+def vcf_file_no_ind(request):
+    "Return the path to the hapmap vcf"
+    hapmap = "tests/fixtures/no_ind.vcf"
+    return hapmap
+
+@pytest.fixture(scope='function')
 def vcf_file_sv(request):
     "Return the path to the hapmap vcf with sv variants"
     hapmap = "tests/fixtures/hapmap.sv.vep.vcf.gz"
