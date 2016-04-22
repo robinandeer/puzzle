@@ -19,11 +19,32 @@
 
       <div id="view-filters" class="panel-collapse collapse {% if is_active %}in{% endif %}">
         <div class="panel-body">
-          {{ filters_form(case_id, db, inheritance_models, consequences, impact_severities, filters, gene_lists=gene_lists) }}
+          {{ filters_form(case_id, db, inheritance_models, consequences, impact_severities, filters, gene_lists=gene_lists, queries=queries) }}
         </div>
       </div>
     </div>
   </div>
+
+  {% if filters.gemini_query %}
+    <form action="{{ url_for('variants.queries') }}" method="POST">
+      <div class="panel panel-default">
+        <div class="panel-heading">Store GEMINI query</div>
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-xs-5">
+              <input class="form-control" type="text" name="query" value="{{ filters.gemini_query }}">
+            </div>
+            <div class="col-xs-5">
+              <input class="form-control" type="text" name="name" placeholder="Name (optional)">
+            </div>
+            <div class="col-xs-2">
+              <button class="form-control" type="submit">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  {% endif %}
 
   <div class="well well-sm text-center">
     {% if nr_of_variants >= 1000 %}
@@ -55,7 +76,7 @@
             <td>{{ variant.gene_symbols|join(', ') }}</td>
             <td>{{ variant.most_severe_consequence or '-' }}</td>
             <td>
-	      {% if(variant.max_freq) %}
+	      {% if variant.max_freq %}
 	         {{ variant.max_freq|round(4) }}
 	      {% else %}
 	          <small class="text-muted">-</small>
