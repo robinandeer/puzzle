@@ -2,9 +2,9 @@
 
 
 def test_gemini_query(test_db):
-    name = 'Chuck Norris Query'
-    query_obj = test_db.gemini_query(name)
-    assert query_obj.name == name
+    only_query = test_db.gemini_queries()[0]
+    query_obj = test_db.gemini_query(only_query.id)
+    assert query_obj.name == only_query.name
 
 
 def test_gemini_queries(test_db):
@@ -20,7 +20,7 @@ def test_add_gemini_query(test_db):
 
 
 def test_delete_query(test_db):
-    name = 'Chuck Norris Query'
-    assert test_db.gemini_query(name)
-    test_db.delete_gemini_query(name)
-    assert test_db.gemini_query(name) is None
+    only_query = test_db.gemini_queries()[0]
+    assert test_db.gemini_query(only_query.id)
+    test_db.delete_gemini_query(only_query.id)
+    assert test_db.gemini_query(only_query.id) is None
