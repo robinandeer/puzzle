@@ -1,4 +1,4 @@
-{% macro gt_call(individuals) -%}
+{% macro gt_call(case_id, individuals) -%}
 <table class="table table-bordered table-hover">
   <thead>
     <tr>
@@ -16,7 +16,7 @@
   <tbody>
     {% for individual in individuals %}
       <tr>
-        <td>{{ individual.case_id }}</td>
+        <td>{{ case_id }}</td>
         <td>
           {% if individual.is_affected %}
             <strong><mark>{{ individual.sample_id }}</mark></strong>
@@ -34,7 +34,7 @@
 </table>
 {%- endmacro %}
 
-{% macro sv_gt_call(individuals) -%}
+{% macro sv_gt_call(case_id, individuals) -%}
 <table class="table table-bordered table-hover">
   <thead>
     <tr>
@@ -51,7 +51,7 @@
   <tbody>
     {% for individual in individuals %}
       <tr>
-        <td>{{ individual.case_id }}</td>
+        <td>{{ case_id }}</td>
         <td>
           {% if individual.is_affected %}
             <strong><mark>{{ individual.sample_id }}</mark></strong>

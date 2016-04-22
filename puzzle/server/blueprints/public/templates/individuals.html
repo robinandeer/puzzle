@@ -6,7 +6,7 @@
       <tr>
         <th>#</th>
         <th>Name</th>
-        <th>Case</th>
+        <th>Cases</th>
         <th>Sex</th>
         <th>Affected</th>
       </tr>
@@ -28,9 +28,11 @@
       </a>
     </td>
     <td>
-      <a href="{{ url_for('public.case', case_id=individual.case_name) }}">
-        {{ individual.case_name }}
-      </a>
+      {% for case in individual.cases %}
+        <a href="{{ url_for('public.case', case_id=case.name) }}">
+          {{ case.name }}
+        </a>
+      {% endfor %}
     </td>
     <td>
       {{ individual.sex_human }}

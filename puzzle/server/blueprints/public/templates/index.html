@@ -2,46 +2,18 @@
 
 {% block container %}
   <div class="row">
-    <div class="col-md-8">
-      {% for case in cases %}
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <a href="{{ url_for('public.case', case_id=case.case_id) }}">
-              {{ case.name }}
-            </a>
-            <span class="label label-info">
-              {{ case.variant_mode }}
-            </span>
-            <span class="label label-warning">
-              {{ case.variant_type }}
-            </span>
-            
-            <a class="pull-right" href="{{ url_for('variants.variants', case_id=case.case_id) }}">
-              Variants
-            </a>
-          </div>
-          <ul class="list-group">
-            {% for individual in case.individuals %}
-              <li class="list-group-item">
-                <a href="{{ url_for('public.individual', ind_id=individual.ind_id) }}">
-                  {{ individual.name }}
-                </a>
-                {% if individual.is_affected %}
-                  <span class="badge">
-                    <span class="glyphicon glyphicon-exclamation-sign"></span>
-                  </span>
-                {% endif %}
-              </li>
-            {% else %}
-              <li class="list-group-item">No individuals.</li>
-            {% endfor %}
-          </ul>
-        </div>
+    <div class="col-md-6">
+      {% for (source, vtype, mode), cases in case_groups.items() %}
+        {% if mode == 'gemini' %}
+          {{ case_form(source, vtype, cases) }}
+        {% else %}
+          {{ case_list(cases) }}
+        {% endif %}
       {% endfor %}
     </div>
 
     {% if config['STORE_ENABLED'] %}
-      <div class="col-md-4">
+      <div class="col-md-6">
         <div class="panel panel-default">
           <div class="panel-heading">Gene lists</div>
           <ul class="list-group">
@@ -81,3 +53,107 @@
     {% endif %}
   </div>
 {% endblock %}
+
+
+{% macro case_form(source, vtype, cases) %}
+  <form action="{{ url_for('public.add_case') }}" method="POST">
+    <input type="text" name="source" value="{{ source }}" hidden>
+    <input type="text" name="type" value="{{ vtype }}" hidden>
+    <div class="panel panel-default">
+      <div class="panel-heading">Source: <strong>{{ source }}</strong></div>
+
+      {% for case in cases %}
+        <div class="panel-heading">
+          <a href="{{ url_for('public.case', case_id=case.case_id) }}">
+            {{ case.name }}
+          </a>
+          <span class="label label-info">
+            {{ case.variant_mode }}
+          </span>
+          <span class="label label-warning">
+            {{ case.variant_type }}
+          </span>
+
+          <a class="pull-right" href="{{ url_for('variants.variants', case_id=case.case_id) }}">
+            Variants
+          </a>
+        </div>
+
+        <ul class="list-group">
+          {% for individual in case.individuals %}
+            <li class="list-group-item">
+              <div class="row">
+                <div class="col-xs-1">
+                  <input name="ind_id" type="checkbox" value="{{ individual.ind_id }}">
+                </div>
+                <div class="col-xs-10">
+                  <a href="{{ url_for('public.individual', ind_id=individual.ind_id) }}">
+                    {{ individual.name }}
+                  </a>
+                </div>
+                <div class="col-xs-1">
+                  {% if individual.is_affected %}
+                    <span class="badge">
+                      <span class="glyphicon glyphicon-exclamation-sign"></span>
+                    </span>
+                  {% endif %}
+                </div>
+              </div>
+            </li>
+          {% else %}
+            <li class="list-group-item">No individuals.</li>
+          {% endfor %}
+        </ul>
+      {% endfor %}
+      <div class="panel-footer">
+        <div class="row">
+          <div class="col-xs-9">
+            <input class="form-control" name="case_id" type="text" placeholder="New case name" required>
+          </div>
+          <div class="col-xs-3">
+            <button class="btn btn-default form-control">Add case</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+{% endmacro %}
+
+{% macro case_list(cases) %}
+  <div class="panel panel-default">
+    {% for case in cases %}
+      <div class="panel-heading">
+        <a href="{{ url_for('public.case', case_id=case.case_id) }}">
+          {{ case.name }}
+        </a>
+        <span class="label label-info">
+          {{ case.variant_mode }}
+        </span>
+        <span class="label label-warning">
+          {{ case.variant_type }}
+        </span>
+
+        <a class="pull-right" href="{{ url_for('variants.variants', case_id=case.case_id) }}">
+          Variants
+        </a>
+      </div>
+
+      <ul class="list-group">
+        {% for individual in case.individuals %}
+          <li class="list-group-item">
+            <a href="{{ url_for('public.individual', ind_id=individual.ind_id) }}">
+              {{ individual.name }}
+            </a>
+            {% if individual.is_affected %}
+              <span class="badge">
+                <span class="glyphicon glyphicon-exclamation-sign"></span>
+              </span>
+            {% endif %}
+          </li>
+        {% else %}
+          <li class="list-group-item">No individuals.</li>
+        {% endfor %}
+      </ul>
+    {% endfor %}
+  </div>
+{% endmacro %}

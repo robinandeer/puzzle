@@ -16,7 +16,7 @@ def test_individual(session):
     # proband = Individual(ind_id="Proband")
     family = Case(case_id="2")
     proband = Individual(ind_id="Proband")
-    proband.case = family
+    proband.cases.append(family)
     session.add(proband)
     session.add(family)
     session.commit()

@@ -2,7 +2,7 @@
 from datetime import datetime
 
 from sqlalchemy import (Column, DateTime, ForeignKey, Integer, String, Boolean,
-                        Text)
+                        Text, UniqueConstraint)
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -10,6 +10,19 @@ from puzzle.models.mixins import PedigreeHumanMixin
 
 # base for declaring a mapping
 BASE = declarative_base()
+
+
+class CaseIndividualLink(BASE):
+
+    """Link between case and individuals."""
+
+    __tablename__ = 'case_ind_link'
+    __table_args__ = (UniqueConstraint('case_id', 'ind_id',
+                                       name='_case_ind_uc'),)
+
+    id = Column(Integer, primary_key=True)
+    case_id = Column(Integer, ForeignKey('case.id'))
+    ind_id = Column(Integer, ForeignKey('individual.id'))
 
 
 class Case(BASE):
@@ -88,16 +101,10 @@ class Individual(BASE, PedigreeHumanMixin):
     ind_index = Column(Integer)
     variant_source = Column(String(32))
     bam_path = Column(String(32))
-    case_id = Column(Integer, ForeignKey("case.id"))
-    case = relationship(Case, backref=("individuals"))
-
-    @property
-    def case_name(self):
-        """Fetch display name of case."""
-        return self.case.name
+    cases = relationship('Case', secondary='case_ind_link', backref='individuals')
 
     def __repr__(self):
         return("<Individual(id:{self.id}, ind_id:{self.ind_id}, mother:{self.mother},"\
                 " father{self.father}, sex:{self.sex}, phenotype.{self.phenotype}"\
                 ", ind_index:{self.ind_index}, variant_source:"\
-                "{self.variant_source}, case_id:{self.case_id})>".format(self=self))
+                "{self.variant_source})>".format(self=self))

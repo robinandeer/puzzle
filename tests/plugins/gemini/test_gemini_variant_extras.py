@@ -66,18 +66,17 @@ class TestGenotypes:
         ind = DotDict()
         ind.ind_index = 0
         ind.ind_id = '1'
-        ind.case_id = 'Case_1'
         ind.phenotype = 2
         ind_objs = [ind]
 
-        adapter._add_genotypes(variant, gemini_variant, ind_objs)
+        adapter._add_genotypes(variant, gemini_variant, 'dummy', ind_objs)
         
         genotype = variant.individuals[0]
 
         assert genotype.sample_id == ind.ind_id
         assert genotype.sample_id == ind.ind_id
         assert genotype.genotype == 'G/A'
-        assert genotype.case_id == ind.case_id
+        assert genotype.case_id == 'dummy'
         assert genotype.phenotype == ind.phenotype
         assert genotype.ref_depth == 10
         assert genotype.alt_depth == 7

@@ -44,7 +44,7 @@ def test_individual(test_db):
 
     # THEN: the returned case has ind_id: "ADM1059A1"
     assert ind_obj.ind_id == 'ADM1059A1'
-    assert ind_obj.case.case_id == '636808'
+    assert ind_obj.cases[0].case_id == '636808'
 
 
 def test_cases(test_db):
