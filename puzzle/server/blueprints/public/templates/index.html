@@ -49,6 +49,27 @@
             </form>
           </div>
         </div>
+
+        {% if queries %}
+          <div class="panel panel-default">
+            <div class="panel-heading">GEMINI queries</div>
+            <ul class="list-group">
+              {% for query in queries %}
+                <li class="list-group-item">
+                  {{ query.name_query }}
+
+                  <form class="badge" action="{{ url_for('variants.delete_query', query_id=query.id) }}" method="POST" accept-charset="utf-8">
+                    <button class="no-style" type="submit">
+                      <span class="glyphicon glyphicon-remove"></span>
+                    </button>
+                  </form>
+                </li>
+              {% else %}
+                <li class="list-group-item">No queries added.</li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
       </div>
     {% endif %}
   </div>

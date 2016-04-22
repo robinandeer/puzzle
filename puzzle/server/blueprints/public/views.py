@@ -18,6 +18,7 @@ blueprint = Blueprint(BP_NAME, __name__, template_folder='templates',
 def index():
     """Show the landing page."""
     gene_lists = app.db.gene_lists() if app.config['STORE_ENABLED'] else []
+    queries = app.db.gemini_queries() if app.config['STORE_ENABLED'] else []
 
     case_groups = {}
     for case in app.db.cases():
@@ -27,7 +28,7 @@ def index():
         case_groups[key].append(case)
 
     return render_template('index.html', case_groups=case_groups,
-                           gene_lists=gene_lists)
+                           gene_lists=gene_lists, queries=queries)
 
 
 @blueprint.route('/cases/<case_id>')

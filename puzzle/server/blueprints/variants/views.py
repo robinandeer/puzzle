@@ -38,11 +38,15 @@ def variants(case_id):
     )
     gene_lists = ([gene_list.list_id for gene_list in app.db.gene_lists()]
                   if app.config['STORE_ENABLED'] else [])
+    queries = ([(query.name or query.query, query.query) for query
+                in app.db.gemini_queries()]
+               if app.config['STORE_ENABLED'] else [])
     kwargs = dict(variants=variants, case_id=case_id, db=app.db,
                   filters=filters, consequences=SO_TERMS,
                   inheritance_models=INHERITANCE_MODELS_SHORT,
                   gene_lists=gene_lists, impact_severities=IMPACT_LEVELS,
-                  is_active=is_active, nr_of_variants=nr_of_variants)
+                  is_active=is_active, nr_of_variants=nr_of_variants,
+                  queries=queries)
 
     if app.db.variant_type == 'sv':
         return render_template('sv_variants.html', sv_types=SV_TYPES, **kwargs)
@@ -80,7 +84,8 @@ def parse_filters():
     filters['selected_sv_types'] = request.args.getlist('sv_types')
     filters['skip'] = int(request.args.get('skip', 0))
     filters['gene_lists'] = request.args.getlist('gene_lists')
-    filters['gemini_query'] = request.args.get('gemini_query')
+    filters['gemini_query'] = (request.args.get('gemini_query') or
+                               request.args.get('preset_gemini_query'))
     filters['impact_severities'] = request.args.getlist('impact_severities')
     filters['range'] = None
 
@@ -110,4 +115,20 @@ def suspects(case_id, variant_id):
 def delete_suspect(suspect_id):
     """Delete a suspect."""
     app.db.delete_suspect(suspect_id)
+    return redirect(request.referrer)
+
+
+@blueprint.route('/queries', methods=['POST'])
+def queries():
+    """Store a new GEMINI query."""
+    query = request.form['query']
+    name = request.form.get('name')
+    app.db.add_gemini_query(name, query)
+    return redirect(request.referrer)
+
+
+@blueprint.route('/queries/delete/<query_id>', methods=['POST'])
+def delete_query(query_id):
+    """Delete a query."""
+    app.db.delete_gemini_query(query_id)
     return redirect(request.referrer)

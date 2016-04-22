@@ -62,3 +62,7 @@ def bind_extensions(app):
     # bind bootstrap blueprints
     bootstrap.init_app(app)
     markdown(app)
+
+    @app.template_filter('islist')
+    def islist(object):
+        return isinstance(object, (tuple, list))
