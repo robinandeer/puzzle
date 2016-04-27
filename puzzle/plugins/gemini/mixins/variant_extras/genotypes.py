@@ -19,6 +19,7 @@ class GenotypeExtras(object):
                     individual_objs (list(dict)): A list of Individuals
 
         """
+        
         for ind in individual_objs:
             index = ind.ind_index
             variant_obj.add_individual(Genotype(

@@ -1,13 +1,14 @@
 import logging
 
 from gemini import GeminiQuery
+from gemini.gim import (DeNovo, AutoRec, AutoDom, CompoundHet)
 
 from puzzle.plugins import BaseVariantMixin
 from puzzle.plugins.constants import Results
 
 from puzzle.models import (Compound, Variant, Gene, Genotype, Transcript,)
 from puzzle.utils import (get_most_severe_consequence, get_omim_number,
-                          get_cytoband_coord)
+                          get_cytoband_coord, build_gemini_query, Args)
 
 from . import VariantExtras
 
@@ -15,133 +16,6 @@ logger = logging.getLogger(__name__)
 
 class VariantMixin(BaseVariantMixin, VariantExtras):
     """Class to store variant specific functions for gemini plugin"""
-
-
-    def build_gemini_query(self, query, extra_info):
-        """Append sql to a gemini query
-
-        Args:
-            query(str): The gemini query
-            extra_info(str): The text that should be added
-
-        Return:
-            extended_query(str)
-        """
-        if 'WHERE' in query:
-            return "{0} AND {1}".format(query, extra_info)
-        else:
-            return "{0} WHERE {1}".format(query, extra_info)
-
-    def variants(self, case_id, skip=0, count=1000, filters=None):
-        """Return count variants for a case.
-
-        This function needs to have different behaviours based on what is asked
-        for. It should allways try to give minimal information back to improve
-        on speed. For example, if consequences are not asked for we will not
-        build all transcripts. If not sv variants we will not build sv
-        coordinates.
-        So the minimal case is to just show what is asked for in the variants
-        interface.
-
-            Args:
-                case_id (str): A gemini db
-                skip (int): Skip first variants
-                count (int): The number of variants to return
-                filters (dict): A dictionary with filters. Currently this will
-                look like: {
-                    gene_list: [] (list of hgnc ids),
-                    frequency: None (float),
-                    cadd: None (float),
-                    consequence: [] (list of consequences),
-                    impact_severities: [] (list of consequences),
-                    genetic_models [] (list of genetic models)
-                }
-            Returns:
-                puzzle.constants.Results : Named tuple with variants and
-                                           nr_of_variants
-
-        """
-        filters = filters or {}
-        logger.debug("Looking for variants in {0}".format(case_id))
-
-        limit = count + skip
-
-        gemini_query = filters.get('gemini_query') or "SELECT * from variants v"
-
-        any_filter = False
-
-        if filters.get('frequency'):
-            frequency = filters['frequency']
-
-            extra_info = "(v.max_aaf_all < {0} or v.max_aaf_all is"\
-                         " Null)".format(frequency)
-            gemini_query = self.build_gemini_query(gemini_query, extra_info)
-
-        if filters.get('cadd'):
-            cadd_score = filters['cadd']
-
-            extra_info = "(v.cadd_scaled > {0})".format(cadd_score)
-            gemini_query = self.build_gemini_query(gemini_query, extra_info)
-
-        if filters.get('gene_ids'):
-            gene_list = [gene_id.strip() for gene_id in filters['gene_ids']]
-
-            gene_string = "v.gene in ("
-            for index, gene_id in enumerate(gene_list):
-                if index == 0:
-                    gene_string += "'{0}'".format(gene_id)
-                else:
-                    gene_string += ", '{0}'".format(gene_id)
-            gene_string += ")"
-
-            gemini_query = self.build_gemini_query(gemini_query, gene_string)
-
-        if filters.get('range'):
-            chrom = filters['range']['chromosome']
-            if not chrom.startswith('chr'):
-                chrom = "chr{0}".format(chrom)
-
-            range_string = "v.chrom = '{0}' AND "\
-                           "((v.start BETWEEN {1} AND {2}) OR "\
-                           "(v.end BETWEEN {1} AND {2}))".format(
-                               chrom,
-                               filters['range']['start'],
-                               filters['range']['end']
-                           )
-            gemini_query = self.build_gemini_query(gemini_query, range_string)
-
-        filtered_variants = self._variants(
-            case_id=case_id,
-            gemini_query=gemini_query,
-        )
-
-        if filters.get('consequence'):
-            consequences = set(filters['consequence'])
-
-            filtered_variants = (variant for variant in filtered_variants if
-                set(variant.consequences).intersection(consequences))
-
-        if filters.get('impact_severities'):
-            severities = set([severity.strip()
-                    for severity in filters['impact_severities']])
-            new_filtered_variants = []
-            filtered_variants = (variant for variant in filtered_variants if
-                set([variant.impact_severity]).intersection(severities))
-
-        if filters.get('sv_len'):
-            sv_len = int(filters['sv_len'])
-            filtered_variants = (variant for variant in filtered_variants if
-                variant.sv_len >= sv_len)
-
-        variants = []
-        for index, variant_obj in enumerate(filtered_variants):
-            if index >= skip:
-                if index < limit:
-                    variants.append(variant_obj)
-                else:
-                    break
-
-        return Results(variants, len(variants))
 
     def variant(self, case_id, variant_id):
         """Return a specific variant.
@@ -186,7 +60,83 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
 
         return None
 
-    def _variants(self, case_id, gemini_query):
+    def variants(self, case_id, skip=0, count=1000, filters=None):
+        """Return count variants for a case.
+
+        This function needs to have different behaviours based on what is asked
+        for. It should allways try to give minimal information back to improve
+        on speed. For example, if consequences are not asked for we will not
+        build all transcripts. If not sv variants we will not build sv
+        coordinates.
+        So the minimal case is to just show what is asked for in the variants
+        interface.
+
+            Args:
+                case_id (str): A gemini db
+                skip (int): Skip first variants
+                count (int): The number of variants to return
+                filters (dict): A dictionary with filters. Currently this will
+                look like: {
+                    gene_list: [] (list of hgnc ids),
+                    frequency: None (float),
+                    cadd: None (float),
+                    consequence: [] (list of consequences),
+                    impact_severities: [] (list of consequences),
+                    genetic_models [] (list of genetic models)
+                }
+            Returns:
+                puzzle.constants.Results : Named tuple with variants and
+                                           nr_of_variants
+
+        """
+        filters = filters or {}
+        logger.debug("Looking for variants in {0}".format(case_id))
+
+        limit = count + skip
+        
+        genetic_models = None
+        if filters.get('genetic_models'):
+            gemini_query = build_gemini_query(filters, add_where=False)
+        else:
+            gemini_query = build_gemini_query(filters)
+
+        any_filter = False
+
+        filtered_variants = self._variants(
+            case_id=case_id,
+            gemini_query=gemini_query,
+            genetic_models=filters.get('genetic_models')
+        )
+
+        if filters.get('consequence'):
+            consequences = set(filters['consequence'])
+
+            filtered_variants = (variant for variant in filtered_variants if
+                set(variant.consequences).intersection(consequences))
+
+        if filters.get('impact_severities'):
+            severities = set([severity.strip()
+                    for severity in filters['impact_severities']])
+            new_filtered_variants = []
+            filtered_variants = (variant for variant in filtered_variants if
+                set([variant.impact_severity]).intersection(severities))
+
+        if filters.get('sv_len'):
+            sv_len = int(filters['sv_len'])
+            filtered_variants = (variant for variant in filtered_variants if
+                variant.sv_len >= sv_len)
+
+        variants = []
+        for index, variant_obj in enumerate(filtered_variants):
+            if index >= skip:
+                if index < limit:
+                    variants.append(variant_obj)
+                else:
+                    break
+
+        return Results(variants, len(variants))
+
+    def _variants(self, case_id, gemini_query, genetic_models=None):
         """Return variants found in the gemini database
 
             Args:
@@ -205,34 +155,73 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
 
         self.db = case_obj.variant_source
         self.variant_type = case_obj.variant_type
-
-        gq = GeminiQuery(self.db)
-
-        gq.run(gemini_query)
+        
+        variant_generators = []
+        
+        if genetic_models:
+            for genetic_model in genetic_models:
+                if genetic_model in ['AR_hom', 'AR_hom_dn']:
+                    results = AutoRec(Args(db=self.db,
+                             columns="*",
+                             filter=gemini_query,
+                             families=case_id))
+                    variant_generators.append(results.report_candidates())
+                elif genetic_model == 'AD':
+                    results = AutoDom(Args(db=self.db,
+                             columns="*",
+                             filter=gemini_query,
+                             families=case_id))
+                    variant_generators.append(results.report_candidates())
+                elif genetic_model == 'AD_dn':
+                    results = DeNovo(Args(db=self.db,
+                             columns="*",
+                             filter=gemini_query,
+                             families=case_id))
+                    variant_generators.append(results.report_candidates())
+                elif genetic_model in ['AR_comp', 'AR_comp_dn']:
+                    results = CompoundHet(Args(db=self.db,
+                             columns="*",
+                             filter=gemini_query,
+                             families=case_id))
+                    variant_generators.append(results.report_candidates())
+                    
+        
+        else:
+            gq = GeminiQuery(self.db)
+            gq.run(gemini_query)
+            variant_generators.append(gq)
 
         index = 0
-        for gemini_variant in gq:
-            variant = None
-
-            # Check if variant is non ref in the individuals
-            is_variant = self._is_variant(gemini_variant, individuals)
-
-            if self.variant_type == 'snv' and not is_variant:
+        for variants in variant_generators:
+            for gemini_variant in variants:
                 variant = None
-
-            else:
-                index += 1
-                logger.debug("Updating index to: {0}".format(index))
-                variant = self._format_variant(
-                        case_id=case_id,
-                        gemini_variant=gemini_variant,
-                        individual_objs=individuals,
-                        index=index
-                        )
-
-            if variant:
-
-                yield variant
+                
+                if not genetic_models:
+                    # Check if variant is non ref in the individuals
+                    is_variant = self._is_variant(gemini_variant, individuals)
+                    
+                    if self.variant_type == 'snv' and not is_variant:
+                        variant = None
+            
+                    else:
+                        index += 1
+                        logger.debug("Updating index to: {0}".format(index))
+                        variant = self._format_variant(
+                                case_id=case_id,
+                                gemini_variant=gemini_variant,
+                                individual_objs=individuals,
+                                index=index
+                                )
+                    
+                else:
+                    index += 1
+                    is_variant = True
+                    variant = self.variant(case_id, gemini_variant['variant_id'])
+                    variant['index'] = index
+            
+                if variant:
+            
+                    yield variant
 
     def _format_variant(self, case_id, gemini_variant, individual_objs,
                         index=0, add_all_info=False):

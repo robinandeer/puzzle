@@ -73,17 +73,6 @@ def test_is_variant(gemini_case_obj):
 
     assert not plugin._is_variant(gemini_variant, ind_objs)
 
-def test_build_gemini_query():
-    plugin = GeminiPlugin()
-    query = "SELECT * from variants"
-    extra_info = "max_aaf_all < 0.01"
-    new_query = plugin.build_gemini_query(query, extra_info)
-    assert new_query == "SELECT * from variants WHERE max_aaf_all < 0.01"
-
-    extra_info = "cadd_score > 10"
-    new_query = plugin.build_gemini_query(new_query, extra_info)
-    assert new_query == "SELECT * from variants WHERE max_aaf_all < 0.01 AND cadd_score > 10"
-
 class TestFilters:
 
     def test_filters_no_filters(self, gemini_case_obj):
@@ -250,3 +239,48 @@ class TestFilters:
             assert variant_obj.stop <= end
         
         assert nr_of_variants == 1
+
+class TestGeminiInheritance:
+    def test_filters_ar(self, gemini_case_obj):
+        plugin = GeminiPlugin()
+        plugin.add_case(gemini_case_obj)
+
+        filters = {'genetic_models': ['AR_hom']}
+        result = plugin.variants('643594', filters=filters, count=1000)
+        variants = result.variants
+        nr_of_variants = result.nr_of_variants
+        
+        assert nr_of_variants == 0
+
+    def test_filters_ad(self, gemini_case_obj):
+        plugin = GeminiPlugin()
+        plugin.add_case(gemini_case_obj)
+
+        filters = {'genetic_models': ['AD']}
+        result = plugin.variants('643594', filters=filters, count=1000)
+        variants = result.variants
+        nr_of_variants = result.nr_of_variants
+        
+        assert nr_of_variants == 0
+
+    def test_filters_ad_dn(self, gemini_case_obj):
+        plugin = GeminiPlugin()
+        plugin.add_case(gemini_case_obj)
+
+        filters = {'genetic_models': ['AD_dn']}
+        result = plugin.variants('643594', filters=filters, count=1000)
+        variants = result.variants
+        nr_of_variants = result.nr_of_variants
+        
+        assert nr_of_variants == 6
+
+    def test_filters_ar_comp(self, gemini_case_obj):
+        plugin = GeminiPlugin()
+        plugin.add_case(gemini_case_obj)
+
+        filters = {'genetic_models': ['AR_comp']}
+        result = plugin.variants('643594', filters=filters, count=1000)
+        variants = result.variants
+        nr_of_variants = result.nr_of_variants
+        
+        assert nr_of_variants == 0
