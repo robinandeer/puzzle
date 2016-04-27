@@ -135,7 +135,7 @@ def view(ctx, host, port, debug, pattern, family_file, family_type,
 
     app = create_app(config_obj=BaseConfig)
 
-    if not debug or ((not no_browser) and (not main_loop)):
+    if no_browser is False:
         webbrowser.open_new_tab("http://{}:{}".format(host, port))
 
     app.run(host=host, port=port, debug=debug)
