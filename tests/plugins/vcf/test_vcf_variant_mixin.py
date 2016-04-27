@@ -66,7 +66,7 @@ class TestFilters:
         for variant_obj in variants:
             assert variant_obj.max_freq <= 0.001
         
-        assert nr_of_variants == 88
+        assert nr_of_variants == 73
 
     def test_filters_cadd(self, case_obj):
         plugin = VcfPlugin()
