@@ -4,17 +4,20 @@ from puzzle.utils import (get_gene_info, get_gene_symbols)
 class GeneExtras(object):
     """Methods for genes"""
     
-    def _add_hgnc_symbols(self, variant_obj):
+    def _add_hgnc_symbols(self, variant_obj, gemini_variant):
         """Add hgnc symbols to the variant
         
             If there are transcripts use the symbols found here,
             otherwise use phizz to get the gene ids.
         """
         hgnc_symbols = set()
+        #if there are transcripts we get the gene symbols from these
         if variant_obj.transcripts:
             for transcript in variant_obj.transcripts:
                 if transcript.hgnc_symbol:
                     hgnc_symbols.add(transcript.hgnc_symbol)
+        elif gemini_variant['gene']:
+            hgnc_symbols.add(gemini_variant['gene'])
         else:
             chrom = variant_obj.CHROM
             start = variant_obj.start

@@ -102,7 +102,7 @@ def build_gemini_query(filters, add_where=True):
         chrom = filters['range']['chromosome']
         if not chrom.startswith('chr'):
             chrom = "chr{0}".format(chrom)
-
+        
         range_string = "chrom = '{0}' AND "\
                        "((start BETWEEN {1} AND {2}) OR "\
                        "(end BETWEEN {1} AND {2}))".format(

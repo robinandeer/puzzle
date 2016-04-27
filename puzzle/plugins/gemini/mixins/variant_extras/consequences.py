@@ -5,14 +5,17 @@ logger = logging.getLogger(__name__)
 class ConsequenceExtras(object):
     """Methods to handle consequences"""
     
-    def _add_consequences(self, variant_obj):
+    def _add_consequences(self, variant_obj, gemini_variant):
         """Add the consequences found in all transcripts
 
         Args:
             variant_obj (puzzle.models.Variant)
         """
-
         consequences = set()
+
+        if gemini_variant['impact_so']:
+            consequences.add(gemini_variant['impact_so'])
+
         for transcript in variant_obj.transcripts:
             for consequence in transcript.consequence.split('&'):
                 consequences.add(consequence)

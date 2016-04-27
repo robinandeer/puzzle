@@ -53,6 +53,12 @@ def gemini_path(request):
     gemini_db = "tests/fixtures/HapMapFew.db"
     return gemini_db
 
+@pytest.fixture(scope='function')
+def gemini_large_path(request):
+    """Return the path of a gemini database"""
+    gemini_db = "tests/fixtures/HapMapMany.db"
+    return gemini_db
+
 
 @pytest.fixture(scope='function')
 def vcf_file(request):
@@ -220,6 +226,12 @@ def case_obj(ped_lines):
 def gemini_case_obj(gemini_db_path):
     """Return a case object extracted from gemini database"""
     _case = get_cases(gemini_db_path, variant_mode='gemini')[0]
+    yield _case
+
+@pytest.yield_fixture(scope='function')
+def gemini_large_case_obj(gemini_large_path):
+    """Return a case object extracted from gemini database"""
+    _case = get_cases(gemini_large_path, variant_mode='gemini')[0]
     yield _case
 
 @pytest.yield_fixture(scope='function')

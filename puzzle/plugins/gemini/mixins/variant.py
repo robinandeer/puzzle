@@ -158,31 +158,44 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         
         variant_generators = []
         
+        models_found = []
         if genetic_models:
             for genetic_model in genetic_models:
-                if genetic_model in ['AR_hom', 'AR_hom_dn']:
+                
+                if genetic_model in ['XR', 'XR_dn', 'XD', 'XD_dn']:
+                    chrom_x_string = "chrom = 'chrX'"
+                    if not gemini_query:
+                        gemini_query = chrom_x_string
+                    else:
+                        gemini_query = "{0} AND {1}".format(gemini_query, chrom_x_string)
+                    
+                if genetic_model in ['AR_hom', 'AR_hom_dn', 'XR', 'XR_dn']:
                     results = AutoRec(Args(db=self.db,
                              columns="*",
                              filter=gemini_query,
                              families=case_id))
                     variant_generators.append(results.report_candidates())
-                elif genetic_model == 'AD':
+                    models_found = ['AR_hom']
+                elif genetic_model in ['AD', 'XD']:
                     results = AutoDom(Args(db=self.db,
                              columns="*",
                              filter=gemini_query,
                              families=case_id))
                     variant_generators.append(results.report_candidates())
-                elif genetic_model == 'AD_dn':
+                    models_found = [genetic_model]
+                elif genetic_model in ['AD_dn', 'XD_dn']:
                     results = DeNovo(Args(db=self.db,
                              columns="*",
                              filter=gemini_query,
                              families=case_id))
                     variant_generators.append(results.report_candidates())
+                    models_found = ['AD_dn']
                 elif genetic_model in ['AR_comp', 'AR_comp_dn']:
                     results = CompoundHet(Args(db=self.db,
                              columns="*",
                              filter=gemini_query,
                              families=case_id))
+                    models_found = ['AR_comp']
                     variant_generators.append(results.report_candidates())
                     
         
@@ -210,7 +223,8 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
                                 case_id=case_id,
                                 gemini_variant=gemini_variant,
                                 individual_objs=individuals,
-                                index=index
+                                index=index,
+                                models_found=models_found
                                 )
                     
                 else:
@@ -224,7 +238,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
                     yield variant
 
     def _format_variant(self, case_id, gemini_variant, individual_objs,
-                        index=0, add_all_info=False):
+                        index=0, add_all_info=False, models_found = []):
         """Make a puzzle variant from a gemini variant
 
             Args:
@@ -237,6 +251,7 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
                 variant (dict): A Variant object
         """
         chrom = gemini_variant['chrom']
+        
         if chrom.startswith('chr') or chrom.startswith('CHR'):
             chrom = chrom[3:]
 
@@ -258,7 +273,6 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             variant.variant_id))
 
         variant['index'] = index
-
         # Add the most severe consequence
         self._add_most_severe_consequence(variant, gemini_variant)
 
@@ -277,7 +291,6 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
         else:
             ### Consequence and region annotations
             #Add the transcript information
-            self._add_transcripts(variant, gemini_variant)
             self._add_thousand_g(variant, gemini_variant)
             self._add_exac(variant, gemini_variant)
             self._add_gmaf(variant, gemini_variant)
@@ -294,20 +307,17 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
             sift = gemini_variant['sift_pred']
             if sift:
                 variant.add_severity('SIFT', sift)
-
-        #Add the genes based on the hgnc symbols
-        self._add_hgnc_symbols(variant)
-        if self.variant_type == 'snv':
-            self._add_genes(variant)
-
-        self._add_consequences(variant)
-
+        
         ### GENOTYPE ANNOATTIONS ###
         #Get the genotype info
         if add_all_info:
+            self._add_transcripts(variant, gemini_variant)
             self._add_genotypes(variant, gemini_variant, case_id, individual_objs)
-            if self.variant_type == 'sv':
-                self._add_genes(variant)
+            self._add_genes(variant)
+
+        self._add_consequences(variant, gemini_variant)
+        self._add_hgnc_symbols(variant, gemini_variant)
+        variant.genetic_models = models_found
 
         return variant
 
