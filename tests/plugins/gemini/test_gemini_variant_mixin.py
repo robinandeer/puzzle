@@ -241,20 +241,20 @@ class TestFilters:
         assert nr_of_variants == 1
 
 class TestGeminiInheritance:
-    def test_filters_ar(self, gemini_large_case_obj):
+    def test_filters_ar(self, gemini_case_obj):
         plugin = GeminiPlugin()
-        plugin.add_case(gemini_large_case_obj)
+        plugin.add_case(gemini_case_obj)
 
         filters = {'genetic_models': ['AR_hom']}
         result = plugin.variants('643594', filters=filters, count=100000)
         variants = result.variants
         nr_of_variants = result.nr_of_variants
         
-        assert nr_of_variants == 635
+        assert nr_of_variants == 0
 
-    def test_filters_ad(self, gemini_large_case_obj):
+    def test_filters_ad(self, gemini_case_obj):
         plugin = GeminiPlugin()
-        plugin.add_case(gemini_large_case_obj)
+        plugin.add_case(gemini_case_obj)
 
         filters = {'genetic_models': ['AD']}
         result = plugin.variants('643594', filters=filters, count=1000)
@@ -263,24 +263,24 @@ class TestGeminiInheritance:
         
         assert nr_of_variants == 0
 
-    def test_filters_ad_dn(self, gemini_large_case_obj):
+    def test_filters_ad_dn(self, gemini_case_obj):
         plugin = GeminiPlugin()
-        plugin.add_case(gemini_large_case_obj)
+        plugin.add_case(gemini_case_obj)
 
         filters = {'genetic_models': ['AD_dn']}
         result = plugin.variants('643594', filters=filters, count=1000)
         variants = result.variants
         nr_of_variants = result.nr_of_variants
         
-        assert nr_of_variants == 170
+        assert nr_of_variants == 6
 
-    def test_filters_ar_comp(self, gemini_large_case_obj):
+    def test_filters_ar_comp(self, gemini_case_obj):
         plugin = GeminiPlugin()
-        plugin.add_case(gemini_large_case_obj)
+        plugin.add_case(gemini_case_obj)
 
         filters = {'genetic_models': ['AR_comp']}
         result = plugin.variants('643594', filters=filters, count=10000)
         variants = result.variants
         nr_of_variants = result.nr_of_variants
         
-        assert nr_of_variants == 2466
+        assert nr_of_variants == 0

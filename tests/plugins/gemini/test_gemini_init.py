@@ -13,7 +13,7 @@ def test_setup_no_db():
     assert adapter.variant_type == 'snv'
     
     assert adapter.filters.can_filter_gene == True
-    assert adapter.filters.can_filter_inheritance == False
+    assert adapter.filters.can_filter_inheritance == True
 
 def test_setup_with_variant_type(gemini_path):
     adapter = GeminiPlugin('sv')
