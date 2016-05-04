@@ -246,7 +246,7 @@ class TestGeminiInheritance:
         plugin.add_case(gemini_case_obj)
 
         filters = {'genetic_models': ['AR_hom']}
-        result = plugin.variants('643594', filters=filters, count=100000)
+        result = plugin.variants('643594', filters=filters, count=1000)
         variants = result.variants
         nr_of_variants = result.nr_of_variants
         
