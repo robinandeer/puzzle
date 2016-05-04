@@ -229,12 +229,6 @@ def gemini_case_obj(gemini_db_path):
     yield _case
 
 @pytest.yield_fixture(scope='function')
-def gemini_large_case_obj(gemini_large_path):
-    """Return a case object extracted from gemini database"""
-    _case = get_cases(gemini_large_path, variant_mode='gemini')[0]
-    yield _case
-
-@pytest.yield_fixture(scope='function')
 def gemini_sv_case_obj(gemini_sv_db_path):
     """Return a case object extracted from gemini database"""
     _case = get_cases(gemini_sv_db_path, variant_mode='gemini')[0]
