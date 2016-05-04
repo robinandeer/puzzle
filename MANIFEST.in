@@ -15,4 +15,4 @@ recursive-exclude * *.db
 recursive-include puzzle *.html
 recursive-include puzzle *.css
 
-recursive-include puzzle/resources/*
+recursive-include puzzle/resources *
