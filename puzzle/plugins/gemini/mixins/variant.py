@@ -173,30 +173,30 @@ class VariantMixin(BaseVariantMixin, VariantExtras):
                     results = AutoRec(Args(db=self.db,
                              columns="*",
                              filter=gemini_query,
-                             families=case_id))
-                    variant_generators.append(results.report_candidates())
+                             families=case_id)) # pragma: no cover
+                    variant_generators.append(results.report_candidates())# pragma: no cover
                     models_found = ['AR_hom']
                 elif genetic_model in ['AD', 'XD']:
                     results = AutoDom(Args(db=self.db,
                              columns="*",
                              filter=gemini_query,
-                             families=case_id))
-                    variant_generators.append(results.report_candidates())
+                             families=case_id)) # pragma: no cover
+                    variant_generators.append(results.report_candidates())# pragma: no cover
                     models_found = [genetic_model]
                 elif genetic_model in ['AD_dn', 'XD_dn']:
                     results = DeNovo(Args(db=self.db,
                              columns="*",
                              filter=gemini_query,
-                             families=case_id))
-                    variant_generators.append(results.report_candidates())
+                             families=case_id)) # pragma: no cover
+                    variant_generators.append(results.report_candidates()) # pragma: no cover
                     models_found = ['AD_dn']
                 elif genetic_model in ['AR_comp', 'AR_comp_dn']:
                     results = CompoundHet(Args(db=self.db,
                              columns="*",
                              filter=gemini_query,
-                             families=case_id))
+                             families=case_id)) # pragma: no cover
                     models_found = ['AR_comp']
-                    variant_generators.append(results.report_candidates())
+                    variant_generators.append(results.report_candidates()) # pragma: no cover
                     
         
         else:
