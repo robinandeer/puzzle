@@ -3,8 +3,6 @@
 #   pip install -r requirements.txt
 #
 
--r requirements/conda.txt
-
 click
 Flask-Script
 Flask-Bootstrap
