@@ -17,4 +17,4 @@ query-phenomizer>=0.5
 pyyaml
 cython
 numpy
-cyvcf2
+cyvcf2==0.2.8
