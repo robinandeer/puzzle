@@ -20,9 +20,9 @@ install:
     - conda info -a
 
     # create a new conda env
-    - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pytest coverage numpy=1.9.2 bcolz=0.10 cython scipy PyYAML>=3.10 ipython pandas>=0.11.0 pyflakes pyzmq cyvcf2
+    - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pytest coverage numpy=1.9.2 bcolz=0.10 cython scipy PyYAML>=3.10 ipython pandas>=0.11.0 pyflakes pyzmq
     - source activate test-environment
-    - conda install -c bioconda pysam pybedtools
+    - conda install -c bioconda pysam pybedtools cyvcf2
     - pip install gemini
 
     # install dependencies
