@@ -1,5 +1,7 @@
 # Puzzle [![Build Status][travis-image]][travis-url] [![Test Coverage][coveralls-img]][coveralls-url]
 
+> **Note to users and collaborators**: We developed Puzzle as an alternative to [Scout](https://github.com/Clinical-Genomics/scout) which would be easy to install and use for anyone. We have since worked a lot with these aspects on the former software and decided to *focus our efforts there*. Scout features the same SNV and SV views and we are continuing to add features - please check it out: https://github.com/Clinical-Genomics/scout!
+
 Variant Caller GUI and genetic disease analysis tool.
 
 Documentation: https://robinandeer.gitbooks.io/puzzle/content/
