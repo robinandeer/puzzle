@@ -27,7 +27,7 @@
   "dependencies": {
     "bootstrap": "^3.3.5",
     "bootstrap-select": "^1.7.5",
-    "jquery": "^2.1.4"
+    "jquery": "^3.5.0"
   },
   "devDependencies": {
     "browser-sync": "^2.9.8",
